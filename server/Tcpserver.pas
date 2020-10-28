@@ -429,13 +429,13 @@ end;
 
 function TTCPClient.SendData(DataPtr: PByte; DataSize: Integer): Integer;
 begin
-  if (DataSize <= 0) or (DataSize > FSendBufSize - FSendDataSize) then
+   if (DataSize <= 0) or (DataSize > FSendBufSize - FSendDataSize) then
   begin
     Result := -1;
     Exit;
   end;
 
-  Move(DataPtr^, FSendBuffer[FSendDataSize], DataSize);
+  System.Move(DataPtr^, FSendBuffer[FSendDataSize], DataSize);
   FSendDataSize := FSendDataSize + DataSize;
 end;
 

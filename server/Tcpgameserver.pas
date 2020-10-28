@@ -33,7 +33,7 @@ type
     procedure SetGamerPos(AGamer: TGameClient);
     function RegisterNewUser(RequestPtr: PLoginMsg; AClient: TTCPClient): Integer;
     function LoginUser(RequestPtr: PLoginMsg; AClient: TTCPClient): Integer;
-    function SendAllUser(AClient: TTCPClient): Integer;
+    function SendAllUser: Integer;
   end;
 
 var
@@ -46,9 +46,9 @@ implementation
 
 constructor TTcpgameserver.Create;
 begin
+  inherited Create;
   FGamers := TStringList.Create;
   InitMap;
-  inherited Create;
 end;
 
 destructor TTcpgameserver.Destroy;
@@ -105,7 +105,7 @@ begin
       AGameer.FUsername := RequestPtr.UserName;
       SetGamerPos(AGameer);
       FGamers.AddObject(UserName, AGameer);
-//      SendAllUser(AClient: TTCPClient);
+      SendAllUser;
       Result := 0;
     end
     else
@@ -224,7 +224,7 @@ begin
   AClient.SendData(@Request, sizeof(Request));
 end;
 
-function TTcpgameserver.SendAllUser(AClient: TTCPClient): Integer;
+function TTcpgameserver.SendAllUser: Integer;
 var
   UserName: AnsiString;
   i: integer;
@@ -232,9 +232,13 @@ begin
   for i := 0 to FGamers.Count - 1 do
   begin
     UserName := FGamers.Strings[i];
-    AClient.SendData(@Fmap, SizeOf(FMap));
+    FMap.head.Flag := PACK_FLAG;
+    FMap.head.Size := SizeOf(FMap);
+    FMap.head.Command := S_MAP;
+
+    TGameClient(FGamers.Objects[i]).FClient.SendData(@Fmap, SizeOf(FMap));
   end;
-   Result := 0;
+  Result := 0;
 end;
 
 procedure TTcpgameserver.SetGamerPos(AGamer: TGameClient);
@@ -244,7 +248,7 @@ begin
   repeat
     X := randomrange(0, 9);
     Y := RandomRange(0, 9);
-  until FMap.Map[X][Y] = 1;
+  until FMap.Map[X][Y] = 0;
   AGamer.GamerPosX := X;
   AGamer.GamerPosY := Y;
   FMap.Map[X][Y] := 3;

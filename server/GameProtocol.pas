@@ -36,11 +36,11 @@ type
     ErrorInfo: array[0..31] of AnsiChar;
   end;
 
-
   MapSign = (MOVE, BLOCK, BOX, CHARACTRT); //可移动，障碍物，木箱，有角色
 
   TMap = record
-  Map: array[0..MapLength, 0..MapWide] of Integer;
+    head: TLoginMsgHead;
+    Map: array[0..MapLength, 0..MapWide] of Integer;
   end;
 
 const
@@ -48,6 +48,7 @@ const
   S_REGISTER = 2;
   C_LOGIN = 3;
   S_LOGIN = 4;
+  S_MAP = 5;
 
 implementation
 
