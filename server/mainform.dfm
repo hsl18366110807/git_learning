@@ -45,7 +45,7 @@ object FormMain: TFormMain
     Width = 121
     Height = 21
     TabOrder = 1
-    Text = '10.246.54.171'
+    Text = '10.246.54.151'
   end
   object PortEdit: TEdit
     Left = 278
@@ -53,6 +53,7 @@ object FormMain: TFormMain
     Width = 121
     Height = 21
     TabOrder = 2
+    Text = '1234'
   end
   object PageControl1: TPageControl
     Left = 16

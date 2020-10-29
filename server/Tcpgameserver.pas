@@ -105,7 +105,7 @@ begin
       AGameer.FUsername := RequestPtr.UserName;
       SetGamerPos(AGameer);
       FGamers.AddObject(UserName, AGameer);
-      SendAllUser;
+//      SendAllUser;
       Result := 0;
     end
     else
@@ -135,6 +135,11 @@ begin
     StrLCopy(@request.ErrorInfo[0], PAnsiChar(Error), Length(Error));
   end;
   AClient.SendData(@request, SizeOf(request));
+//  if Result = 0 then
+//  begin
+//    SendAllUser;
+//  end;
+
 end;
 
 procedure TTcpgameserver.ProcessClientIO(AClient: TTCPClient);
@@ -183,6 +188,10 @@ begin
     C_LOGIN:
       begin
         LoginUser(PLoginMsg(RequestPtr), AClient);
+      end;
+    C_MAP:
+      begin
+        SendAllUser;
       end;
   end;
 end;

@@ -48,7 +48,8 @@ const
   S_REGISTER = 2;
   C_LOGIN = 3;
   S_LOGIN = 4;
-  S_MAP = 5;
+  C_MAP = 5;
+  S_MAP = 6;
 
 implementation
 
