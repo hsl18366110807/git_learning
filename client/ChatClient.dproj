@@ -1040,6 +1040,10 @@
         <DCCReference Include="ChatManager.pas"/>
         <DCCReference Include="TCPClient.pas"/>
         <DCCReference Include="ChatProtocol.pas"/>
+        <DCCReference Include="FormMap.pas">
+            <Form>FrmMap</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

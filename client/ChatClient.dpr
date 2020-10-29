@@ -7,7 +7,8 @@ uses
   FormLogin in 'FormLogin.pas' {FrmLogin},
   ChatManager in 'ChatManager.pas',
   TCPClient in 'TCPClient.pas',
-  ChatProtocol in 'ChatProtocol.pas';
+  ChatProtocol in 'ChatProtocol.pas',
+  FormMap in 'FormMap.pas' {FrmMap};
 
 //  {$R}
 //  var,
@@ -45,7 +46,8 @@ begin
 
   if not ExitApp then
   begin
-    Application.CreateForm(TFrmMain, FrmMain);
-  Application.Run;
+    Application.CreateForm(TFrmMap, FrmMap);
+    Application.Run;
   end;
 end.
+

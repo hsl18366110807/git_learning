@@ -7,6 +7,8 @@ uses
   
 const
   PACK_FLAG = $FFBBFFCC;
+  MapLength = 9; //地图最大长度
+  MapWide = 9; //地图最大宽度
 
 type
   TUserAccount = array[0..15] of AnsiChar;
@@ -73,6 +75,14 @@ type
     ErrorInfo: array[0..31] of AnsiChar;
   end;
 
+ // 地图 为二维数组
+ MapSign = (MOVE, BLOCK, BOX, CHARACTRT); //可移动，障碍物，木箱，有角色
+
+  TMap = record
+  Map: array[0..MapLength, 0..MapWide] of Integer;
+  end;
+
+
 type
   PChatMsgNode = ^TChatMsgNode;
   TChatMsgNode = record
@@ -119,7 +129,11 @@ const
   C_LOGIN         =   3;
   S_LOGIN         =   4;
 
-  CM_USER_STATE    =   5;
+
+
+   S_Map  = 5;
+
+    CM_USER_STATE    =   5;
   SM_USER_STATE    =   6;
 
   CM_SENDMSG       =   7;

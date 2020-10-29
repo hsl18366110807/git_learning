@@ -17,6 +17,7 @@ type
     function RequestRegister(Account: String; Password: String): Integer;
     function RequestLogin(Account: String; Password: String): Integer;
     function RequestUsers: Integer;
+    function RequestMap: Integer;
     function RequestSendMsg(Account: String; Msg: String): Integer;
   public
     constructor Create;
@@ -82,7 +83,7 @@ begin
           FetchSize := FetchSize + PChatMsgHead(BufPtr)^.Size;
 
           GetMem(MsgPtr, PChatMsgHead(BufPtr)^.Size);
-          Move(BufPtr^, MsgPtr^, PChatMsgHead(BufPtr)^.Size);
+          System.Move(BufPtr^, MsgPtr^, PChatMsgHead(BufPtr)^.Size);
 
           BufSize := BufSize - MsgPtr^.Head.Size;
           BufPtr := Pointer(Integer(BufPtr) + MsgPtr^.Head.Size);
@@ -129,9 +130,6 @@ begin
   CMLogin.Head.Size := SizeOf(CMLogin);
   CMLogin.Head.Command := C_LOGIN;
 
-//  StrLCopy(@CMLogin.Account[0], PAnsiChar(@Account), Length(Account));
-//  CopyMemory(@CMLogin.UserName[0], PAnsiChar(@Account), Length(Account));
-//  StrLCopy(@CMLogin.Password[0], PAnsiChar(Password), Length(Password));
 
   strpcopy(@CMLogin.UserName[0], AnsiString(Account));
   strpcopy(@CMLogin.Password[0], AnsiString(Password));
@@ -139,6 +137,8 @@ begin
   if WriteSendData(@CMLogin, SizeOf(CMLogin)) < 0 then
     Result := -3;
 end;
+
+
 
 function TChatMgr.RequestRegister(Account, Password: String): Integer;
 var
@@ -201,6 +201,23 @@ begin
   if WriteSendData(@CMUserState, SizeOf(CMUserState)) < 0 then
     Result := -3;
 end;
+
+function TChatMgr.RequestMap: Integer;
+var
+  CReqMap: TCMap;
+begin
+  Result := 0;
+  FillChar(CReqMap, SizeOf(CReqMap), 0);
+  CReqMap.Head.Flag := PACK_FLAG;
+  CReqMap.Head.Size := SizeOf(CReqMap);
+  CReqMap.Head.Command := C_Map;
+
+  if WriteSendData(@CReqMap, SizeOf(CReqMap)) < 0 then
+    Result := -3;
+
+end;
+
+
 
 initialization
   ChatMgr := TChatMgr.Create;

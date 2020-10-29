@@ -251,8 +251,24 @@ begin
             else
             begin
               ModalResult := mrOK;
+//              OutputDebugString('login success');
+              Timer1.Enabled := False
             end;
+//            ServerMsgPtr := Pointer(Integer(ServerMsgPtr) + ServerMsgPtr^.Head.Size);
+////            BufPtr := Pointer(Integer(BufPtr) + 1);
+//            if ServerMsgPtr^.Head.Command = S_Map then
+//            begin
+//              OutputDebugString('recv map');
+//            end;
+
           end;
+
+//          S_Map:
+//          begin
+//           ShowMessage('recv map');
+//
+//          end;
+
         end;
       finally
         FreeMem(MsgPtr);
