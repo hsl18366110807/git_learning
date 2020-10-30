@@ -8,6 +8,8 @@ uses
   ChatManager in 'ChatManager.pas',
   TCPClient in 'TCPClient.pas',
   ChatProtocol in 'ChatProtocol.pas',
+  GR32_Png in 'GR32_Png.pas',
+  GR32_PortableNetworkGraphic in 'GR32_PortableNetworkGraphic.pas',
   FormMap in 'FormMap.pas' {FrmMap};
 
 //  {$R}

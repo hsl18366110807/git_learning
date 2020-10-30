@@ -7,8 +7,8 @@ uses
   
 const
   PACK_FLAG = $FFBBFFCC;
-  MapLength = 9; //地图最大长度
-  MapWide = 9; //地图最大宽度
+  MapLength = 19; //地图最大长度
+  MapWide = 19; //地图最大宽度
 
 type
   TUserAccount = array[0..15] of AnsiChar;
@@ -46,6 +46,18 @@ type
   TCMUserState = record
     Head: TChatMsgHead;
   end;
+
+  PTCMap = ^TCMap;
+  TCMap = record
+    Head: TChatMsgHead;
+  end;
+
+ PTSMap = ^TSMap;
+ TSMap = record
+   Head: TChatMsgHead;
+   Map: array[0..MapLength, 0..MapWide] of Integer;
+ end;
+
 
   PSMUserState = ^TSMUserState;
   TSMUserState = record
@@ -130,8 +142,8 @@ const
   S_LOGIN         =   4;
 
 
-
-   S_Map  = 5;
+   C_Map  = 5;
+   S_Map  = 6;
 
     CM_USER_STATE    =   5;
   SM_USER_STATE    =   6;
