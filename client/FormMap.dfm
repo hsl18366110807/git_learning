@@ -2,8 +2,8 @@ object FrmMap: TFrmMap
   Left = 0
   Top = 0
   Caption = 'FrmMap'
-  ClientHeight = 299
-  ClientWidth = 635
+  ClientHeight = 722
+  ClientWidth = 801
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,22 +14,13 @@ object FrmMap: TFrmMap
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object Button1: TButton
-    Left = 552
-    Top = 266
-    Width = 75
-    Height = 25
-    Caption = 'Button1'
-    TabOrder = 0
-    OnClick = Button1Click
-  end
-  object btn1: TButton
+  object pntbx: TPaintBox32
     Left = 0
-    Top = 266
-    Width = 75
-    Height = 25
-    Caption = 'btn1'
-    TabOrder = 1
-    OnClick = btn1Click
+    Top = 0
+    Width = 801
+    Height = 722
+    Align = alClient
+    TabOrder = 0
+    ExplicitHeight = 810
   end
 end
