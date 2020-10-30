@@ -12,6 +12,7 @@ object FrmMap: TFrmMap
   Font.Style = []
   OldCreateOrder = False
   OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
   PixelsPerInch = 96
   TextHeight = 13
   object pntbx: TPaintBox32

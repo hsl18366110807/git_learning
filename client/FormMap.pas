@@ -16,6 +16,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure doWork(Sender: TObject);
     procedure processAni(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 //    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 //    procedure btn1Click(Sender: TObject);
   private
@@ -94,10 +95,7 @@ begin
           S_Map:
             begin
               MapPtr := PTSMap(MsgPtr);
-//            SetLength(FMap, Length(MapPtr^.Map));
               CopyMemory(FMap, @MapPtr^.Map[0], 1600);
-//            processAni(self);
-//          ShowMessage(' ’µΩ map');
             end;
         end;
       finally
@@ -154,6 +152,34 @@ begin
   timer.OnTimer := doWork;
   timer.Interval := 500;
   timer.Enabled := True;
+end;
+
+procedure TFrmMap.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Key = Word('A') then
+  begin
+    posX := posX - 40;
+    bmp := bmpWW;
+  end;
+  if Key = Word('S') then
+  begin
+    posY := posY + 40;
+    bmp := bmpS;
+  end;
+  if Key = Word('D') then
+  begin
+    posX := posX + 40;
+    bmp := bmpE;
+  end;
+  if Key = Word('W') then
+  begin
+    posY := posY - 40;
+    bmp := bmpN;
+  end;
+  bmpW := bmp.Width;
+  bmpH := bmp.Height;
+  piceW := bmpW div 6;
 end;
 
 procedure TFrmMap.processAni(Sender: TObject);
