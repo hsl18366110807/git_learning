@@ -59,7 +59,7 @@ begin
   BombX := TBomb(FBombList.Objects[BomePos]).FBombPosX;
   BombY := TBomb(FBombList.Objects[BomePos]).FBombPosY;
   SendBombEvent(BombX, BombY);
-  for I := 0 to BoomScope - 1 do
+  for I := 0 to BoomScope - 1 do   //判定是否爆破到人
   begin
     if (FMap.Map[BombX + I][BombY] <> 0) and (FMap.Map[BombX + I][BombY] = 3) then
     begin
@@ -67,17 +67,108 @@ begin
       PlayerY := BombY;
       for J := 0 to FGamers.Count - 1 do
       begin
-        if (TGameClient(FGamers.Objects[I]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[I]).GamerPosy = PlayerY) then
+        if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
-          PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PlayerX, PlayerY);
-          FGamers.Delete(I);
+          PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
+          FGamers.Delete(J);
           FMap.Map[PlayerX][PlayerY] := 0;
           SendAllUser;
         end;
       end;
+    end
+    else if FMap.Map[BombX + I][BombY] = 1 then
+    begin
+      Exit;
+    end
+    else if FMap.Map[BombX + I][BombY] = 2 then
+    begin
+      FMap.Map[BombX + I][BombY] := 0;
+      SendAllUser;
+      Exit;
+    end;
+  end;
+  for I := 0 to BoomScope - 1 do
+  begin
+    if (FMap.Map[BombX - I][BombY] <> 0) and (FMap.Map[BombX - I][BombY] = 3) then
+    begin
+      PlayerX := BombX - I;
+      PlayerY := BombY;
+      for J := 0 to FGamers.Count - 1 do
+      begin
+        if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
+        begin
+          PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
+          FGamers.Delete(J);
+          FMap.Map[PlayerX][PlayerY] := 0;
+          SendAllUser;
+        end;
+      end;
+    end
+    else if FMap.Map[BombX - I][BombY] = 1 then
+    begin
+      Exit;
+    end
+    else if FMap.Map[BombX - I][BombY] = 2 then
+    begin
+      FMap.Map[BombX - I][BombY] := 0;
+      SendAllUser;
+      Exit;
     end;
   end;
 
+  for I := 0 to BoomScope - 1 do
+  begin
+    if (FMap.Map[BombX][BombY + I] <> 0) and (FMap.Map[BombX][BombY + I] = 3) then
+    begin
+      for J := 0 to FGamers.Count - 1 do
+      begin
+        if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
+        begin
+          PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
+          FGamers.Delete(J);
+          FMap.Map[PlayerX][PlayerY] := 0;
+          SendAllUser;
+        end;
+      end;
+    end
+    else if FMap.Map[BombX][BombY + I] = 1 then
+    begin
+      Exit;
+    end
+    else if FMap.Map[BombX][BombY + I] = 2 then
+    begin
+      FMap.Map[BombX][BombY + I] := 0;
+      SendAllUser;
+      Exit;
+    end;
+  end;
+
+  for I := 0 to BoomScope - 1 do
+  begin
+    if (FMap.Map[BombX][BombY - I] <> 0) and (FMap.Map[BombX][BombY - I] = 3) then
+    begin
+      for J := 0 to FGamers.Count - 1 do
+      begin
+        if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
+        begin
+          PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
+          FGamers.Delete(J);
+          FMap.Map[PlayerX][PlayerY] := 0;
+          SendAllUser;
+        end;
+      end;
+    end
+    else if FMap.Map[BombX][BombY - I] = 1 then
+    begin
+      Exit;
+    end
+    else if FMap.Map[BombX][BombY - I] = 2 then
+    begin
+      FMap.Map[BombX][BombY - I] := 0;
+      SendAllUser;
+      Exit;
+    end;
+  end;
 end;
 
 constructor TTcpgameserver.Create;

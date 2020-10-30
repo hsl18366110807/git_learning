@@ -97,7 +97,7 @@ const
   C_MOVE = 7;
   C_BOOM = 8;
   S_BOMBBOOM = 9;
-  S_PlayerDead = 10;
+  S_PLAYERDEAD = 10;
 
 implementation
 
