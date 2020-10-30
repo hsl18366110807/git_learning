@@ -30,7 +30,9 @@ type
   protected
     procedure Execute; override;
     procedure ProcessClientIO(AClient: TTCPClient); override;
+    procedure ClientRemoved(AClient: TTCPClient); override;
   private
+    function FindGamer(AClient: TTCPClient): TGameClient;
     procedure InitGameMap;
     procedure SetGamerPos(AGamer: TGameClient);
     function RegisterNewUser(RequestPtr: PLoginMsg; AClient: TTCPClient): Integer;
@@ -171,6 +173,24 @@ begin
   end;
 end;
 
+procedure TTcpgameserver.ClientRemoved(AClient: TTCPClient);
+var
+  Idx: Integer;
+  DeletedChatter: TGameClient;
+begin
+  DeletedChatter := FindGamer(AClient);
+  FMap.Map[DeletedChatter.GamerPosX][DeletedChatter.GamerPosY] := 0;
+  if DeletedChatter <> nil then
+  begin
+    Idx := FGamers.IndexOfObject(DeletedChatter);
+    if Idx >= 0 then
+      FGamers.Delete(Idx)
+    else
+      Exit;
+    DeletedChatter.Free;
+  end;
+end;
+
 constructor TTcpgameserver.Create;
 begin
   inherited Create;
@@ -207,6 +227,21 @@ begin
       end;
     end;
 
+  end;
+end;
+
+function TTcpgameserver.FindGamer(AClient: TTCPClient): TGameClient;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to FGamers.Count - 1 do
+  begin
+    if TGameClient(FGamers.Objects[i]).FClient = AClient then
+    begin
+      Result := TGameClient(FGamers.Objects[i]);
+      break;
+    end;
   end;
 end;
 
@@ -300,7 +335,7 @@ begin
   PlayerDeadEvent.head.Flag := PACK_FLAG;
   PlayerDeadEvent.head.Size := SizeOf(PlayerDeadEvent);
   PlayerDeadEvent.head.Command := S_PlayerDead;
-  PlayerDeadEvent.UserName := UserName;
+  Move(Pointer(UserName)^, PlayerDeadEvent.UserName, Length(UserName));
   PlayerDeadEvent.PlayerPosX := PlayerPosX;
   PlayerDeadEvent.PlayerPosY := PlayerPosY;
   for I := 0 to FGamers.Count - 1 do
@@ -313,47 +348,50 @@ end;
 function TTcpgameserver.PlayerMove(RequestPtr: PPlayerMove; AClient: TTCPClient): Integer;
 var
   X, Y: Integer;
+  PlayerName: AnsiString;
 begin
-  if RequestPtr.MoveType = MOEVUP then
+
+  PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
+  if RequestPtr.MoveType = MOVEUP then
   begin
-    X := TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).GamerPosX;
-    Y := TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).GamerPosY;
+    X := TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).GamerPosX;
+    Y := TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).GamerPosY;
     if FMap.Map[X][Y + 1] = 0 then
     begin
-      TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).ChangeGamerPos(MOEVUP);
+      TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).ChangeGamerPos(MOVEUP);
       FMap.Map[X][Y] := 0;
       FMap.Map[X][Y + 1] := 3;
     end;
   end
   else if RequestPtr.MoveType = MOVEDOWN then
   begin
-    X := TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).GamerPosX;
-    Y := TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).GamerPosY;
+    X := TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).GamerPosX;
+    Y := TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).GamerPosY;
     if FMap.Map[X][Y - 1] = 0 then
     begin
-      TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).ChangeGamerPos(MOVEDOWN);
+      TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).ChangeGamerPos(MOVEDOWN);
       FMap.Map[X][Y] := 0;
       FMap.Map[X][Y - 1] := 3;
     end;
   end
   else if RequestPtr.MoveType = MOVELEFT then
   begin
-    X := TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).GamerPosX;
-    Y := TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).GamerPosY;
+    X := TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).GamerPosX;
+    Y := TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).GamerPosY;
     if FMap.Map[X - 1][Y] = 0 then
     begin
-      TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).ChangeGamerPos(MOVELEFT);
+      TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).ChangeGamerPos(MOVELEFT);
       FMap.Map[X][Y] := 0;
       FMap.Map[X - 1][Y] := 3;
     end;
   end
   else if RequestPtr.MoveType = MOVERIGHT then
   begin
-    X := TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).GamerPosX;
-    Y := TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).GamerPosY;
+    X := TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).GamerPosX;
+    Y := TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).GamerPosY;
     if FMap.Map[X + 1][Y] = 0 then
     begin
-      TGameClient(FGamers.Objects[FGamers.IndexOfName(RequestPtr.PlayerName)]).ChangeGamerPos(MOVERIGHT);
+      TGameClient(FGamers.Objects[FGamers.IndexOfName(PlayerName)]).ChangeGamerPos(MOVERIGHT);
       FMap.Map[X][Y] := 0;
       FMap.Map[X + 1][Y] := 3;
     end;
@@ -524,7 +562,7 @@ end;
 
 procedure TGameClient.ChangeGamerPos(ChangeType: MoveDirect);
 begin
-  if ChangeType = MOEVUP then
+  if ChangeType = MOVEUP then
   begin
     GamerPosY := GamerPosY + 1;
   end

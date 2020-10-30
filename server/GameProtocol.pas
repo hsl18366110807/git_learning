@@ -12,7 +12,7 @@ const
   BoomTime = 5000;
   BoomScope = 5;
 type
-  MoveDirect = (MOEVUP, MOVEDOWN, MOVELEFT, MOVERIGHT);
+  MoveDirect = (MOVEUP, MOVEDOWN, MOVELEFT, MOVERIGHT);
 
   PGameMsgHead = ^TGameMsgHead;
 
@@ -39,7 +39,7 @@ type
     ErrorInfo: array[0..31] of AnsiChar;
   end;
 
-  MapSign = (MOVE, BLOCK, BOX, CHARACTRT); //可移动，障碍物，木箱，有角色
+  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT); //可移动，障碍物，木箱，有角色
 
   TMap = record
     head: TGameMsgHead;
@@ -50,7 +50,7 @@ type
 
   TPlayerMove = record
     head: TGameMsgHead;
-    PlayerName: AnsiString;
+    UserName: array[0..15] of AnsiChar;
     MoveType: MoveDirect;
   end;
 
@@ -69,7 +69,7 @@ type
 
   TPlayerDeadEvent = record
     head: TGameMsgHead;
-    UserName: AnsiString;
+    UserName: array[0..15] of AnsiChar;
     PlayerPosX: Integer;
     PlayerPosY: Integer;
   end;
