@@ -6,24 +6,28 @@ uses
   ChatProtocol, TCPClient, SyncObjs, Winapi.Windows;
 
 type
+//  const
+//   PRESSW =
+
   TChatMgr = class(TTCPClient)
   private
     FServerMsgs: TLockChatMsgs;
-    FAccount: String;
+    FAccount: AnsiString;
   protected
     procedure ProcessReadData; override;
   public
     procedure ReadResponse(Msgs: TChatMsgs);
-    function RequestRegister(Account: String; Password: String): Integer;
-    function RequestLogin(Account: String; Password: String): Integer;
+    function RequestRegister(Account: string; Password: string): Integer;
+    function RequestLogin(Account: string; Password: string): Integer;
     function RequestUsers: Integer;
     function RequestMap: Integer;
-    function RequestSendMsg(Account: String; Msg: String): Integer;
+    function RequestMove(Key: Word): Integer;
+    function RequestSendMsg(Account: string; Msg: string): Integer;
   public
     constructor Create;
     destructor Destroy; override;
   public
-    property Account: String read FAccount;
+    property Account: AnsiString read FAccount;
   end;
 
 var
@@ -39,7 +43,7 @@ uses
 constructor TChatMgr.Create;
 begin
   FServerMsgs := TLockChatMsgs.Create;
- 
+
   inherited Create;
 end;
 
@@ -105,7 +109,7 @@ begin
   FServerMsgs.FetchTo(Msgs);
 end;
 
-function TChatMgr.RequestLogin(Account, Password: String): Integer;
+function TChatMgr.RequestLogin(Account, Password: string): Integer;
 var
   CMLogin: TCMLogin;
 begin
@@ -114,7 +118,7 @@ begin
     Result := -1;
     Exit;
   end;
-  
+
   if Length(Password) >= Length(CMLogin.Password) then
   begin
     Result := -2;
@@ -130,7 +134,6 @@ begin
   CMLogin.Head.Size := SizeOf(CMLogin);
   CMLogin.Head.Command := C_LOGIN;
 
-
   strpcopy(@CMLogin.UserName[0], AnsiString(Account));
   strpcopy(@CMLogin.Password[0], AnsiString(Password));
 
@@ -138,9 +141,7 @@ begin
     Result := -3;
 end;
 
-
-
-function TChatMgr.RequestRegister(Account, Password: String): Integer;
+function TChatMgr.RequestRegister(Account, Password: string): Integer;
 var
   CMReg: TCMRegister;
 begin
@@ -149,7 +150,7 @@ begin
     Result := -1;
     Exit;
   end;
-  
+
   if (Length(Password) >= Length(CMReg.Password)) then
   begin
     Result := -2;
@@ -170,12 +171,12 @@ begin
     Result := -3;
 end;
 
-function TChatMgr.RequestSendMsg(Account, Msg: String): Integer;
+function TChatMgr.RequestSendMsg(Account, Msg: string): Integer;
 var
   CMChitChat: TCMChitChat;
 begin
   Result := 0;
-  
+
   FillChar(CMChitChat, SizeOf(CMChitChat), 0);
   CMChitChat.Head.Flag := PACK_FLAG;
   CMChitChat.Head.Size := SizeOf(CMChitChat);
@@ -217,7 +218,32 @@ begin
 
 end;
 
+function TChatMgr.RequestMove(Key: Word): Integer;
+var
+  CReqMove: TPlayerMove;
+begin
+  Result := 0;
+  FillChar(CReqMove, SizeOf(CReqMove), 0);
+  CReqMove.head.Flag := PACK_FLAG;
+  CReqMove.head.Size := SizeOf(CReqMove);
+  CReqMove.head.Command := C_MOVE;
+  CopyMemory(@CReqMove.PlayerName[0], Pointer(FAccount), Length(FAccount));
 
+  case Key of
+     Word('A'):
+      CReqMove.MoveType := MOVELEFT;
+    Word('S'):
+      CReqMove.MoveType := MOVEDOWN;
+    Word('W'):
+      CReqMove.MoveType := MOVEUP;
+    Word('D'):
+      CReqMove.MoveType := MOVERIGHT;
+  end;
+
+  if WriteSendData(@CReqMove, SizeOf(CReqMove)) < 0 then
+    Result := -3;
+
+end;
 
 initialization
   ChatMgr := TChatMgr.Create;
@@ -226,3 +252,4 @@ finalization
   FreeAndNil(ChatMgr);
 
 end.
+

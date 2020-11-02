@@ -139,7 +139,6 @@ begin
 
   bmp4 := TBitmap32.Create;
   bmp4.DrawMode := dmBlend;
-//  bmp4.DrawMode := dm
   LoadBitmap32FromPNG(bmp4, 'img/box1.png');
 
   posX := 0;
@@ -160,26 +159,28 @@ begin
   if Key = Word('A') then
   begin
     posX := posX - 40;
-    bmp := bmpWW;
+//    bmp := bmpWW;
   end;
-  if Key = Word('S') then
-  begin
-    posY := posY + 40;
-    bmp := bmpS;
-  end;
-  if Key = Word('D') then
-  begin
-    posX := posX + 40;
-    bmp := bmpE;
-  end;
-  if Key = Word('W') then
-  begin
-    posY := posY - 40;
-    bmp := bmpN;
-  end;
-  bmpW := bmp.Width;
-  bmpH := bmp.Height;
-  piceW := bmpW div 6;
+//  if Key = Word('S') then
+//  begin
+//    posY := posY + 40;
+////    bmp := bmpS;
+//  end;
+//  if Key = Word('D') then
+//  begin
+//    posX := posX + 40;
+////    bmp := bmpE;
+//  end;
+//  if Key = Word('W') then
+//  begin
+//    posY := posY - 40;
+////    bmp := bmpN;
+//  end;
+
+  ChatMgr.RequestMove(Key);
+//  bmpW := bmp.Width;
+//  bmpH := bmp.Height;
+//  piceW := bmpW div 6;
 end;
 
 procedure TFrmMap.processAni(Sender: TObject);

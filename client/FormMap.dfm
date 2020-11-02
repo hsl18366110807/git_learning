@@ -22,6 +22,5 @@ object FrmMap: TFrmMap
     Height = 722
     Align = alClient
     TabOrder = 0
-    ExplicitHeight = 810
   end
 end
