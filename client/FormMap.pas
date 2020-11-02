@@ -156,11 +156,11 @@ end;
 procedure TFrmMap.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if Key = Word('A') then
-  begin
-    posX := posX - 40;
-//    bmp := bmpWW;
-  end;
+//  if Key = Word('A') then
+//  begin
+//    posX := posX - 40;
+////    bmp := bmpWW;
+//  end;
 //  if Key = Word('S') then
 //  begin
 //    posY := posY + 40;
