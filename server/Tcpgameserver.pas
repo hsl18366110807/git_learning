@@ -356,22 +356,22 @@ begin
   begin
     X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
     Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if FMap.Map[X][Y + 1] = 0 then
+    if FMap.Map[X][Y - 1] = 0 then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEUP);
       FMap.Map[X][Y] := 0;
-      FMap.Map[X][Y + 1] := 3;
+      FMap.Map[X][Y - 1] := 3;
     end;
   end
   else if RequestPtr.MoveType = MOVEDOWN then
   begin
     X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
     Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if FMap.Map[X][Y - 1] = 0 then
+    if FMap.Map[X][Y + 1] = 0 then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEDOWN);
       FMap.Map[X][Y] := 0;
-      FMap.Map[X][Y - 1] := 3;
+      FMap.Map[X][Y + 1] := 3;
     end;
   end
   else if RequestPtr.MoveType = MOVELEFT then
@@ -564,11 +564,11 @@ procedure TGameClient.ChangeGamerPos(ChangeType: MoveDirect);
 begin
   if ChangeType = MOVEUP then
   begin
-    GamerPosY := GamerPosY + 1;
+    GamerPosY := GamerPosY - 1;
   end
   else if ChangeType = MOVEDOWN then
   begin
-    GamerPosY := GamerPosY - 1;
+    GamerPosY := GamerPosY + 1;
   end
   else if ChangeType = MOVELEFT then
   begin

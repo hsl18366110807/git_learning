@@ -402,7 +402,7 @@ begin
   begin
     ReadSize := recv(FSocket, FReadBuffer[FReadDataSize], Min(256, RemainSize), 0);
     FReadDataSize := FReadDataSize + ReadSize;
-    Result := (RemainSize > 0);
+    Result := (ReadSize > 0);
   end;
 
 end;
@@ -445,6 +445,12 @@ begin
     raise Exception.Create('Fetch size error');
   Move(FReadBuffer[FetchSize], FReadBuffer[0], FetchSize);
   FReadDataSize := FReadDataSize - FetchSize;
+end;
+
+
+procedure haha;
+begin
+
 end;
 
 end.
