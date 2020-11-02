@@ -71,7 +71,7 @@ type
 
   TPlayerMove = record
     head: TChatMsgHead;
-    PlayerName: AnsiString;
+    PlayerName: TUserAccount;
     MoveType: MoveDirect;
   end;
 
