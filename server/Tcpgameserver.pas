@@ -189,6 +189,7 @@ begin
       Exit;
     DeletedChatter.Free;
   end;
+  SendAllUser;
 end;
 
 constructor TTcpgameserver.Create;
