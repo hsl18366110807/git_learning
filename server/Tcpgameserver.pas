@@ -179,9 +179,9 @@ var
   DeletedChatter: TGameClient;
 begin
   DeletedChatter := FindGamer(AClient);
-  FMap.Map[DeletedChatter.GamerPosX][DeletedChatter.GamerPosY] := 0;
   if DeletedChatter <> nil then
   begin
+    FMap.Map[DeletedChatter.GamerPosX][DeletedChatter.GamerPosY] := 0;
     Idx := FGamers.IndexOfObject(DeletedChatter);
     if Idx >= 0 then
       FGamers.Delete(Idx)
