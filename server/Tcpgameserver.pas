@@ -412,9 +412,11 @@ var
   x: Integer;
   y: Integer;
   ABomb: TBOMB;
+  PlayerName: AnsiString;
 begin
-  x := TGameClient(FGamers.Objects[FGamers.IndexOf(RequestPtr.PlayerName)]).GamerPosX;
-  y := TGameClient(FGamers.Objects[FGamers.IndexOf(RequestPtr.PlayerName)]).GamerPosY;
+  PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
+  x := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
+  y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
   ABomb := TBOMB.Create(x, y);
   ABomb.BombID := FBombList.Count;
   FBombList.AddObject(IntToStr(ABomb.BombID), ABomb);

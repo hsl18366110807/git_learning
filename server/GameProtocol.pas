@@ -59,7 +59,7 @@ type
 
   TPlayerSetBoom = record
     head: TGameMsgHead;
-    PlayerName: AnsiString; //根据用户名寻找坐标
+    UserName: array[0..15] of AnsiChar; //根据用户名寻找坐标
   end;
 
   TBombBoom = record
