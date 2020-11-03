@@ -110,10 +110,6 @@ type
  // 地图 为二维数组
   MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB); //可移动，障碍物，木箱，有角色，炸弹
 
-  TMap = record
-    Map: array[0..MapLength, 0..MapWide] of Integer;
-  end;
-
    TPlayerSetBoom = record
     head: TChatMsgHead;
     PlayerName: TUserAccount; //根据用户名寻找坐标

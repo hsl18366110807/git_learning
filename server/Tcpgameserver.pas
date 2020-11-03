@@ -63,19 +63,17 @@ begin
   BombX := TBomb(FBombList.Objects[BomePos]).FBombPosX;
   BombY := TBomb(FBombList.Objects[BomePos]).FBombPosY;
 
-  for I := 0 to BoomScope - 1 do   //判定是否爆破到人
+  for I := 0 to BoomScope - 1 do
   begin
-    Inc(BoomD);
-    if (FMap.Map[BombX + I][BombY] <> 0) and (FMap.Map[BombX + I][BombY] = 3) then
+    if FMap.Map[BombX + I][BombY] = 3 then  //判定是否爆破到人
     begin
-
       PlayerX := BombX + I;
       PlayerY := BombY;
       for J := 0 to FGamers.Count - 1 do
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
-          PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
+//          PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FGamers.Delete(J);
           FMap.Map[PlayerX][PlayerY] := 0;
           SendAllUser;
@@ -92,11 +90,12 @@ begin
       SendAllUser;
       Break;
     end;
+    Inc(BoomD);
   end;
   for I := 0 to BoomScope - 1 do
   begin
-    Inc(BoomA);
-    if (FMap.Map[BombX - I][BombY] <> 0) and (FMap.Map[BombX - I][BombY] = 3) then
+
+    if (FMap.Map[BombX - I][BombY] = 3) then
     begin
       PlayerX := BombX - I;
       PlayerY := BombY;
@@ -121,10 +120,11 @@ begin
       SendAllUser;
       Break;
     end;
+    Inc(BoomA);
   end;
   for I := 0 to BoomScope - 1 do
   begin
-    Inc(BoomS);
+
     if (FMap.Map[BombX][BombY + I] <> 0) and (FMap.Map[BombX][BombY + I] = 3) then
     begin
       for J := 0 to FGamers.Count - 1 do
@@ -148,11 +148,12 @@ begin
       SendAllUser;
       Break;
     end;
+    Inc(BoomS);
   end;
 
   for I := 0 to BoomScope - 1 do
   begin
-    Inc(BoomW);
+
     if (FMap.Map[BombX][BombY - I] <> 0) and (FMap.Map[BombX][BombY - I] = 3) then
     begin
       for J := 0 to FGamers.Count - 1 do
@@ -176,6 +177,7 @@ begin
       SendAllUser;
       Break;
     end;
+    Inc(BoomW);
   end;
   SendBombEvent(BombX, BombY, BoomW, BoomA, BoomS, BoomD);
   FMap.Map[BombX][BombY] := 0;
