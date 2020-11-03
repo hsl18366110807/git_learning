@@ -119,6 +119,19 @@ type
     PlayerName: TUserAccount; //根据用户名寻找坐标
   end;
 
+
+  PTBombBoom = ^TBombBoom;
+  TBombBoom = record
+    head: TChatMsgHead;
+    Bombx: Integer;
+    BombY: Integer;
+    BoomW: Integer;
+    BoomA: Integer;
+    BoomS: Integer;
+    BoomD: Integer;
+  end;
+
+
 type
   PChatMsgNode = ^TChatMsgNode;
 
@@ -168,6 +181,7 @@ const
   S_Map = 6;
   C_MOVE = 7;
   C_BOOM = 8;
+  S_BOMBBOOM = 9;
   CM_USER_STATE = 5;
   SM_USER_STATE = 6;
   CM_SENDMSG = 7;

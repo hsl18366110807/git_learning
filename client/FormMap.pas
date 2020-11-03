@@ -28,7 +28,7 @@ type
     posX, posY: Integer;
     FOldMap: array of Integer;
     FMap: array of Integer;
-    FMapChanged: Boolean;
+//    FMapChanged: Boolean;
 //    FMap:
     { Private declarations }
   public
@@ -49,39 +49,12 @@ var
   bmp2, bmp3, bmp4: TBitmap32;
   bmpE, bmpWW, bmpS, bmpN: TBitmap32;
 
-//procedure TFrmMap.FormKeyDown(Sender: TObject; var Key: Word;
-//  Shift: TShiftState);
-//begin
-//  if Key = Word('A') then
-//  begin
-//    posX := posX - 40;
-//    bmp := bmpWW;
-//  end;
-//  if Key = Word('S') then
-//  begin
-//    posY := posY + 40;
-//    bmp := bmpS;
-//  end;
-//  if Key = Word('D') then
-//  begin
-//    posX := posX + 40;
-//    bmp := bmpE;
-//  end;
-//  if Key = Word('W') then
-//  begin
-//    posY := posY - 40;
-//    bmp := bmpN;
-//  end;
-//  bmpW := bmp.Width;
-//  bmpH := bmp.Height;
-//  piceW := bmpW div 6;
-//end;
-
 procedure TFrmMap.doWork(Sender: TObject);
 var
   MsgPtr: PChatMsg;
   ServerMsgPtr: PServerMessage;
   MapPtr: PTSMap;
+  BoomFlor: PTBombBoom;
 begin
   ChatMgr.ReadResponse(FMsgs);
   while not FMsgs.IsEmpty do
@@ -97,19 +70,19 @@ begin
             begin
               MapPtr := PTSMap(MsgPtr);
               CopyMemory(FMap, @MapPtr^.Map[0], 1600);
-//              FMapChanged := True;
             end;
+          S_BOMBBOOM:
+            begin
+              BoomFlor := PTBombBoom(MsgPtr);
+//              doBoomFlor(BoomFlor);
+            end;
+
         end;
       finally
         FreeMem(MsgPtr);
       end;
     end;
   end;
-//  if FMapChanged then
-//  begin
-//    processAni(self);
-//    FMapChanged := False;
-//  end;
   processAni(self);
 end;
 
@@ -246,7 +219,7 @@ begin
       end
       else if FMap[i * 20 + j] = 4 then
       begin
-         posX := x;
+        posX := x;
         posY := y;
         drawY := posY - (FBmpBoom.Height - 40) - 10;
         FBmpBoom.DrawTo(pntbx.Buffer, rect(posX, drawY, W + posX, drawY + bmpRoleH), Rect(piceBoomW * tickfour, 0, piceBoomW * (tickfour + 1), bmpBoomH));
