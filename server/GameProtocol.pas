@@ -11,6 +11,7 @@ const
   MapWide = 19;
   BoomTime = 5000;
   BoomScope = 5;
+
 type
   MoveDirect = (MOVEUP, MOVEDOWN, MOVELEFT, MOVERIGHT);
 
@@ -39,7 +40,7 @@ type
     ErrorInfo: array[0..31] of AnsiChar;
   end;
 
-  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT); //可移动，障碍物，木箱，有角色
+  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB); //可移动，障碍物，木箱，有角色，炸弹
 
   TMap = record
     head: TGameMsgHead;
@@ -65,6 +66,10 @@ type
     head: TGameMsgHead;
     Bombx: Integer;
     BombY: Integer;
+    BoomW: Integer;
+    BoomA: Integer;
+    BoomS: Integer;
+    BoomD: Integer;
   end;
 
   TPlayerDeadEvent = record

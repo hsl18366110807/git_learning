@@ -41,7 +41,7 @@ type
     function PlayerSetBomb(RequestPtr: PPlayerSetBoom; AClient: TTCPClient): Integer;
     function BombEvent(BomePos: Integer): Integer;
     function SendAllUser: Integer;
-    function SendBombEvent(BombX: Integer; BombY: Integer): Integer;
+    function SendBombEvent(BombX: Integer; BombY: Integer; BoomW: Integer; BoomA: Integer; BoomS: Integer; BoomD: Integer): Integer;
     function PlayerDead(UserName: AnsiString; PlayerPosX: Integer; PlayerPosY: Integer): Integer;
   end;
 
@@ -56,15 +56,18 @@ implementation
 function TTcpgameserver.BombEvent(BomePos: Integer): Integer;
 var
   BombX, BombY, PlayerX, PlayerY, I, J: Integer;
+  BoomW, BoomA, BoomD, BoomS: Integer;
 begin
 
   BombX := TBomb(FBombList.Objects[BomePos]).FBombPosX;
   BombY := TBomb(FBombList.Objects[BomePos]).FBombPosY;
-  SendBombEvent(BombX, BombY);
+
   for I := 0 to BoomScope - 1 do   //判定是否爆破到人
   begin
+    Inc(BoomD);
     if (FMap.Map[BombX + I][BombY] <> 0) and (FMap.Map[BombX + I][BombY] = 3) then
     begin
+
       PlayerX := BombX + I;
       PlayerY := BombY;
       for J := 0 to FGamers.Count - 1 do
@@ -80,17 +83,18 @@ begin
     end
     else if FMap.Map[BombX + I][BombY] = 1 then
     begin
-      Exit;
+      Break;
     end
     else if FMap.Map[BombX + I][BombY] = 2 then
     begin
       FMap.Map[BombX + I][BombY] := 0;
       SendAllUser;
-      Exit;
+      Break;
     end;
   end;
   for I := 0 to BoomScope - 1 do
   begin
+    Inc(BoomA);
     if (FMap.Map[BombX - I][BombY] <> 0) and (FMap.Map[BombX - I][BombY] = 3) then
     begin
       PlayerX := BombX - I;
@@ -108,18 +112,18 @@ begin
     end
     else if FMap.Map[BombX - I][BombY] = 1 then
     begin
-      Exit;
+      Break;
     end
     else if FMap.Map[BombX - I][BombY] = 2 then
     begin
       FMap.Map[BombX - I][BombY] := 0;
       SendAllUser;
-      Exit;
+      Break;
     end;
   end;
-
   for I := 0 to BoomScope - 1 do
   begin
+    Inc(BoomS);
     if (FMap.Map[BombX][BombY + I] <> 0) and (FMap.Map[BombX][BombY + I] = 3) then
     begin
       for J := 0 to FGamers.Count - 1 do
@@ -135,18 +139,19 @@ begin
     end
     else if FMap.Map[BombX][BombY + I] = 1 then
     begin
-      Exit;
+      Break;
     end
     else if FMap.Map[BombX][BombY + I] = 2 then
     begin
       FMap.Map[BombX][BombY + I] := 0;
       SendAllUser;
-      Exit;
+      Break;
     end;
   end;
 
   for I := 0 to BoomScope - 1 do
   begin
+    Inc(BoomW);
     if (FMap.Map[BombX][BombY - I] <> 0) and (FMap.Map[BombX][BombY - I] = 3) then
     begin
       for J := 0 to FGamers.Count - 1 do
@@ -162,15 +167,17 @@ begin
     end
     else if FMap.Map[BombX][BombY - I] = 1 then
     begin
-      Exit;
+      Break;
     end
     else if FMap.Map[BombX][BombY - I] = 2 then
     begin
       FMap.Map[BombX][BombY - I] := 0;
       SendAllUser;
-      Exit;
+      Break;
     end;
   end;
+
+  SendBombEvent(BombX, BombY, BoomW, BoomA, BoomS, BoomD);
 end;
 
 procedure TTcpgameserver.ClientRemoved(AClient: TTCPClient);
@@ -411,6 +418,8 @@ begin
   ABomb := TBOMB.Create(x, y);
   ABomb.BombID := FBombList.Count;
   FBombList.AddObject(IntToStr(ABomb.BombID), ABomb);
+  FMap.Map[x][y] := 4;
+  SendAllUser;
 end;
 
 procedure TTcpgameserver.ProcessClientIO(AClient: TTCPClient);
@@ -530,7 +539,7 @@ begin
   Result := 0;
 end;
 
-function TTcpgameserver.SendBombEvent(BombX: Integer; BombY: Integer): Integer;
+function TTcpgameserver.SendBombEvent(BombX: Integer; BombY: Integer; BoomW: Integer; BoomA: Integer; BoomS: Integer; BoomD: Integer): Integer;
 var
   I: integer;
   BombEvent: TBombBoom;
