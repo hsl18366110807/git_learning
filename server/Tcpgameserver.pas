@@ -367,7 +367,10 @@ begin
     if FMap.Map[X][Y - 1] = 0 then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEUP);
-      FMap.Map[X][Y] := 0;
+      if FMap.Map[X][Y] <> 4 then
+      begin
+        FMap.Map[X][Y] := 0;
+      end;
       FMap.Map[X][Y - 1] := 3;
     end;
   end
@@ -378,7 +381,10 @@ begin
     if FMap.Map[X][Y + 1] = 0 then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEDOWN);
-      FMap.Map[X][Y] := 0;
+      if FMap.Map[X][Y] <> 4 then
+      begin
+        FMap.Map[X][Y] := 0;
+      end;
       FMap.Map[X][Y + 1] := 3;
     end;
   end
@@ -389,7 +395,10 @@ begin
     if FMap.Map[X - 1][Y] = 0 then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVELEFT);
-      FMap.Map[X][Y] := 0;
+      if FMap.Map[X][Y] <> 4 then
+      begin
+        FMap.Map[X][Y] := 0;
+      end;
       FMap.Map[X - 1][Y] := 3;
     end;
   end
@@ -400,7 +409,10 @@ begin
     if FMap.Map[X + 1][Y] = 0 then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVERIGHT);
-      FMap.Map[X][Y] := 0;
+      if FMap.Map[X][Y] <> 4 then
+      begin
+        FMap.Map[X][Y] := 0;
+      end;
       FMap.Map[X + 1][Y] := 3;
     end;
   end;
