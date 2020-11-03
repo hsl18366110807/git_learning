@@ -115,6 +115,7 @@ var
   ReqBoom: TPlayerSetBoom;
 begin
   //
+  FillChar(ReqBoom, SizeOf(ReqBoom), 0);
   ReqBoom.head.Flag := PACK_FLAG;
   ReqBoom.head.Size := SizeOf(ReqBoom);
   ReqBoom.head.Command := C_BOOM;
