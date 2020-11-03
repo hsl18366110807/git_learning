@@ -114,6 +114,11 @@ type
     Map: array[0..MapLength, 0..MapWide] of Integer;
   end;
 
+   TPlayerSetBoom = record
+    head: TChatMsgHead;
+    PlayerName: TUserAccount; //根据用户名寻找坐标
+  end;
+
 type
   PChatMsgNode = ^TChatMsgNode;
 

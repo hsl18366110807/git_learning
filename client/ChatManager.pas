@@ -21,6 +21,7 @@ type
     function RequestLogin(Account: string; Password: string): Integer;
     function RequestUsers: Integer;
     function RequestMap: Integer;
+    function RequestBoom: Integer;
     function RequestMove(Key: Word): Integer;
     function RequestSendMsg(Account: string; Msg: string): Integer;
   public
@@ -107,6 +108,20 @@ end;
 procedure TChatMgr.ReadResponse(Msgs: TChatMsgs);
 begin
   FServerMsgs.FetchTo(Msgs);
+end;
+
+function TChatMgr.RequestBoom: Integer;
+var
+  ReqBoom: TPlayerSetBoom;
+begin
+  //
+  ReqBoom.head.Flag := PACK_FLAG;
+  ReqBoom.head.Size := SizeOf(ReqBoom);
+  ReqBoom.head.Command := C_BOOM;
+  CopyMemory(@ReqBoom.PlayerName[0], Pointer(FAccount), Length(FAccount));
+
+  if WriteSendData(@ReqBoom, SizeOf(ReqBoom)) < 0 then
+     Result := -3;
 end;
 
 function TChatMgr.RequestLogin(Account, Password: string): Integer;

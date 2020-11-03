@@ -153,9 +153,14 @@ begin
   timer.Enabled := True;
 end;
 
-procedure TFrmMap.FormKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+procedure TFrmMap.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
+  if Key = 32 then
+  begin
+    ChatMgr.RequestBoom;
+    exit;
+  end;
+
   if Key = Word('A') then
   begin
 //    posX := posX - 40;
@@ -176,11 +181,7 @@ begin
 //    posY := posY - 40;
     bmp := bmpN;
   end;
-
   ChatMgr.RequestMove(Key);
-//  bmpW := bmp.Width;
-//  bmpH := bmp.Height;
-//  piceW := bmpW div 6;
 end;
 
 procedure TFrmMap.processAni(Sender: TObject);
@@ -222,8 +223,8 @@ begin
       end
       else if FMap[i * 20 + j] = 3 then
       begin
-         posX := x;
-         posY := y;
+        posX := x;
+        posY := y;
         drawY := posY - (bmp.Height - 40);
         bmp.DrawTo(pntbx.Buffer, rect(posX, drawY, W + posX, drawY + bmpH), Rect(piceW * tick, 0, piceW * (tick + 1), bmpH));
       end;
