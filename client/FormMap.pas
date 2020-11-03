@@ -156,26 +156,26 @@ end;
 procedure TFrmMap.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-//  if Key = Word('A') then
-//  begin
+  if Key = Word('A') then
+  begin
 //    posX := posX - 40;
-////    bmp := bmpWW;
-//  end;
-//  if Key = Word('S') then
-//  begin
+    bmp := bmpWW;
+  end;
+  if Key = Word('S') then
+  begin
 //    posY := posY + 40;
-////    bmp := bmpS;
-//  end;
-//  if Key = Word('D') then
-//  begin
+    bmp := bmpS;
+  end;
+  if Key = Word('D') then
+  begin
 //    posX := posX + 40;
-////    bmp := bmpE;
-//  end;
-//  if Key = Word('W') then
-//  begin
+    bmp := bmpE;
+  end;
+  if Key = Word('W') then
+  begin
 //    posY := posY - 40;
-////    bmp := bmpN;
-//  end;
+    bmp := bmpN;
+  end;
 
   ChatMgr.RequestMove(Key);
 //  bmpW := bmp.Width;
