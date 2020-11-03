@@ -9,7 +9,7 @@ const
   PACK_FLAG = $FFBBFFCC;
   MapLength = 19;
   MapWide = 19;
-  BoomTime = 5000;
+  BoomTime = 5;
   BoomScope = 5;
 
 type

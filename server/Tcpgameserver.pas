@@ -4,7 +4,7 @@ interface
 
 uses
   Tcpserver, System.Classes, GameProtocol, System.SysUtils, LogServer,
-  GameSqlServer, System.Math;
+  GameSqlServer, System.Math, DateUtils;
 
 type
   TGameClient = class
@@ -31,6 +31,7 @@ type
     procedure Execute; override;
     procedure ProcessClientIO(AClient: TTCPClient); override;
     procedure ClientRemoved(AClient: TTCPClient); override;
+    procedure CheckBombTime; override;
   private
     function FindGamer(AClient: TTCPClient): TGameClient;
     procedure InitGameMap;
@@ -176,8 +177,29 @@ begin
       Break;
     end;
   end;
-
   SendBombEvent(BombX, BombY, BoomW, BoomA, BoomS, BoomD);
+  FMap.Map[BombX][BombY] := 0;
+  SendAllUser;
+end;
+
+procedure TTcpgameserver.CheckBombTime;
+var
+  i: Integer;
+  nowtimer: TDateTime;
+begin
+  inherited;
+  if FBombList.Count > 0 then
+  begin
+    for i := 0 to FBombList.Count - 1 do
+    begin
+      nowtimer := Now;
+      if SecondsBetween(nowtimer, (TBOMB(FBombList.Objects[i]).Timer)) = BoomTime then
+      begin
+        BombEvent(i); //爆炸事件;
+      end;
+    end;
+  end;
+
 end;
 
 procedure TTcpgameserver.ClientRemoved(AClient: TTCPClient);
@@ -220,22 +242,9 @@ begin
 end;
 
 procedure TTcpgameserver.Execute;
-var
-  i: Integer;
-  nowtimer: TDateTime;
 begin
   inherited;
-  if FBombList.Count > 0 then
-  begin
-    for i := 0 to FBombList.Count - 1 do
-    begin
-      if (nowtimer - (TBOMB(FBombList.Objects[i]).Timer)) = BoomTime then
-      begin
-        BombEvent(i); //爆炸事件;
-      end;
-    end;
 
-  end;
 end;
 
 function TTcpgameserver.FindGamer(AClient: TTCPClient): TGameClient;

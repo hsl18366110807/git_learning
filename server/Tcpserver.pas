@@ -61,6 +61,7 @@ type
     procedure Execute; override;
     procedure ClientRemoved(AClient: TTCPClient); virtual;
     procedure ProcessClientIO(AClient: TTCPClient); virtual;
+    procedure CheckBombTime; virtual;
   protected
     property Status: TServerStatus read FStatus write SetStatus;
   public
@@ -77,6 +78,11 @@ implementation
 { TTcpServer }
 uses
   LogServer, Math;
+
+procedure TTcpServer.CheckBombTime;
+begin
+
+end;
 
 procedure TTcpServer.ClientRemoved(AClient: TTCPClient);
 begin
@@ -366,6 +372,7 @@ begin
   begin
     ProcessClientIO(FClients.Items[i]);
   end;
+  CheckBombTime;
 end;
 
 
@@ -429,7 +436,7 @@ end;
 
 function TTCPClient.SendData(DataPtr: PByte; DataSize: Integer): Integer;
 begin
-   if (DataSize <= 0) or (DataSize > FSendBufSize - FSendDataSize) then
+  if (DataSize <= 0) or (DataSize > FSendBufSize - FSendDataSize) then
   begin
     Result := -1;
     Exit;
@@ -446,7 +453,6 @@ begin
   Move(FReadBuffer[FetchSize], FReadBuffer[0], FetchSize);
   FReadDataSize := FReadDataSize - FetchSize;
 end;
-
 
 procedure haha;
 begin
