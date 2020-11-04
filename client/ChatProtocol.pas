@@ -108,6 +108,7 @@ type
     ErrorInfo: array[0..31] of AnsiChar;
   end;
 
+  PTPlayerInfo  = ^TPlayerInfo;
   TPlayerInfo = record
     UserName: array[0..15] of AnsiChar;
     UserPosX: Integer;

@@ -15,6 +15,8 @@ type
     procedure doWork(Sender: TObject);
     procedure processAni(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+//    function FindInOldUserMap(role: TPlayerInfo): PTPlayerInfo;
+    function FindInList(UserList: TUserList; role: TPlayerInfo): PTPlayerInfo;
   private
     FBmpRole: TBitmap32;
     FBmpBoom: TBitmap32;
@@ -28,7 +30,9 @@ type
     posX, posY: Integer;
     FOldMap: array of Integer;
     FMap: array of Integer;
-    FUserList: TUserList;// array[0..4] of TPlayerInfo;
+    FUserListNew: TUserList; // array[0..4] of TPlayerInfo;
+    FUserListOld: TUserList;
+
 //    FMapChanged: Boolean;
 //    FMap:
     { Private declarations }
@@ -76,7 +80,7 @@ begin
           S_USERLIST:
             begin
               UserPtr := PTPlayerInfoList(MsgPtr);
-              FUserList := UserPtr^.UserList;
+              FUserListNew := UserPtr^.UserList;
             end;
         end;
       finally
@@ -86,6 +90,40 @@ begin
   end;
   processAni(self);
 end;
+
+function TFrmMap.FindInList(UserList: TUserList; role: TPlayerInfo): PTPlayerInfo;
+var
+  i, j: Integer;
+  tmpRole: TPlayerInfo;
+begin
+  Result := nil;
+  for i := 0 to Length(UserList) do
+  begin
+    tmpRole := UserList[i];
+    j := 0;
+    while tmpRole.UserName[j] = role.UserName[j] do
+      Inc(j);
+    if j = Length(role.UserName) then
+      Result := @tmpRole;
+  end;
+end;
+
+//function TFrmMap.FindInOldUserMap(role: TPlayerInfo): PTPlayerInfo;
+//var
+//  i, j: Integer;
+//  roleOld: TPlayerInfo;
+//begin
+//  Result := nil;
+//  for i := 0 to Length(FUserListOld) do
+//  begin
+//    roleOld := FUserListOld[i];
+//    j := 0;
+//    while roleOld.UserName[j] = role.UserName[j] do
+//      Inc(j);
+//    if j = Length(role.UserName) then
+//      Result := @roleOld;
+//  end;
+//end;
 
 procedure TFrmMap.FormCreate(Sender: TObject);
 begin
@@ -172,7 +210,10 @@ procedure TFrmMap.processAni(Sender: TObject);
 var
   x, y, i, j: Integer;
   drawX, drawY: Integer;
-  Role: TPlayerInfo;
+  RoleNew: TPlayerInfo;
+  RoleOld: TPlayerInfo;
+  PRoleOld: PTPlayerInfo;
+  PRoleNew: PTPlayerInfo;
 begin
   x := 0;
   y := 0;
@@ -234,24 +275,49 @@ begin
 //    FaceTo: FaceOrientate;
 //  end;
 // FaceOrientate = (NORTH, SOUTH, WEST, EAST);
-   for i := 0 to Length(FUserList) do
-   begin
-     Role := FUserList[i];
-     if  Role.UserName[0] <> #0 then
-         begin
-           //渲染 角色位置 和角色朝向
-           case Role.FaceTo of
-               NORTH:  FBmpRole := bmpN;
-               SOUTH:  FBmpRole := bmpS;
-               WEST: FBmpRole := bmpWW;
-               EAST: FBmpRole := bmpE;
-           end;
-           posX := Role.UserPosX * 40;
-           posY := Role.UserPosY * 40 - (FBmpRole.Height - 40);
-           FBmpRole.DrawTo(pntbx.Buffer, rect(posX, posY, W + posX, posY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
-         end;
-   end;
+  for i := 0 to Length(FUserListNew) do
+  begin
+    RoleNew := FUserListNew[i];
+    PRoleOld := FindInList(FUserListOld, RoleNew);
+    if PRoleOld = nil then
+    begin   //角色新建立
+      FBmpRole := bmpN;
+      posX := RoleNew.UserPosX * 40;
+      posY := RoleNew.UserPosY * 40 - (FBmpRole.Height - 40);
+      FBmpRole.DrawTo(pntbx.Buffer, rect(posX, posY, W + posX, posY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+    end
+    else if (PRoleOld^.UserPosX <> RoleNew.UserPosX) or (PRoleOld^.UserPosX <> RoleNew.UserPosX) then
+    begin
+           //角色移动
+    end;
 
+//    if RoleNew.UserName[0] <> #0 then
+//    begin
+//           //渲染 角色位置 和角色朝向
+//      case RoleNew.FaceTo of
+//        NORTH:
+//          FBmpRole := bmpN;
+//        SOUTH:
+//          FBmpRole := bmpS;
+//        WEST:
+//          FBmpRole := bmpWW;
+//        EAST:
+//          FBmpRole := bmpE;
+//      end;
+//      posX := RoleNew.UserPosX * 40;
+//      posY := RoleNew.UserPosY * 40 - (FBmpRole.Height - 40);
+//      FBmpRole.DrawTo(pntbx.Buffer, rect(posX, posY, W + posX, posY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+//    end;
+  end;
+  for i := 0 to Length(FUserListOld) do
+  begin
+    RoleOld := FUserListOld[i];
+    PRoleNew := FindInList(FUserListNew, RoleOld);
+    if PRoleNew = nil then
+    begin
+           //角色死亡
+    end;
+  end;
 
 
 
