@@ -116,7 +116,7 @@ const
   C_BOOM = 8;
   S_BOMBBOOM = 9;
   S_PLAYERDEAD = 10;
-
+  S_USERLIST = 11;
 implementation
 
 { TBOMB }

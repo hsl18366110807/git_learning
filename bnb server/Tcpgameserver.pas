@@ -22,7 +22,6 @@ type
   private
     FGamers: TStrings;
     FBombList: TStrings;
-
   public
     FMap: TMap;
     FUserList: TPlayerInfoList;
@@ -312,9 +311,9 @@ begin
       SetGamerPos(AGameer);
       FGamers.AddObject(UserName, AGameer);
       Result := 0;
-      StrPCopy(FUserList.UserList[FGamers.Count].UserName,UserName);
-      FUserList.UserList[FGamers.Count].UserPosX := AGameer.GamerPosX;
-      FUserList.UserList[FGamers.Count].UserPosY := AGameer.GamerPosY;
+      StrPCopy(FUserList.UserList[FGamers.Count - 1].UserName, UserName);
+      FUserList.UserList[FGamers.Count - 1].UserPosX := AGameer.GamerPosX;
+      FUserList.UserList[FGamers.Count - 1].UserPosY := AGameer.GamerPosY;
     end
     else
     begin
@@ -432,7 +431,7 @@ begin
       begin
         if FUserList.UserList[I].FaceTo <> SOUTH then
         begin
-          FUserList.UserList [I].FaceTo := SOUTH;
+          FUserList.UserList[I].FaceTo := SOUTH;
         end;
         FUserList.UserList[I].UserPosX := X;
         FuserList.UserList[I].UserPosY := Y;
@@ -624,6 +623,11 @@ begin
     FMap.head.Flag := PACK_FLAG;
     FMap.head.Size := SizeOf(FMap);
     FMap.head.Command := S_MAP;
+
+    FUserList.head.Flag := PACK_FLAG;
+    FUserList.head.Size := SizeOf(FUserList);
+    FUserList.head.Command := S_USERLIST;
+
     TGameClient(FGamers.Objects[i]).FClient.SendData(@Fmap, SizeOf(FMap));
     TGameClient(FGamers.Objects[i]).FClient.SendData(@FUserList, SizeOf(FUserList));
   end;
