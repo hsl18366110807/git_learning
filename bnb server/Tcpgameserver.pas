@@ -300,7 +300,7 @@ var
 begin
   UserName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
   password := StrPas(PAnsichar(@(RequestPtr.Password)[0]));
-  if FGamers.IndexOf(UserName) = -1 and (FGamers.Count < 5) then
+  if (FGamers.IndexOf(UserName) = -1) and (FGamers.Count < 5) then
   begin
     sql := 'SELECT * from test where username=' + '"' + UserName + '"' + 'and password=' + '"' + password + '";';
     if SQLserver.SetSqlList(sql) = True then
@@ -311,7 +311,7 @@ begin
       SetGamerPos(AGameer);
       FGamers.AddObject(UserName, AGameer);
       Result := 0;
-      FUserList[FGamers.Count].UserName := UserName;
+      StrPCopy(FUserList[FGamers.Count].UserName,UserName);
       FUserList[FGamers.Count].UserPosX := AGameer.GamerPosX;
       FUserList[FGamers.Count].UserPosY := AGameer.GamerPosY;
     end
