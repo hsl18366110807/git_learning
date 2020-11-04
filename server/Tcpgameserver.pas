@@ -22,6 +22,7 @@ type
   private
     FGamers: TStrings;
     FBombList: TStrings;
+    FUserList: array[0..4] of TPlayerInfo;
   public
     FMap: TMap;
     procedure ProcessRequests(RequestPtr: PLoginMsg; AClient: TTCPClient);
@@ -65,10 +66,9 @@ begin
 
   for I := 0 to BoomScope - 1 do   //判定是否爆破到人
   begin
-    Inc(BoomD);
-    if (FMap.Map[BombX + I][BombY] <> 0) and (FMap.Map[BombX + I][BombY] = 3) then
-    begin
 
+    if FMap.Map[BombX + I][BombY] = 3 then
+    begin
       PlayerX := BombX + I;
       PlayerY := BombY;
       for J := 0 to FGamers.Count - 1 do
@@ -92,11 +92,11 @@ begin
       SendAllUser;
       Break;
     end;
+    Inc(BoomD);
   end;
   for I := 0 to BoomScope - 1 do
   begin
-    Inc(BoomA);
-    if (FMap.Map[BombX - I][BombY] <> 0) and (FMap.Map[BombX - I][BombY] = 3) then
+    if FMap.Map[BombX - I][BombY] = 3 then
     begin
       PlayerX := BombX - I;
       PlayerY := BombY;
@@ -121,11 +121,12 @@ begin
       SendAllUser;
       Break;
     end;
+    Inc(BoomA);
   end;
   for I := 0 to BoomScope - 1 do
   begin
-    Inc(BoomS);
-    if (FMap.Map[BombX][BombY + I] <> 0) and (FMap.Map[BombX][BombY + I] = 3) then
+
+    if FMap.Map[BombX][BombY + I] = 3 then
     begin
       for J := 0 to FGamers.Count - 1 do
       begin
@@ -148,12 +149,13 @@ begin
       SendAllUser;
       Break;
     end;
+    Inc(BoomS);
   end;
 
   for I := 0 to BoomScope - 1 do
   begin
-    Inc(BoomW);
-    if (FMap.Map[BombX][BombY - I] <> 0) and (FMap.Map[BombX][BombY - I] = 3) then
+
+    if FMap.Map[BombX][BombY - I] = 3 then
     begin
       for J := 0 to FGamers.Count - 1 do
       begin
@@ -176,6 +178,7 @@ begin
       SendAllUser;
       Break;
     end;
+    Inc(BoomW);
   end;
   SendBombEvent(BombX, BombY, BoomW, BoomA, BoomS, BoomD);
   FMap.Map[BombX][BombY] := 0;
@@ -297,7 +300,7 @@ var
 begin
   UserName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
   password := StrPas(PAnsichar(@(RequestPtr.Password)[0]));
-  if FGamers.IndexOf(UserName) = -1 then
+  if FGamers.IndexOf(UserName) = -1 and (FGamers.Count < 5) then
   begin
     sql := 'SELECT * from test where username=' + '"' + UserName + '"' + 'and password=' + '"' + password + '";';
     if SQLserver.SetSqlList(sql) = True then
@@ -307,8 +310,10 @@ begin
       AGameer.FUsername := RequestPtr.UserName;
       SetGamerPos(AGameer);
       FGamers.AddObject(UserName, AGameer);
-//      SendAllUser;
       Result := 0;
+      FUserList[FGamers.Count].UserName := UserName;
+      FUserList[FGamers.Count].UserPosX := AGameer.GamerPosX;
+      FUserList[FGamers.Count].UserPosY := AGameer.GamerPosY;
     end
     else
     begin
@@ -316,10 +321,15 @@ begin
       Result := 1;
     end;
   end
+  else if (FGamers.Count > 5) then
+  begin
+    Log.Error('用户已达上限！');
+    Result := 2;
+  end
   else
   begin
     Log.Error('用户已经在线！');
-    Result := 2;
+    Result := 3;
   end;
   FillChar(request, SizeOf(request), 0);
   request.head.Flag := PACK_FLAG;
@@ -333,9 +343,15 @@ begin
   end
   else if Result = 2 then
   begin
+    Error := '用户已达上限';
+    StrLCopy(@request.ErrorInfo[0], PAnsiChar(Error), Length(Error));
+  end
+  else if Result = 3 then
+  begin
     Error := '用户已经在线';
     StrLCopy(@request.ErrorInfo[0], PAnsiChar(Error), Length(Error));
   end;
+
   AClient.SendData(@request, SizeOf(request));
 //  if Result = 0 then
 //  begin
@@ -364,10 +380,9 @@ end;
 
 function TTcpgameserver.PlayerMove(RequestPtr: PPlayerMove; AClient: TTCPClient): Integer;
 var
-  X, Y: Integer;
-  PlayerName: AnsiString;
+  X, Y, I: Integer;
+  PlayerName, ListPlayerName: AnsiString;
 begin
-
   PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
   if RequestPtr.MoveType = MOVEUP then
   begin
@@ -381,6 +396,19 @@ begin
         FMap.Map[X][Y] := 0;
       end;
       FMap.Map[X][Y - 1] := 3;
+    end;
+    for I := 0 to FGamers.Count - 1 do
+    begin
+      ListPlayerName := StrPas(PAnsichar(@(FUserList[I].UserName)[0]));
+      if (ListPlayerName = PlayerName) then
+      begin
+        if FUserList[I].FaceTo <> NORTH then
+        begin
+          FUserList[I].FaceTo := NORTH;
+        end;
+        FUserList[I].UserPosX := X;
+        FuserList[I].UserPosY := Y;
+      end;
     end;
   end
   else if RequestPtr.MoveType = MOVEDOWN then
@@ -396,6 +424,19 @@ begin
       end;
       FMap.Map[X][Y + 1] := 3;
     end;
+    for I := 0 to FGamers.Count - 1 do
+    begin
+      ListPlayerName := StrPas(PAnsichar(@(FUserList[I].UserName)[0]));
+      if (ListPlayerName = PlayerName) then
+      begin
+        if FUserList[I].FaceTo <> SOUTH then
+        begin
+          FUserList[I].FaceTo := SOUTH;
+        end;
+        FUserList[I].UserPosX := X;
+        FuserList[I].UserPosY := Y;
+      end;
+    end;
   end
   else if RequestPtr.MoveType = MOVELEFT then
   begin
@@ -410,6 +451,19 @@ begin
       end;
       FMap.Map[X - 1][Y] := 3;
     end;
+    for I := 0 to FGamers.Count - 1 do
+    begin
+      ListPlayerName := StrPas(PAnsichar(@(FUserList[I].UserName)[0]));
+      if (ListPlayerName = PlayerName) then
+      begin
+        if FUserList[I].FaceTo <> WEST then
+        begin
+          FUserList[I].FaceTo := WEST;
+        end;
+        FUserList[I].UserPosX := X;
+        FuserList[I].UserPosY := Y;
+      end;
+    end;
   end
   else if RequestPtr.MoveType = MOVERIGHT then
   begin
@@ -423,6 +477,19 @@ begin
         FMap.Map[X][Y] := 0;
       end;
       FMap.Map[X + 1][Y] := 3;
+    end;
+    for I := 0 to FGamers.Count - 1 do
+    begin
+      ListPlayerName := StrPas(PAnsichar(@(FUserList[I].UserName)[0]));
+      if (ListPlayerName = PlayerName) then
+      begin
+        if FUserList[I].FaceTo <> EAST then
+        begin
+          FUserList[I].FaceTo := EAST;
+        end;
+        FUserList[I].UserPosX := X;
+        FuserList[I].UserPosY := Y;
+      end;
     end;
   end;
   SendAllUser;
@@ -556,8 +623,8 @@ begin
     FMap.head.Flag := PACK_FLAG;
     FMap.head.Size := SizeOf(FMap);
     FMap.head.Command := S_MAP;
-
     TGameClient(FGamers.Objects[i]).FClient.SendData(@Fmap, SizeOf(FMap));
+    TGameClient(FGamers.Objects[i]).FClient.SendData(@FUserList, SizeOf(FUserList));
   end;
   Result := 0;
 end;

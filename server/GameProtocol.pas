@@ -14,6 +14,7 @@ const
 
 type
   MoveDirect = (MOVEUP, MOVEDOWN, MOVELEFT, MOVERIGHT);
+  FaceOrientate = (NORTH, SOUTH, WEST, EAST);
 
   PGameMsgHead = ^TGameMsgHead;
 
@@ -45,6 +46,13 @@ type
   TMap = record
     head: TGameMsgHead;
     Map: array[0..MapLength, 0..MapWide] of Integer;
+  end;
+
+  TPlayerInfo = record
+    UserName: array[0..15] of AnsiChar;
+    UserPosX: Integer;
+    UserPosY: Integer;
+    FaceTo: FaceOrientate;
   end;
 
   PPlayerMove = ^TPlayerMove;
