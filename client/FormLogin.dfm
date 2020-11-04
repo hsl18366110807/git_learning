@@ -54,6 +54,7 @@ object FrmLogin: TFrmLogin
     Width = 121
     Height = 20
     TabOrder = 0
+    Text = '1234'
   end
   object edtPassword: TEdit
     Left = 150
@@ -62,6 +63,7 @@ object FrmLogin: TFrmLogin
     Height = 20
     PasswordChar = '*'
     TabOrder = 1
+    Text = '1234'
   end
   object cbbServerIP: TComboBox
     Left = 150
@@ -69,7 +71,7 @@ object FrmLogin: TFrmLogin
     Width = 121
     Height = 20
     TabOrder = 2
-    Text = '127.0.0.1'
+    Text = '10.246.54.151'
     Items.Strings = (
       '10.246.54.151'
       '10.246.54.171')

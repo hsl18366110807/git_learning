@@ -28,6 +28,7 @@ type
     posX, posY: Integer;
     FOldMap: array of Integer;
     FMap: array of Integer;
+    FUserList: TUserList;// array[0..4] of TPlayerInfo;
 //    FMapChanged: Boolean;
 //    FMap:
     { Private declarations }
@@ -54,6 +55,7 @@ var
   MsgPtr: PChatMsg;
   ServerMsgPtr: PServerMessage;
   MapPtr: PTSMap;
+  UserPtr: PTPlayerInfoList;
   BoomFlor: PTBombBoom;
 begin
   ChatMgr.ReadResponse(FMsgs);
@@ -71,12 +73,11 @@ begin
               MapPtr := PTSMap(MsgPtr);
               CopyMemory(FMap, @MapPtr^.Map[0], 1600);
             end;
-          S_BOMBBOOM:
+          S_USERLIST:
             begin
-              BoomFlor := PTBombBoom(MsgPtr);
-//              doBoomFlor(BoomFlor);
+              UserPtr := PTPlayerInfoList(MsgPtr);
+              FUserList := UserPtr^.UserList;
             end;
-
         end;
       finally
         FreeMem(MsgPtr);
@@ -132,9 +133,7 @@ begin
   posY := 0;
 
   SetLength(FMap, 400);
-  SetLength(FOldMap, 400);
   FillMemory(FMap, 400, 0);
-  FillMemory(FOldMap, 400, 0);
 
   timer := TTimer.Create(Self);
   timer.OnTimer := doWork;
@@ -150,26 +149,22 @@ begin
     exit;
   end;
 
-  if Key = Word('A') then
-  begin
-//    posX := posX - 40;
-    FBmpRole := bmpWW;
-  end;
-  if Key = Word('S') then
-  begin
-//    posY := posY + 40;
-    FBmpRole := bmpS;
-  end;
-  if Key = Word('D') then
-  begin
-//    posX := posX + 40;
-    FBmpRole := bmpE;
-  end;
-  if Key = Word('W') then
-  begin
-//    posY := posY - 40;
-    FBmpRole := bmpN;
-  end;
+//  if Key = Word('A') then
+//  begin
+//    FBmpRole := bmpWW;
+//  end;
+//  if Key = Word('S') then
+//  begin
+//    FBmpRole := bmpS;
+//  end;
+//  if Key = Word('D') then
+//  begin
+//    FBmpRole := bmpE;
+//  end;
+//  if Key = Word('W') then
+//  begin
+//    FBmpRole := bmpN;
+//  end;
   ChatMgr.RequestMove(Key);
 end;
 
@@ -177,6 +172,7 @@ procedure TFrmMap.processAni(Sender: TObject);
 var
   x, y, i, j: Integer;
   drawX, drawY: Integer;
+  Role: TPlayerInfo;
 begin
   x := 0;
   y := 0;
@@ -209,26 +205,55 @@ begin
       begin
         drawY := y - (bmp4.Height - 40);
         bmp4.DrawTo(pntbx.Buffer, x, drawY);
-      end//      else if (FMap[i * 20 + j] = 3) and (FOldMap[i * 20 + j] <> 3) then
-      else if FMap[i * 20 + j] = 3 then
-      begin
-        posX := x;
-        posY := y;
-        drawY := posY - (FBmpRole.Height - 40);
-        FBmpRole.DrawTo(pntbx.Buffer, rect(posX, drawY, W + posX, drawY + bmpRoleH), Rect(piceRoleW * ticksix, 0, piceRoleW * (ticksix + 1), bmpRoleH));
-      end
-      else if FMap[i * 20 + j] = 4 then
-      begin
-        posX := x;
-        posY := y;
-        drawY := posY - (FBmpBoom.Height - 40) - 10;
-        FBmpBoom.DrawTo(pntbx.Buffer, rect(posX, drawY, W + posX, drawY + bmpRoleH), Rect(piceBoomW * tickfour, 0, piceBoomW * (tickfour + 1), bmpBoomH));
-      end;
+      end;   // else if (FMap[i * 20 + j] = 3) and (FOldMap[i * 20 + j] <> 3) then
+//      else if FMap[i * 20 + j] = 3 then
+//      begin
+//        posX := x;
+//        posY := y;
+//        drawY := posY - (FBmpRole.Height - 40);
+////        FBmpRole.DrawTo(pntbx.Buffer, rect(posX, drawY, W + posX, drawY + bmpRoleH), Rect(piceRoleW * ticksix, 0, piceRoleW * (ticksix + 1), bmpRoleH));
+//        FBmpRole.DrawTo(pntbx.Buffer, rect(posX, drawY, W + posX, drawY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+////        FBmpRole.DrawTo(pntbx.Buffer, posX, drawY);
+//      end
+//      else if FMap[i * 20 + j] = 4 then
+//      begin
+//        posX := x;
+//        posY := y;
+//        drawY := posY - (FBmpBoom.Height - 40) - 10;
+//        FBmpBoom.DrawTo(pntbx.Buffer, rect(posX, drawY, W + posX, drawY + bmpRoleH), Rect(piceBoomW * tickfour, 0, piceBoomW * (tickfour + 1), bmpBoomH));
+//      end;
       y := y + 40;
     end;
     x := x + 40;
     y := 0;
   end;
+//    TPlayerInfo = record
+//    UserName: array[0..15] of AnsiChar;
+//    UserPosX: Integer;
+//    UserPosY: Integer;
+//    FaceTo: FaceOrientate;
+//  end;
+// FaceOrientate = (NORTH, SOUTH, WEST, EAST);
+   for i := 0 to Length(FUserList) do
+   begin
+     Role := FUserList[i];
+     if  Role.UserName[0] <> #0 then
+         begin
+           //渲染 角色位置 和角色朝向
+           case Role.FaceTo of
+               NORTH:  FBmpRole := bmpN;
+               SOUTH:  FBmpRole := bmpS;
+               WEST: FBmpRole := bmpWW;
+               EAST: FBmpRole := bmpE;
+           end;
+           posX := Role.UserPosX * 40;
+           posY := Role.UserPosY * 40 - (FBmpRole.Height - 40);
+           FBmpRole.DrawTo(pntbx.Buffer, rect(posX, posY, W + posX, posY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+         end;
+   end;
+
+
+
 
 //  CopyMemory(@FOldMap[0], @FMap[0], 1600);
   //画人，部分绘图

@@ -12,6 +12,7 @@ const
 
 type
   MoveDirect = (MOVEUP, MOVEDOWN, MOVELEFT, MOVERIGHT);
+  FaceOrientate = (NORTH, SOUTH, WEST, EAST);
 
   TUserAccount = array[0..15] of AnsiChar;
 
@@ -107,6 +108,21 @@ type
     ErrorInfo: array[0..31] of AnsiChar;
   end;
 
+  TPlayerInfo = record
+    UserName: array[0..15] of AnsiChar;
+    UserPosX: Integer;
+    UserPosY: Integer;
+    FaceTo: FaceOrientate;
+  end;
+
+  TUserList = array[0..4] of TPlayerInfo;
+
+  PTPlayerInfoList = ^TPlayerInfoList;
+  TPlayerInfoList = record
+    head: TChatMsgHead;
+    UserList: TUserList; //array[0..4] of TPlayerInfo;
+  end;
+
  // 地图 为二维数组
   MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB); //可移动，障碍物，木箱，有角色，炸弹
 
@@ -178,6 +194,7 @@ const
   C_MOVE = 7;
   C_BOOM = 8;
   S_BOMBBOOM = 9;
+  S_USERLIST = 11;
   CM_USER_STATE = 5;
   SM_USER_STATE = 6;
   CM_SENDMSG = 7;
