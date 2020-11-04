@@ -55,6 +55,11 @@ type
     FaceTo: FaceOrientate;
   end;
 
+  TPlayerInfoList = record
+    head: TGameMsgHead;
+    UserList: array[0..4] of TPlayerInfo;
+  end;
+
   PPlayerMove = ^TPlayerMove;
 
   TPlayerMove = record

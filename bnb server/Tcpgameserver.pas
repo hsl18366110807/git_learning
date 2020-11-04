@@ -22,9 +22,10 @@ type
   private
     FGamers: TStrings;
     FBombList: TStrings;
-    FUserList: array[0..4] of TPlayerInfo;
+
   public
     FMap: TMap;
+    FUserList: TPlayerInfoList;
     procedure ProcessRequests(RequestPtr: PLoginMsg; AClient: TTCPClient);
     constructor Create;
     destructor Destroy; override;
@@ -311,9 +312,9 @@ begin
       SetGamerPos(AGameer);
       FGamers.AddObject(UserName, AGameer);
       Result := 0;
-      StrPCopy(FUserList[FGamers.Count].UserName,UserName);
-      FUserList[FGamers.Count].UserPosX := AGameer.GamerPosX;
-      FUserList[FGamers.Count].UserPosY := AGameer.GamerPosY;
+      StrPCopy(FUserList.UserList[FGamers.Count].UserName,UserName);
+      FUserList.UserList[FGamers.Count].UserPosX := AGameer.GamerPosX;
+      FUserList.UserList[FGamers.Count].UserPosY := AGameer.GamerPosY;
     end
     else
     begin
@@ -399,15 +400,15 @@ begin
     end;
     for I := 0 to FGamers.Count - 1 do
     begin
-      ListPlayerName := StrPas(PAnsichar(@(FUserList[I].UserName)[0]));
+      ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
       if (ListPlayerName = PlayerName) then
       begin
-        if FUserList[I].FaceTo <> NORTH then
+        if FUserList.UserList[I].FaceTo <> NORTH then
         begin
-          FUserList[I].FaceTo := NORTH;
+          FUserList.UserList[I].FaceTo := NORTH;
         end;
-        FUserList[I].UserPosX := X;
-        FuserList[I].UserPosY := Y;
+        FUserList.UserList[I].UserPosX := X;
+        FuserList.UserList[I].UserPosY := Y;
       end;
     end;
   end
@@ -426,15 +427,15 @@ begin
     end;
     for I := 0 to FGamers.Count - 1 do
     begin
-      ListPlayerName := StrPas(PAnsichar(@(FUserList[I].UserName)[0]));
+      ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
       if (ListPlayerName = PlayerName) then
       begin
-        if FUserList[I].FaceTo <> SOUTH then
+        if FUserList.UserList[I].FaceTo <> SOUTH then
         begin
-          FUserList[I].FaceTo := SOUTH;
+          FUserList.UserList [I].FaceTo := SOUTH;
         end;
-        FUserList[I].UserPosX := X;
-        FuserList[I].UserPosY := Y;
+        FUserList.UserList[I].UserPosX := X;
+        FuserList.UserList[I].UserPosY := Y;
       end;
     end;
   end
@@ -453,15 +454,15 @@ begin
     end;
     for I := 0 to FGamers.Count - 1 do
     begin
-      ListPlayerName := StrPas(PAnsichar(@(FUserList[I].UserName)[0]));
+      ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
       if (ListPlayerName = PlayerName) then
       begin
-        if FUserList[I].FaceTo <> WEST then
+        if FUserList.UserList[I].FaceTo <> WEST then
         begin
-          FUserList[I].FaceTo := WEST;
+          FUserList.UserList[I].FaceTo := WEST;
         end;
-        FUserList[I].UserPosX := X;
-        FuserList[I].UserPosY := Y;
+        FUserList.UserList[I].UserPosX := X;
+        FuserList.UserList[I].UserPosY := Y;
       end;
     end;
   end
@@ -480,15 +481,15 @@ begin
     end;
     for I := 0 to FGamers.Count - 1 do
     begin
-      ListPlayerName := StrPas(PAnsichar(@(FUserList[I].UserName)[0]));
+      ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
       if (ListPlayerName = PlayerName) then
       begin
-        if FUserList[I].FaceTo <> EAST then
+        if FUserList.UserList[I].FaceTo <> EAST then
         begin
-          FUserList[I].FaceTo := EAST;
+          FUserList.UserList[I].FaceTo := EAST;
         end;
-        FUserList[I].UserPosX := X;
-        FuserList[I].UserPosY := Y;
+        FUserList.UserList[I].UserPosX := X;
+        FuserList.UserList[I].UserPosY := Y;
       end;
     end;
   end;
