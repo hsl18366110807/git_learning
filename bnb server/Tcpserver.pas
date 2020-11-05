@@ -38,11 +38,12 @@ type
   end;
 
   TTcpServer = class(TThread)
+  public
+    FClients: TList;
   private
     FStatus: TServerStatus;
     FLock: TCriticalSection;
     FSocket: TSocket;
-    FClients: TList;
     FIP: AnsiString;
     FPort: Word;
     FEventsReceiver: TServerEventsReceiver;

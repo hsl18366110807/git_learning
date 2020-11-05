@@ -71,14 +71,14 @@ begin
     begin
       PlayerX := BombX + I;
       PlayerY := BombY;
-      for J := 0 to FGamers.Count - 1 do
+      for J := FGamers.Count - 1 downto 0 do
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
+          Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
-          FGamers.Delete(J);
-          FMap.Map[PlayerX][PlayerY] := 0;
-          SendAllUser;
+          FClients.Delete(J);
+          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
         end;
       end;
     end
@@ -100,14 +100,14 @@ begin
     begin
       PlayerX := BombX - I;
       PlayerY := BombY;
-      for J := 0 to FGamers.Count - 1 do
+      for J := FGamers.Count - 1 downto 0 do
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
+          Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
-          FGamers.Delete(J);
-          FMap.Map[PlayerX][PlayerY] := 0;
-          SendAllUser;
+          FClients.Delete(J);
+          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
         end;
       end;
     end
@@ -128,14 +128,14 @@ begin
 
     if FMap.Map[BombX][BombY + I] = 3 then
     begin
-      for J := 0 to FGamers.Count - 1 do
+      for J := FGamers.Count - 1 downto 0 do
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
+          Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
-          FGamers.Delete(J);
-          FMap.Map[PlayerX][PlayerY] := 0;
-          SendAllUser;
+          FClients.Delete(J);
+          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
         end;
       end;
     end
@@ -157,14 +157,14 @@ begin
 
     if FMap.Map[BombX][BombY - I] = 3 then
     begin
-      for J := 0 to FGamers.Count - 1 do
+      for J := FGamers.Count - 1 downto 0 do
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
+          Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
-          FGamers.Delete(J);
-          FMap.Map[PlayerX][PlayerY] := 0;
-          SendAllUser;
+          FClients.Delete(J);
+          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
         end;
       end;
     end
