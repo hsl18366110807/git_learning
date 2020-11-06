@@ -416,6 +416,7 @@ begin
           if FMap.Map[X][Y - 1] = 5 then
           begin
             FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
             Dec(ShoseNum);
           end;
         end;
@@ -450,6 +451,7 @@ begin
           if FMap.Map[X][Y + 1] = 5 then
           begin
             FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
             Dec(ShoseNum);
           end;
         end;
@@ -483,6 +485,7 @@ begin
           if FMap.Map[X - 1][Y] = 5 then
           begin
             FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
             Dec(ShoseNum);
           end;
         end;
@@ -516,6 +519,7 @@ begin
           if FMap.Map[X + 1][Y] = 5 then
           begin
             FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
             Dec(ShoseNum);
           end;
 
@@ -689,8 +693,8 @@ var
   X, Y: Integer;
 begin
   repeat
-    X := randomrange(0, 9);
-    Y := RandomRange(0, 9);
+    X := randomrange(0, 19);
+    Y := RandomRange(0, 19);
   until FMap.Map[X][Y] = 0;
   AGamer.GamerPosX := X;
   AGamer.GamerPosY := Y;
@@ -709,8 +713,8 @@ begin
   if SecondsBetween(NowTime, ShoseTime) = 15 then
   begin
     repeat
-      X := randomrange(0, 9);
-      Y := RandomRange(0, 9);
+      X := randomrange(0, 19);
+      Y := RandomRange(0, 19);
     until FMap.Map[X][Y] = 0;
     if ShoseNum < 7 then
     begin
