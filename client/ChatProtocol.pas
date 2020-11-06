@@ -110,10 +110,12 @@ type
 
   PTPlayerInfo  = ^TPlayerInfo;
   TPlayerInfo = record
+    UserID: Integer;
     UserName: array[0..15] of AnsiChar;
     UserPosX: Integer;
     UserPosY: Integer;
     FaceTo: FaceOrientate;
+    Speed: Integer;
   end;
 
   TUserList = array[0..4] of TPlayerInfo;
@@ -125,7 +127,7 @@ type
   end;
 
  // 地图 为二维数组
-  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB); //可移动，障碍物，木箱，有角色，炸弹
+  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, PSHOES); //可移动，障碍物，木箱，有角色，炸弹
 
    TPlayerSetBoom = record
     head: TChatMsgHead;
