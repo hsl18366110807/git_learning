@@ -63,6 +63,7 @@ type
     procedure ClientRemoved(AClient: TTCPClient); virtual;
     procedure ProcessClientIO(AClient: TTCPClient); virtual;
     procedure CheckBombTime; virtual;
+    procedure SetShoesProp; virtual;
   protected
     property Status: TServerStatus read FStatus write SetStatus;
   public
@@ -174,6 +175,11 @@ begin
   finally
     FLock.Leave;
   end;
+end;
+
+procedure TTcpServer.SetShoesProp;
+begin
+
 end;
 
 procedure TTcpServer.SetStatus(const Value: TServerStatus);
@@ -310,6 +316,7 @@ var
   NeedCheckSockets: array of TSocket;
   CheckedCount: Integer;
   AClient: TTCPClient;
+  PropTime: Integer;
 begin
   SetLength(NeedCheckSockets, FClients.Count);
   for i := 0 to FClients.Count - 1 do
@@ -374,6 +381,11 @@ begin
     ProcessClientIO(FClients.Items[i]);
   end;
   CheckBombTime;
+  PropTime := randomrange(0, 9);
+  if PropTime = 5 then
+  begin
+    SetShoesProp;
+  end;
 end;
 
 
@@ -453,11 +465,6 @@ begin
     raise Exception.Create('Fetch size error');
   Move(FReadBuffer[FetchSize], FReadBuffer[0], FetchSize);
   FReadDataSize := FReadDataSize - FetchSize;
-end;
-
-procedure haha;
-begin
-
 end;
 
 end.

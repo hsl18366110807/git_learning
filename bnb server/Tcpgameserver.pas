@@ -33,6 +33,7 @@ type
     procedure ProcessClientIO(AClient: TTCPClient); override;
     procedure ClientRemoved(AClient: TTCPClient); override;
     procedure CheckBombTime; override;
+    procedure SetShoesProp; override;
   private
     function FindGamer(AClient: TTCPClient): TGameClient;
     procedure InitGameMap;
@@ -311,6 +312,7 @@ begin
       SetGamerPos(AGameer);
       FGamers.AddObject(UserName, AGameer);
       Result := 0;
+      FUserList.UserList[FGamers.Count - 1].UserID := FGamers.Count - 1;
       StrPCopy(FUserList.UserList[FGamers.Count - 1].UserName, UserName);
       FUserList.UserList[FGamers.Count - 1].UserPosX := AGameer.GamerPosX;
       FUserList.UserList[FGamers.Count - 1].UserPosY := AGameer.GamerPosY;
@@ -388,14 +390,13 @@ begin
   begin
     X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
     Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if FMap.Map[X][Y - 1] = 0 then
+    if (FMap.Map[X][Y - 1] = 0) or (FMap.Map[X][Y - 1] = 5) then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEUP);
       if FMap.Map[X][Y] <> 4 then
       begin
         FMap.Map[X][Y] := 0;
       end;
-      FMap.Map[X][Y - 1] := 3;
       for I := 0 to FGamers.Count - 1 do
       begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
@@ -407,22 +408,27 @@ begin
           end;
           FUserList.UserList[I].UserPosX := X;
           FuserList.UserList[I].UserPosY := Y - 1;
+          if FMap.Map[X][Y - 1] = 5 then
+          begin
+            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+          end;
         end;
       end;
+      FMap.Map[X][Y - 1] := 3;
     end;
   end
   else if RequestPtr.MoveType = MOVEDOWN then
   begin
     X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
     Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if FMap.Map[X][Y + 1] = 0 then
+    if (FMap.Map[X][Y + 1] = 0) or (FMap.Map[X][Y + 1] = 5) then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEDOWN);
       if FMap.Map[X][Y] <> 4 then
       begin
         FMap.Map[X][Y] := 0;
       end;
-      FMap.Map[X][Y + 1] := 3;
+
       for I := 0 to FGamers.Count - 1 do
       begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
@@ -434,22 +440,26 @@ begin
           end;
           FUserList.UserList[I].UserPosX := X;
           FuserList.UserList[I].UserPosY := Y + 1;
+          if FMap.Map[X][Y + 1] = 5 then
+          begin
+            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+          end;
         end;
       end;
+      FMap.Map[X][Y + 1] := 3;
     end;
   end
   else if RequestPtr.MoveType = MOVELEFT then
   begin
     X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
     Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if FMap.Map[X - 1][Y] = 0 then
+    if (FMap.Map[X - 1][Y] = 0) or (FMap.Map[X - 1][Y] = 5) then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVELEFT);
       if FMap.Map[X][Y] <> 4 then
       begin
         FMap.Map[X][Y] := 0;
       end;
-      FMap.Map[X - 1][Y] := 3;
       for I := 0 to FGamers.Count - 1 do
       begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
@@ -461,22 +471,26 @@ begin
           end;
           FUserList.UserList[I].UserPosX := X - 1;
           FuserList.UserList[I].UserPosY := Y;
+          if FMap.Map[X - 1][Y] = 5 then
+          begin
+            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+          end;
         end;
       end;
+      FMap.Map[X - 1][Y] := 3;
     end;
   end
   else if RequestPtr.MoveType = MOVERIGHT then
   begin
     X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
     Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if FMap.Map[X + 1][Y] = 0 then
+    if (FMap.Map[X + 1][Y] = 0) or (FMap.Map[X + 1][Y] = 5) then
     begin
       TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVERIGHT);
       if FMap.Map[X][Y] <> 4 then
       begin
         FMap.Map[X][Y] := 0;
       end;
-      FMap.Map[X + 1][Y] := 3;
       for I := 0 to FGamers.Count - 1 do
       begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
@@ -488,8 +502,14 @@ begin
           end;
           FUserList.UserList[I].UserPosX := X + 1;
           FuserList.UserList[I].UserPosY := Y;
+          if FMap.Map[X + 1][Y] = 5 then
+          begin
+            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+          end;
+
         end;
       end;
+      FMap.Map[X + 1][Y] := 3;
     end;
   end;
   SendAllUser;
@@ -663,6 +683,20 @@ begin
   AGamer.GamerPosY := Y;
   FMap.Map[X][Y] := 3;
 end;
+
+procedure TTcpgameserver.SetShoesProp;
+var
+  X, Y: Integer;
+begin
+  inherited;
+  repeat
+    X := randomrange(0, 9);
+    Y := RandomRange(0, 9);
+  until FMap.Map[X][Y] = 0;
+  FMap.Map[X][Y] := 5;
+  SendAllUser;
+end;
+
 { TGameClient }
 
 procedure TGameClient.ChangeGamerPos(ChangeType: MoveDirect);

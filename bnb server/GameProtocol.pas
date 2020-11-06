@@ -41,7 +41,7 @@ type
     ErrorInfo: array[0..31] of AnsiChar;
   end;
 
-  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB); //可移动，障碍物，木箱，有角色，炸弹
+  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, SHOES); //可移动，障碍物，木箱，有角色，炸弹，鞋子
 
   TMap = record
     head: TGameMsgHead;
@@ -49,10 +49,12 @@ type
   end;
 
   TPlayerInfo = record
+    UserID: Integer;
     UserName: array[0..15] of AnsiChar;
     UserPosX: Integer;
     UserPosY: Integer;
     FaceTo: FaceOrientate;
+    Speed: Integer;
   end;
 
   TPlayerInfoList = record
