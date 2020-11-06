@@ -381,11 +381,7 @@ begin
     ProcessClientIO(FClients.Items[i]);
   end;
   CheckBombTime;
-  PropTime := randomrange(0, 9);
-  if PropTime = 5 then
-  begin
-    SetShoesProp;
-  end;
+  SetShoesProp;
 end;
 
 

@@ -22,6 +22,7 @@ type
   private
     FGamers: TStrings;
     FBombList: TStrings;
+    ShoseTime: TDateTime;
   public
     FMap: TMap;
     FUserList: TPlayerInfoList;
@@ -194,12 +195,14 @@ begin
   inherited;
   if FBombList.Count > 0 then
   begin
-    for i := 0 to FBombList.Count - 1 do
+    for i := FBombList.Count - 1 downto 0 do
     begin
       nowtimer := Now;
       if SecondsBetween(nowtimer, (TBOMB(FBombList.Objects[i]).Timer)) = BoomTime then
       begin
+        Log.Info(Format('炸弹 %d 爆炸', [i]));
         BombEvent(i); //爆炸事件;
+        FBombList.Delete(i);
       end;
     end;
   end;
@@ -359,7 +362,7 @@ begin
 //  begin
 //    SendAllUser;
 //  end;
-
+  ShoseTime := Now;
 end;
 
 function TTcpgameserver.PlayerDead(UserName: AnsiString; PlayerPosX: Integer; PlayerPosY: Integer): Integer;
@@ -415,6 +418,7 @@ begin
         end;
       end;
       FMap.Map[X][Y - 1] := 3;
+      Log.Info(Format('玩家 %s 向北移动', [PlayerName]));
     end;
   end
   else if RequestPtr.MoveType = MOVEDOWN then
@@ -447,6 +451,7 @@ begin
         end;
       end;
       FMap.Map[X][Y + 1] := 3;
+      Log.Info(Format('玩家 %s 向南移动', [PlayerName]));
     end;
   end
   else if RequestPtr.MoveType = MOVELEFT then
@@ -478,6 +483,7 @@ begin
         end;
       end;
       FMap.Map[X - 1][Y] := 3;
+      Log.Info(Format('玩家 %s 向西移动', [PlayerName]));
     end;
   end
   else if RequestPtr.MoveType = MOVERIGHT then
@@ -510,6 +516,7 @@ begin
         end;
       end;
       FMap.Map[X + 1][Y] := 3;
+      Log.Info(Format('玩家 %s 向东移动', [PlayerName]));
     end;
   end;
   SendAllUser;
@@ -687,14 +694,22 @@ end;
 procedure TTcpgameserver.SetShoesProp;
 var
   X, Y: Integer;
+  Prevtime: TDateTime;
+  NowTime: TDateTime;
+  PosTime: TDateTime;
 begin
   inherited;
-  repeat
-    X := randomrange(0, 9);
-    Y := RandomRange(0, 9);
-  until FMap.Map[X][Y] = 0;
-  FMap.Map[X][Y] := 5;
-  SendAllUser;
+  NowTime := Now;
+  if SecondsBetween(NowTime, ShoseTime) = 10 then
+  begin
+    repeat
+      X := randomrange(0, 9);
+      Y := RandomRange(0, 9);
+    until FMap.Map[X][Y] = 0;
+    FMap.Map[X][Y] := 5;
+    SendAllUser;
+    ShoseTime := NowTime;
+  end;
 end;
 
 { TGameClient }
