@@ -183,6 +183,7 @@ begin
     end;
     Inc(BoomW);
   end;
+  Log.Info(Format('爆炸范围-> W:%d, A:%d, S:%d, D:%d', [BoomW, BoomA, BoomS, BoomD]));
   SendBombEvent(BombX, BombY, BoomW, BoomA, BoomS, BoomD);
   FMap.Map[BombX][BombY] := 0;
   SendAllUser;
@@ -415,12 +416,12 @@ begin
           if FMap.Map[X][Y - 1] = 5 then
           begin
             FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Dec(ShoseNum); 
+            Dec(ShoseNum);
           end;
         end;
       end;
       FMap.Map[X][Y - 1] := 3;
-      Log.Info(Format('玩家 %s 向北移动', [PlayerName]));
+      Log.Info(Format('玩家 %s 向北移动,当前坐标(%d, %d)', [PlayerName, X, Y - 1]));
     end;
   end
   else if RequestPtr.MoveType = MOVEDOWN then
@@ -454,7 +455,7 @@ begin
         end;
       end;
       FMap.Map[X][Y + 1] := 3;
-      Log.Info(Format('玩家 %s 向南移动', [PlayerName]));
+      Log.Info(Format('玩家 %s 向南移动,当前坐标(%d, %d)', [PlayerName, X, Y + 1]));
     end;
   end
   else if RequestPtr.MoveType = MOVELEFT then
@@ -487,7 +488,7 @@ begin
         end;
       end;
       FMap.Map[X - 1][Y] := 3;
-      Log.Info(Format('玩家 %s 向西移动', [PlayerName]));
+      Log.Info(Format('玩家 %s 向西移动,当前坐标(%d, %d)', [PlayerName, X - 1, Y]));
     end;
   end
   else if RequestPtr.MoveType = MOVERIGHT then
@@ -521,7 +522,7 @@ begin
         end;
       end;
       FMap.Map[X + 1][Y] := 3;
-      Log.Info(Format('玩家 %s 向东移动', [PlayerName]));
+      Log.Info(Format('玩家 %s 向东移动,当前坐标(%d, %d)', [PlayerName, X + 1, Y]));
     end;
   end;
   SendAllUser;
