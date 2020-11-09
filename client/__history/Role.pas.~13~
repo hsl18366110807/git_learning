@@ -1,0 +1,54 @@
+unit Role;
+
+interface
+
+uses
+  System.Classes, GR32, GR32_Image;
+
+type
+  TRole = class(TBitmap32)
+  private
+    FId: Integer;
+    FName: AnsiString;
+    FImag: TBitmap32;
+    FPos: TPoint;
+  public
+    constructor Create; override;
+  public
+    property Id: Integer read FId;
+    property Name: AnsiString read FName; //先暂时没有添加改名接口
+  public
+    procedure Move(Map: TPaintBox32; SrcX, SrcY, DesX, DesY: Integer);
+    procedure FaceTo(Dir: Integer; Imag: TBitmap32);
+    procedure SetBomb;
+  end;
+
+implementation
+
+{ RolePlayer }
+
+
+{ RolePlayer }
+
+constructor TRole.Create;
+begin
+  inherited;
+end;
+
+procedure TRole.FaceTo(Dir: Integer; Imag: TBitmap32);
+begin
+//
+end;
+
+procedure TRole.Move(Map: TPaintBox32; SrcX, SrcY, DesX, DesY: Integer);
+begin
+//
+end;
+
+procedure TRole.SetBomb;
+begin
+// 目前想的是bomb的创建不在role中创建，只是发消息在Map层实现创建和销毁。
+end;
+
+end.
+

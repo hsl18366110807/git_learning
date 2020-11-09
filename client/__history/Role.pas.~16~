@@ -1,0 +1,72 @@
+unit Role;
+
+interface
+
+uses
+  System.Classes, GR32, GR32_Image, GR32_PNG;
+
+type
+  TRole = class(TBitmap32)
+  private
+    FId: Integer;
+    FName: AnsiString;
+    FBmp: TBitmap32;
+    FPos: TPoint;
+  public
+    constructor Create(PosX, PosY: Integer); override;
+  public
+    property Id: Integer read FId;
+    property Name: AnsiString read FName; //先暂时没有添加改名接口
+  public
+    procedure Move(Map: TPaintBox32; SrcX, SrcY, DesX, DesY: Integer);
+    procedure FaceTo(Dir: Integer; Imag: TBitmap32);
+    procedure SetBomb;
+  end;
+
+
+
+
+implementation
+
+var
+  bmpE, bmpW, bmpS, bmpN: TBitmap32;
+
+{ RolePlayer }
+
+constructor TRole.Create(PosX, PosY: Integer);
+begin
+  inherited;
+  bmpE := TBitmap32.Create;
+  bmpW := TBitmap32.Create;
+  bmpN := TBitmap32.Create;
+  bmpS := TBitmap32.Create;
+  bmpE.DrawMode := dmTransparent;
+  bmpN.DrawMode := dmTransparent;
+  bmpS.DrawMode := dmTransparent;
+  bmpW.DrawMode := dmTransparent;
+  LoadBitmap32FromPNG(bmpE, 'img/redp_m_east.png');
+  LoadBitmap32FromPNG(bmpN, 'img/redp_m_north.png');
+  LoadBitmap32FromPNG(bmpS, 'img/redp_m_south.png');
+  LoadBitmap32FromPNG(bmpW, 'img/redp_m_west.png');
+  FPos.X := PosX;
+  FPos.Y := PosY;
+
+end;
+
+procedure TRole.FaceTo(Dir: Integer; Imag: TBitmap32);
+begin
+//
+end;
+
+procedure TRole.Move(Map: TPaintBox32; SrcX, SrcY, DesX, DesY: Integer);
+begin
+//
+end;
+
+procedure TRole.SetBomb;
+begin
+// 目前想的是bomb的创建不在role中创建，只是发消息在Map层实现创建和销毁。
+end;
+
+end.
+
