@@ -131,6 +131,8 @@ begin
 
     if FMap.Map[BombX][BombY + I] = 3 then
     begin
+      PlayerX := BombX;
+      PlayerY := BombY + I;
       for J := FGamers.Count - 1 downto 0 do
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
@@ -160,6 +162,8 @@ begin
 
     if FMap.Map[BombX][BombY - I] = 3 then
     begin
+      PlayerX := BombX;
+      PlayerY := BombY - I;
       for J := FGamers.Count - 1 downto 0 do
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
