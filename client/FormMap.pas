@@ -17,7 +17,7 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     function FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
     procedure RoleMoveOneStepY;
-    procedure RoleMoveOneStepX(SrcY, SrcX, DesX: Integer);
+    procedure RoleMoveOneStepX;
     procedure DrawFloorCooke;
 //    procedure tmr1Timer(Sender: TObject);
   private
@@ -121,17 +121,21 @@ begin
     begin
       i := x div 40;
       j := y div 40;
-      if FMap[i * 20 + j] = 1 then
+      if FMap[i * 20 + j] = 1 then //地板//
       begin
         drawY := y - (bmp3.Height - 40);
         bmp3.DrawTo(pntbx.Buffer, x, drawY);
       end
-      else if FMap[i * 20 + j] = 2 then
+      else if FMap[i * 20 + j] = 2 then  //箱子
       begin
         drawY := y - (bmp4.Height - 40);
         bmp4.DrawTo(pntbx.Buffer, x, drawY);
       end
-      else if FMap[i * 20 + j] = 5 then
+      else if FMap[i * 20 + j] = 3 then
+      begin
+
+      end
+      else if FMap[i * 20 + j] = 5 then //鞋子
       begin
          drawY := y -(FBmpShoe.Height - 40);
          FBmpShoe.DrawTo(pntbx.Buffer, x, drawY);
@@ -173,10 +177,10 @@ begin
   FBmpShoe := TBitmap32.Create;
   FBmpBoom := TBitmap32.Create;
   FBmpRole.DrawMode := dmTransparent;
-  bmpE.DrawMode := dmTransparent;
-  bmpN.DrawMode := dmTransparent;
-  bmpS.DrawMode := dmTransparent;
-  bmpWW.DrawMode := dmTransparent;
+  bmpE.DrawMode := dmBlend;
+  bmpN.DrawMode := dmBlend;
+  bmpS.DrawMode := dmBlend;
+  bmpWW.DrawMode := dmBlend;
   FBmpShoe.DrawMode := dmBlend;
   FBmpBoom.DrawMode := dmTransparent;
   LoadBitmap32FromPNG(FBmpRole, 'img/redp_m_east.png');
@@ -213,7 +217,7 @@ begin
 
   timer := TTimer.Create(Self);
   timer.OnTimer := doWork;
-  timer.Interval := 500;
+  timer.Interval := 100;
   timer.Enabled := True;
 end;
 
@@ -227,37 +231,25 @@ begin
   ChatMgr.RequestMove(Key);
 end;
 
-procedure TFrmMap.RoleMoveOneStepX(SrcY, SrcX, DesX: Integer);
+procedure TFrmMap.RoleMoveOneStepX;
 var
-//  tick: Integer;
   piceRoleW, bmpRoleH: Integer;
   PosX, PosY: Integer;
 begin
   piceRoleW := FBmpRole.Width div 6;
-  if SrcX < DesX then
+  if FSrcX  < FDesX then
   begin
-    while tick <> 6 do
-    begin
       bmpRoleH := FBmpRole.Height;
-      PosX := SrcX * 40 + (tick + 1) * 40 div 6;
-      PosY := SrcY * 40 - (bmpRoleH - 40);
-//      bmp2.DrawTo(pntbx.Buffer, SrcX * 40, SrcY * 40);
-//      bmp2.DrawTo(pntbx.Buffer, (SrcX + 1) * 40, SrcY * 40);
-      DrawFloorCooke;
+      PosX := FSrcX * 40 + (tick + 1) * 40 div 6;
+      PosY := FSrcY * 40 - (bmpRoleH - 40);
       FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
-      tick := tick + 1;
-    end;
   end
   else
   begin
-    while tick <> 6 do
-    begin
       bmpRoleH := FBmpRole.Height;
-      PosX := SrcX * 40 - (tick + 1) * piceRoleW;
-      PosY := SrcY * 40 - (bmpRoleH - 40);
+      PosX := FSrcX * 40 - (tick + 1) * 40 div 6;
+      PosY := FSrcY * 40 - (bmpRoleH - 40);
       FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
-      tick := tick + 1;
-    end;
   end;
 end;
 
@@ -266,22 +258,20 @@ var
   piceRoleW, bmpRoleH: Integer;
   PosX, PosY: Integer;
 begin
-  piceRoleW := FBmpRole.Width div 6;
+   piceRoleW := FBmpRole.Width div 6;
   if FSrcY < FDesY then
   begin
     bmpRoleH := FBmpRole.Height;
     PosX := FSrcX * 40;
     PosY := FSrcY * 40 - (bmpRoleH - 40) + (tick + 1) * 40 div 6;
-//      DrawFloorCooke;
     FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
   end
   else
   begin
     bmpRoleH := FBmpRole.Height;
     PosX := FSrcX * 40;
-    PosY := FSrcY * 40 - (bmpRoleH - 40) - (tick + 1) * piceRoleW;
+    PosY := FSrcY * 40 - (bmpRoleH - 40) - (tick + 1) * 40 div 6;
     FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
-    tick := tick + 1;
   end;
 end;
 
@@ -321,8 +311,9 @@ begin
       PosX := RoleNew.UserPosX * 40;
       PosY := RoleNew.UserPosY * 40 - (FBmpRole.Height - 40);
       FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+      FUserListOld := FUserListNew;
     end
-    else if (FUserListOld[indexRoleOld].UserPosX = RoleNew.UserPosX) or (FUserListOld[indexRoleOld].UserPosY = RoleNew.UserPosY) then
+    else if (FUserListOld[indexRoleOld].UserPosX = RoleNew.UserPosX) and (FUserListOld[indexRoleOld].UserPosY = RoleNew.UserPosY) and (tick = 0) then
     begin //角色存在没有动作
       case RoleNew.FaceTo of
         NORTH:
@@ -368,11 +359,16 @@ begin
       end
       else if FUserListOld[indexRoleOld].UserPosY = RoleNew.UserPosY then
       begin
-        steps := Abs(FUserListOld[indexRoleOld].UserPosX - RoleNew.UserPosX);
-        while steps > 0 do
+        FSrcX := FUserListOld[indexRoleOld].UserPosX;
+        FSrcY := FUserListOld[indexRoleOld].UserPosY;
+        FDesX := RoleNew.UserPosX;
+        FDesY := RoleNew.UserPosY;
+        RoleMoveOneStepX;
+        tick := tick + 1;
+         if tick = 6 then
         begin
-          RoleMoveOneStepX(FUserListOld[indexRoleOld].UserPosY, FUserListOld[indexRoleOld].UserPosX, RoleNew.UserPosX);
-          steps := steps - 1;
+          FUserListOld[indexRoleOld] := RoleNew;
+          tick := 0;
         end;
       end;
 
@@ -387,6 +383,7 @@ begin
     if indexRoleNew = -1 then
     begin
            //角色死亡
+           FMap[RoleOld.UserPosX * 20  + RoleOld.UserPosY] := 0;
     end;
   end;
   pntbx.Invalidate;

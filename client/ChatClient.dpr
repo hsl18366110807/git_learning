@@ -10,7 +10,10 @@ uses
   ChatProtocol in 'ChatProtocol.pas',
   GR32_Png in 'GR32_Png.pas',
   GR32_PortableNetworkGraphic in 'GR32_PortableNetworkGraphic.pas',
-  FormMap in 'FormMap.pas' {FrmMap};
+  FormMap in 'FormMap.pas' {FrmMap},
+  Role in 'Role.pas',
+  Bomb in 'Bomb.pas',
+  Item in 'Item.pas';
 
 //  {$R}
 //  var,
@@ -49,7 +52,7 @@ begin
   if not ExitApp then
   begin
     Application.CreateForm(TFrmMap, FrmMap);
-    Application.Run;
+  Application.Run;
   end;
 end.
 
