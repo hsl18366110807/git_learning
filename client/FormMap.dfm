@@ -23,10 +23,4 @@ object FrmMap: TFrmMap
     Align = alClient
     TabOrder = 0
   end
-  object tmr1: TTimer
-    Enabled = False
-    OnTimer = tmr1Timer
-    Left = 536
-    Top = 392
-  end
 end

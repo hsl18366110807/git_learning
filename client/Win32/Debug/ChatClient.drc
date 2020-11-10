@@ -8,155 +8,145 @@
   resources were bound to the produced executable.
 */
 
-#define GR32_PortableNetworkGraphic_RCStrInterlacingNone 65104
-#define GR32_PortableNetworkGraphic_RCStrInterlacingAdam7 65105
-#define GR32_PortableNetworkGraphic_RCStrCRCError 65106
-#define GR32_PNG_RCStrUnsupportedFormat 65107
-#define GR32_PNG_RCStrDataIncomplete 65108
-#define GR32_PortableNetworkGraphic_RCStrUnsupportedCompressionMethod 65120
-#define GR32_PortableNetworkGraphic_RCStrUnsupportedCompressMethod 65121
-#define GR32_PortableNetworkGraphic_RCStrUnsupportedFilter 65122
-#define GR32_PortableNetworkGraphic_RCStrUnsupportedFilterMethod 65123
-#define GR32_PortableNetworkGraphic_RCStrUnsupportedInterlaceMethod 65124
-#define GR32_PortableNetworkGraphic_RCStrWrongBitdepth 65125
-#define GR32_PortableNetworkGraphic_RCStrWrongInterlaceMethod 65126
-#define GR32_PortableNetworkGraphic_RCStrWrongPixelPerUnit 65127
-#define GR32_PortableNetworkGraphic_RCStrWrongTransparencyFormat 65128
-#define GR32_PortableNetworkGraphic_RCStrInvalidCompressionLevel 65129
-#define GR32_PortableNetworkGraphic_RCStrBitDepthTranscodingError 65130
-#define GR32_PortableNetworkGraphic_RCStrGrayscale 65131
-#define GR32_PortableNetworkGraphic_RCStrTrueColor 65132
-#define GR32_PortableNetworkGraphic_RCStrIndexedColor 65133
-#define GR32_PortableNetworkGraphic_RCStrGrayscaleAlpha 65134
-#define GR32_PortableNetworkGraphic_RCStrTrueColorAlpha 65135
-#define GR32_PortableNetworkGraphic_RCStrHeaderInvalid 65136
-#define GR32_PortableNetworkGraphic_RCStrIncompletePalette 65137
-#define GR32_PortableNetworkGraphic_RCStrIndexOutOfBounds 65138
-#define GR32_PortableNetworkGraphic_RCStrNotAValidPNGFile 65139
-#define GR32_PortableNetworkGraphic_RCStrNotYetImplemented 65140
-#define GR32_PortableNetworkGraphic_RCStrPaletteLimited 65141
-#define GR32_PortableNetworkGraphic_RCStrSeveralChromaChunks 65142
-#define GR32_PortableNetworkGraphic_RCStrSeveralGammaChunks 65143
-#define GR32_PortableNetworkGraphic_RCStrSeveralPaletteChunks 65144
-#define GR32_PortableNetworkGraphic_RCStrSeveralTransparencyChunks 65145
-#define GR32_PortableNetworkGraphic_RCStrSeveralBackgroundChunks 65146
-#define GR32_PortableNetworkGraphic_RCStrSeveralPhysicalPixelDimensionChunks 65147
-#define GR32_PortableNetworkGraphic_RCStrSeveralSignificantBitsChunksFound 65148
-#define GR32_PortableNetworkGraphic_RCStrSeveralTimeChunks 65149
-#define GR32_PortableNetworkGraphic_RCStrUnknownColorType 65150
-#define GR32_PortableNetworkGraphic_RCStrUnspecifiedPixelUnit 65151
-#define GR32_Resamplers_RCStrInvalidSrcRect 65152
-#define GR32_Backends_RCStrCannotAllocateDIBHandle 65153
-#define GR32_Backends_RCStrCannotCreateCompatibleDC 65154
-#define GR32_Backends_RCStrCannotSelectAnObjectIntoDC 65155
-#define GR32_RCStrUnmatchedReferenceCounting 65156
-#define GR32_RCStrCannotSetSize 65157
-#define GR32_RCStrInpropriateBackend 65158
-#define GR32_PortableNetworkGraphic_RCStrAncillaryUnknownChunk 65159
-#define GR32_PortableNetworkGraphic_RCStrChunkSizeTooSmall 65160
-#define GR32_PortableNetworkGraphic_RCStrDataIncomplete 65161
-#define GR32_PortableNetworkGraphic_RCStrDirectCompressionMethodSetError 65162
-#define GR32_PortableNetworkGraphic_RCStrDirectFilterMethodSetError 65163
-#define GR32_PortableNetworkGraphic_RCStrDirectGammaSetError 65164
-#define GR32_PortableNetworkGraphic_RCStrDirectHeightSetError 65165
-#define GR32_PortableNetworkGraphic_RCStrDirectWidthSetError 65166
-#define GR32_PortableNetworkGraphic_RCStrEmptyChunkList 65167
-#define Vcl_Consts_SStyleHookClassRegistered 65168
-#define Vcl_Consts_SStyleHookClassNotRegistered 65169
-#define Vcl_Consts_SStyleInvalidParameter 65170
-#define Vcl_Consts_SStyleFeatureNotSupported 65171
-#define Vcl_Consts_SStyleNotRegistered 65172
-#define Vcl_Consts_SStyleUnregisterError 65173
-#define Vcl_Consts_SStyleNotRegisteredNoName 65174
-#define Vcl_Consts_sBeginInvokeNoHandle 65175
-#define System_Win_ComConst_SOleError 65176
-#define System_Win_ComConst_SNoMethod 65177
-#define System_Win_ComConst_SVarNotObject 65178
-#define System_Win_ComConst_STooManyParams 65179
-#define GR32_Transforms_RCStrReverseTransformationNotImplemented 65180
-#define GR32_Transforms_RCStrForwardTransformationNotImplemented 65181
-#define GR32_Resamplers_SDstNil 65182
-#define GR32_Resamplers_SSrcNil 65183
-#define Vcl_Consts_SPassword 65184
-#define Vcl_Consts_SDomain 65185
-#define Vcl_Consts_SLogin 65186
-#define Vcl_Consts_STrayIconRemoveError 65187
-#define Vcl_Consts_SWindowsVistaRequired 65188
-#define Vcl_Consts_STaskDlgButtonCaption 65189
-#define Vcl_Consts_STaskDlgRadioButtonCaption 65190
-#define Vcl_Consts_SInvalidTaskDlgButtonCaption 65191
-#define Vcl_Consts_SStyleLoadError 65192
-#define Vcl_Consts_SStyleLoadErrors 65193
-#define Vcl_Consts_SStyleRegisterError 65194
-#define Vcl_Consts_SStyleClassRegisterError 65195
-#define Vcl_Consts_SStyleNotFound 65196
-#define Vcl_Consts_SStyleClassNotFound 65197
-#define Vcl_Consts_SStyleInvalidHandle 65198
-#define Vcl_Consts_SStyleFormatError 65199
-#define Vcl_Consts_SOutOfRange 65200
-#define Vcl_Consts_sAllFilter 65201
-#define Vcl_Consts_SInsertLineError 65202
-#define Vcl_Consts_SIconToClipboard 65203
-#define Vcl_Consts_SCannotOpenClipboard 65204
-#define Vcl_Consts_SInvalidPrinterOp 65205
-#define Vcl_Consts_SNoDefaultPrinter 65206
-#define Vcl_Consts_SDuplicateMenus 65207
-#define Vcl_Consts_SDockedCtlNeedsName 65208
-#define Vcl_Consts_SDockTreeRemoveError 65209
-#define Vcl_Consts_SDockZoneNotFound 65210
-#define Vcl_Consts_SDockZoneHasNoCtl 65211
-#define Vcl_Consts_SDockZoneVersionConflict 65212
-#define Vcl_Consts_SPromptArrayTooShort 65213
-#define Vcl_Consts_SPromptArrayEmpty 65214
-#define Vcl_Consts_SUsername 65215
-#define Vcl_Consts_SmkcEsc 65216
-#define Vcl_Consts_SmkcEnter 65217
-#define Vcl_Consts_SmkcSpace 65218
-#define Vcl_Consts_SmkcPgUp 65219
-#define Vcl_Consts_SmkcPgDn 65220
-#define Vcl_Consts_SmkcEnd 65221
-#define Vcl_Consts_SmkcHome 65222
-#define Vcl_Consts_SmkcLeft 65223
-#define Vcl_Consts_SmkcUp 65224
-#define Vcl_Consts_SmkcRight 65225
-#define Vcl_Consts_SmkcDown 65226
-#define Vcl_Consts_SmkcIns 65227
-#define Vcl_Consts_SmkcDel 65228
-#define Vcl_Consts_SmkcShift 65229
-#define Vcl_Consts_SmkcCtrl 65230
-#define Vcl_Consts_SmkcAlt 65231
-#define Vcl_Consts_SMsgDlgInformation 65232
-#define Vcl_Consts_SMsgDlgConfirm 65233
-#define Vcl_Consts_SMsgDlgYes 65234
-#define Vcl_Consts_SMsgDlgNo 65235
-#define Vcl_Consts_SMsgDlgOK 65236
-#define Vcl_Consts_SMsgDlgCancel 65237
-#define Vcl_Consts_SMsgDlgHelp 65238
-#define Vcl_Consts_SMsgDlgAbort 65239
-#define Vcl_Consts_SMsgDlgRetry 65240
-#define Vcl_Consts_SMsgDlgIgnore 65241
-#define Vcl_Consts_SMsgDlgAll 65242
-#define Vcl_Consts_SMsgDlgNoToAll 65243
-#define Vcl_Consts_SMsgDlgYesToAll 65244
-#define Vcl_Consts_SMsgDlgClose 65245
-#define Vcl_Consts_SmkcBkSp 65246
-#define Vcl_Consts_SmkcTab 65247
-#define Vcl_Consts_SYesButton 65248
-#define Vcl_Consts_SNoButton 65249
-#define Vcl_Consts_SHelpButton 65250
-#define Vcl_Consts_SCloseButton 65251
-#define Vcl_Consts_SIgnoreButton 65252
-#define Vcl_Consts_SRetryButton 65253
-#define Vcl_Consts_SAbortButton 65254
-#define Vcl_Consts_SAllButton 65255
-#define Vcl_Consts_SCannotDragForm 65256
-#define Vcl_Consts_SVMetafiles 65257
-#define Vcl_Consts_SVEnhMetafiles 65258
-#define Vcl_Consts_SVIcons 65259
-#define Vcl_Consts_SVBitmaps 65260
-#define Vcl_Consts_SVTIFFImages 65261
-#define Vcl_Consts_SMsgDlgWarning 65262
-#define Vcl_Consts_SMsgDlgError 65263
+#define GR32_PortableNetworkGraphic_RCStrBitDepthTranscodingError 65120
+#define GR32_PortableNetworkGraphic_RCStrGrayscale 65121
+#define GR32_PortableNetworkGraphic_RCStrTrueColor 65122
+#define GR32_PortableNetworkGraphic_RCStrIndexedColor 65123
+#define GR32_PortableNetworkGraphic_RCStrGrayscaleAlpha 65124
+#define GR32_PortableNetworkGraphic_RCStrTrueColorAlpha 65125
+#define GR32_PortableNetworkGraphic_RCStrInterlacingNone 65126
+#define GR32_PortableNetworkGraphic_RCStrInterlacingAdam7 65127
+#define GR32_PortableNetworkGraphic_RCStrCRCError 65128
+#define GR32_PNG_RCStrUnsupportedFormat 65129
+#define GR32_PNG_RCStrDataIncomplete 65130
+#define GR32_PortableNetworkGraphic_RCStrSeveralBackgroundChunks 65136
+#define GR32_PortableNetworkGraphic_RCStrSeveralPhysicalPixelDimensionChunks 65137
+#define GR32_PortableNetworkGraphic_RCStrSeveralSignificantBitsChunksFound 65138
+#define GR32_PortableNetworkGraphic_RCStrSeveralTimeChunks 65139
+#define GR32_PortableNetworkGraphic_RCStrUnknownColorType 65140
+#define GR32_PortableNetworkGraphic_RCStrUnspecifiedPixelUnit 65141
+#define GR32_PortableNetworkGraphic_RCStrUnsupportedCompressionMethod 65142
+#define GR32_PortableNetworkGraphic_RCStrUnsupportedCompressMethod 65143
+#define GR32_PortableNetworkGraphic_RCStrUnsupportedFilter 65144
+#define GR32_PortableNetworkGraphic_RCStrUnsupportedFilterMethod 65145
+#define GR32_PortableNetworkGraphic_RCStrUnsupportedInterlaceMethod 65146
+#define GR32_PortableNetworkGraphic_RCStrWrongBitdepth 65147
+#define GR32_PortableNetworkGraphic_RCStrWrongInterlaceMethod 65148
+#define GR32_PortableNetworkGraphic_RCStrWrongPixelPerUnit 65149
+#define GR32_PortableNetworkGraphic_RCStrWrongTransparencyFormat 65150
+#define GR32_PortableNetworkGraphic_RCStrInvalidCompressionLevel 65151
+#define GR32_PortableNetworkGraphic_RCStrDirectCompressionMethodSetError 65152
+#define GR32_PortableNetworkGraphic_RCStrDirectFilterMethodSetError 65153
+#define GR32_PortableNetworkGraphic_RCStrDirectGammaSetError 65154
+#define GR32_PortableNetworkGraphic_RCStrDirectHeightSetError 65155
+#define GR32_PortableNetworkGraphic_RCStrDirectWidthSetError 65156
+#define GR32_PortableNetworkGraphic_RCStrEmptyChunkList 65157
+#define GR32_PortableNetworkGraphic_RCStrHeaderInvalid 65158
+#define GR32_PortableNetworkGraphic_RCStrIncompletePalette 65159
+#define GR32_PortableNetworkGraphic_RCStrIndexOutOfBounds 65160
+#define GR32_PortableNetworkGraphic_RCStrNotAValidPNGFile 65161
+#define GR32_PortableNetworkGraphic_RCStrNotYetImplemented 65162
+#define GR32_PortableNetworkGraphic_RCStrPaletteLimited 65163
+#define GR32_PortableNetworkGraphic_RCStrSeveralChromaChunks 65164
+#define GR32_PortableNetworkGraphic_RCStrSeveralGammaChunks 65165
+#define GR32_PortableNetworkGraphic_RCStrSeveralPaletteChunks 65166
+#define GR32_PortableNetworkGraphic_RCStrSeveralTransparencyChunks 65167
+#define System_Win_ComConst_SVarNotObject 65168
+#define System_Win_ComConst_STooManyParams 65169
+#define GR32_Transforms_RCStrReverseTransformationNotImplemented 65170
+#define GR32_Transforms_RCStrForwardTransformationNotImplemented 65171
+#define GR32_Resamplers_SDstNil 65172
+#define GR32_Resamplers_SSrcNil 65173
+#define GR32_Resamplers_RCStrInvalidSrcRect 65174
+#define GR32_Backends_RCStrCannotAllocateDIBHandle 65175
+#define GR32_Backends_RCStrCannotCreateCompatibleDC 65176
+#define GR32_Backends_RCStrCannotSelectAnObjectIntoDC 65177
+#define GR32_RCStrUnmatchedReferenceCounting 65178
+#define GR32_RCStrCannotSetSize 65179
+#define GR32_RCStrInpropriateBackend 65180
+#define GR32_PortableNetworkGraphic_RCStrAncillaryUnknownChunk 65181
+#define GR32_PortableNetworkGraphic_RCStrChunkSizeTooSmall 65182
+#define GR32_PortableNetworkGraphic_RCStrDataIncomplete 65183
+#define Vcl_Consts_SStyleRegisterError 65184
+#define Vcl_Consts_SStyleClassRegisterError 65185
+#define Vcl_Consts_SStyleNotFound 65186
+#define Vcl_Consts_SStyleClassNotFound 65187
+#define Vcl_Consts_SStyleInvalidHandle 65188
+#define Vcl_Consts_SStyleFormatError 65189
+#define Vcl_Consts_SStyleHookClassRegistered 65190
+#define Vcl_Consts_SStyleHookClassNotRegistered 65191
+#define Vcl_Consts_SStyleInvalidParameter 65192
+#define Vcl_Consts_SStyleFeatureNotSupported 65193
+#define Vcl_Consts_SStyleNotRegistered 65194
+#define Vcl_Consts_SStyleUnregisterError 65195
+#define Vcl_Consts_SStyleNotRegisteredNoName 65196
+#define Vcl_Consts_sBeginInvokeNoHandle 65197
+#define System_Win_ComConst_SOleError 65198
+#define System_Win_ComConst_SNoMethod 65199
+#define Vcl_Consts_SDockZoneNotFound 65200
+#define Vcl_Consts_SDockZoneHasNoCtl 65201
+#define Vcl_Consts_SDockZoneVersionConflict 65202
+#define Vcl_Consts_SPromptArrayTooShort 65203
+#define Vcl_Consts_SPromptArrayEmpty 65204
+#define Vcl_Consts_SUsername 65205
+#define Vcl_Consts_SPassword 65206
+#define Vcl_Consts_SDomain 65207
+#define Vcl_Consts_SLogin 65208
+#define Vcl_Consts_STrayIconRemoveError 65209
+#define Vcl_Consts_SWindowsVistaRequired 65210
+#define Vcl_Consts_STaskDlgButtonCaption 65211
+#define Vcl_Consts_STaskDlgRadioButtonCaption 65212
+#define Vcl_Consts_SInvalidTaskDlgButtonCaption 65213
+#define Vcl_Consts_SStyleLoadError 65214
+#define Vcl_Consts_SStyleLoadErrors 65215
+#define Vcl_Consts_SmkcDown 65216
+#define Vcl_Consts_SmkcIns 65217
+#define Vcl_Consts_SmkcDel 65218
+#define Vcl_Consts_SmkcShift 65219
+#define Vcl_Consts_SmkcCtrl 65220
+#define Vcl_Consts_SmkcAlt 65221
+#define Vcl_Consts_SOutOfRange 65222
+#define Vcl_Consts_sAllFilter 65223
+#define Vcl_Consts_SInsertLineError 65224
+#define Vcl_Consts_SIconToClipboard 65225
+#define Vcl_Consts_SCannotOpenClipboard 65226
+#define Vcl_Consts_SInvalidPrinterOp 65227
+#define Vcl_Consts_SNoDefaultPrinter 65228
+#define Vcl_Consts_SDuplicateMenus 65229
+#define Vcl_Consts_SDockedCtlNeedsName 65230
+#define Vcl_Consts_SDockTreeRemoveError 65231
+#define Vcl_Consts_SMsgDlgAll 65232
+#define Vcl_Consts_SMsgDlgNoToAll 65233
+#define Vcl_Consts_SMsgDlgYesToAll 65234
+#define Vcl_Consts_SMsgDlgClose 65235
+#define Vcl_Consts_SmkcBkSp 65236
+#define Vcl_Consts_SmkcTab 65237
+#define Vcl_Consts_SmkcEsc 65238
+#define Vcl_Consts_SmkcEnter 65239
+#define Vcl_Consts_SmkcSpace 65240
+#define Vcl_Consts_SmkcPgUp 65241
+#define Vcl_Consts_SmkcPgDn 65242
+#define Vcl_Consts_SmkcEnd 65243
+#define Vcl_Consts_SmkcHome 65244
+#define Vcl_Consts_SmkcLeft 65245
+#define Vcl_Consts_SmkcUp 65246
+#define Vcl_Consts_SmkcRight 65247
+#define Vcl_Consts_SVEnhMetafiles 65248
+#define Vcl_Consts_SVIcons 65249
+#define Vcl_Consts_SVBitmaps 65250
+#define Vcl_Consts_SVTIFFImages 65251
+#define Vcl_Consts_SMsgDlgWarning 65252
+#define Vcl_Consts_SMsgDlgError 65253
+#define Vcl_Consts_SMsgDlgInformation 65254
+#define Vcl_Consts_SMsgDlgConfirm 65255
+#define Vcl_Consts_SMsgDlgYes 65256
+#define Vcl_Consts_SMsgDlgNo 65257
+#define Vcl_Consts_SMsgDlgOK 65258
+#define Vcl_Consts_SMsgDlgCancel 65259
+#define Vcl_Consts_SMsgDlgHelp 65260
+#define Vcl_Consts_SMsgDlgAbort 65261
+#define Vcl_Consts_SMsgDlgRetry 65262
+#define Vcl_Consts_SMsgDlgIgnore 65263
 #define Vcl_Consts_SPropertyOutOfRange 65264
 #define Vcl_Consts_SMenuIndexError 65265
 #define Vcl_Consts_SMenuReinserted 65266
@@ -171,8 +161,8 @@
 #define Vcl_Consts_SNoMDIForm 65275
 #define Vcl_Consts_SImageCanvasNeedsBitmap 65276
 #define Vcl_Consts_SControlParentSetToSelf 65277
-#define Vcl_Consts_SOKButton 65278
-#define Vcl_Consts_SCancelButton 65279
+#define Vcl_Consts_SCannotDragForm 65278
+#define Vcl_Consts_SVMetafiles 65279
 #define Vcl_Consts_SInvalidImageList 65280
 #define Vcl_Consts_SReplaceImage 65281
 #define Vcl_Consts_SInsertImage 65282
@@ -431,11 +421,23 @@
 #define System_SysConst_SDivByZero 65535
 STRINGTABLE
 BEGIN
+	GR32_PortableNetworkGraphic_RCStrBitDepthTranscodingError,	L"Bit depth may not be specified directly yet!"
+	GR32_PortableNetworkGraphic_RCStrGrayscale,	L"Grayscale"
+	GR32_PortableNetworkGraphic_RCStrTrueColor,	L"True Color"
+	GR32_PortableNetworkGraphic_RCStrIndexedColor,	L"Indexed Color"
+	GR32_PortableNetworkGraphic_RCStrGrayscaleAlpha,	L"Transparent Grayscale"
+	GR32_PortableNetworkGraphic_RCStrTrueColorAlpha,	L"Transparent True Color"
 	GR32_PortableNetworkGraphic_RCStrInterlacingNone,	L"None"
 	GR32_PortableNetworkGraphic_RCStrInterlacingAdam7,	L"Adam7"
 	GR32_PortableNetworkGraphic_RCStrCRCError,	L"CRC Error"
 	GR32_PNG_RCStrUnsupportedFormat,	L"Unsupported Format"
 	GR32_PNG_RCStrDataIncomplete,	L"Data not complete"
+	GR32_PortableNetworkGraphic_RCStrSeveralBackgroundChunks,	L"Background chunk defined twice!"
+	GR32_PortableNetworkGraphic_RCStrSeveralPhysicalPixelDimensionChunks,	L"Several physical pixel dimenson chunks found"
+	GR32_PortableNetworkGraphic_RCStrSeveralSignificantBitsChunksFound,	L"Several significant bits chunks found"
+	GR32_PortableNetworkGraphic_RCStrSeveralTimeChunks,	L"Time chunk appears twice!"
+	GR32_PortableNetworkGraphic_RCStrUnknownColorType,	L"Unknown color type!"
+	GR32_PortableNetworkGraphic_RCStrUnspecifiedPixelUnit,	L"Unspecified unit"
 	GR32_PortableNetworkGraphic_RCStrUnsupportedCompressionMethod,	L"Compression method not supported!"
 	GR32_PortableNetworkGraphic_RCStrUnsupportedCompressMethod,	L"Unsupported compression method"
 	GR32_PortableNetworkGraphic_RCStrUnsupportedFilter,	L"Unsupported Filter"
@@ -446,12 +448,12 @@ BEGIN
 	GR32_PortableNetworkGraphic_RCStrWrongPixelPerUnit,	L"Pixel per unit may not be zero!"
 	GR32_PortableNetworkGraphic_RCStrWrongTransparencyFormat,	L"Wrong transparency format"
 	GR32_PortableNetworkGraphic_RCStrInvalidCompressionLevel,	L"Invalid compression level"
-	GR32_PortableNetworkGraphic_RCStrBitDepthTranscodingError,	L"Bit depth may not be specified directly yet!"
-	GR32_PortableNetworkGraphic_RCStrGrayscale,	L"Grayscale"
-	GR32_PortableNetworkGraphic_RCStrTrueColor,	L"True Color"
-	GR32_PortableNetworkGraphic_RCStrIndexedColor,	L"Indexed Color"
-	GR32_PortableNetworkGraphic_RCStrGrayscaleAlpha,	L"Transparent Grayscale"
-	GR32_PortableNetworkGraphic_RCStrTrueColorAlpha,	L"Transparent True Color"
+	GR32_PortableNetworkGraphic_RCStrDirectCompressionMethodSetError,	L"Compression Method may not be specified directly yet!"
+	GR32_PortableNetworkGraphic_RCStrDirectFilterMethodSetError,	L"Filter Method may not be specified directly yet!"
+	GR32_PortableNetworkGraphic_RCStrDirectGammaSetError,	L"Gamma may not be specified directly yet!"
+	GR32_PortableNetworkGraphic_RCStrDirectHeightSetError,	L"Height may not be specified directly yet!"
+	GR32_PortableNetworkGraphic_RCStrDirectWidthSetError,	L"Width may not be specified directly yet!"
+	GR32_PortableNetworkGraphic_RCStrEmptyChunkList,	L"Chunk list is empty"
 	GR32_PortableNetworkGraphic_RCStrHeaderInvalid,	L"The provided header is not valid!"
 	GR32_PortableNetworkGraphic_RCStrIncompletePalette,	L"Palette is incomplete"
 	GR32_PortableNetworkGraphic_RCStrIndexOutOfBounds,	L"Index out of bounds (%d)"
@@ -462,12 +464,12 @@ BEGIN
 	GR32_PortableNetworkGraphic_RCStrSeveralGammaChunks,	L"Gamma chunk defined twice!"
 	GR32_PortableNetworkGraphic_RCStrSeveralPaletteChunks,	L"Palette chunk defined twice!"
 	GR32_PortableNetworkGraphic_RCStrSeveralTransparencyChunks,	L"Transparency chunk defined twice!"
-	GR32_PortableNetworkGraphic_RCStrSeveralBackgroundChunks,	L"Background chunk defined twice!"
-	GR32_PortableNetworkGraphic_RCStrSeveralPhysicalPixelDimensionChunks,	L"Several physical pixel dimenson chunks found"
-	GR32_PortableNetworkGraphic_RCStrSeveralSignificantBitsChunksFound,	L"Several significant bits chunks found"
-	GR32_PortableNetworkGraphic_RCStrSeveralTimeChunks,	L"Time chunk appears twice!"
-	GR32_PortableNetworkGraphic_RCStrUnknownColorType,	L"Unknown color type!"
-	GR32_PortableNetworkGraphic_RCStrUnspecifiedPixelUnit,	L"Unspecified unit"
+	System_Win_ComConst_SVarNotObject,	L"Variant does not reference an automation object"
+	System_Win_ComConst_STooManyParams,	L"Dispatch methods do not support more than 64 parameters"
+	GR32_Transforms_RCStrReverseTransformationNotImplemented,	L"Reverse transformation is not implemented in %s."
+	GR32_Transforms_RCStrForwardTransformationNotImplemented,	L"Forward transformation is not implemented in %s."
+	GR32_Resamplers_SDstNil,	L"Destination bitmap is nil"
+	GR32_Resamplers_SSrcNil,	L"Source bitmap is nil"
 	GR32_Resamplers_RCStrInvalidSrcRect,	L"Invalid SrcRect"
 	GR32_Backends_RCStrCannotAllocateDIBHandle,	L"Can't allocate the DIB handle"
 	GR32_Backends_RCStrCannotCreateCompatibleDC,	L"Can't create compatible DC"
@@ -478,12 +480,12 @@ BEGIN
 	GR32_PortableNetworkGraphic_RCStrAncillaryUnknownChunk,	L"Unknown chunk is marked as ancillary"
 	GR32_PortableNetworkGraphic_RCStrChunkSizeTooSmall,	L"Chunk size too small!"
 	GR32_PortableNetworkGraphic_RCStrDataIncomplete,	L"Data not complete"
-	GR32_PortableNetworkGraphic_RCStrDirectCompressionMethodSetError,	L"Compression Method may not be specified directly yet!"
-	GR32_PortableNetworkGraphic_RCStrDirectFilterMethodSetError,	L"Filter Method may not be specified directly yet!"
-	GR32_PortableNetworkGraphic_RCStrDirectGammaSetError,	L"Gamma may not be specified directly yet!"
-	GR32_PortableNetworkGraphic_RCStrDirectHeightSetError,	L"Height may not be specified directly yet!"
-	GR32_PortableNetworkGraphic_RCStrDirectWidthSetError,	L"Width may not be specified directly yet!"
-	GR32_PortableNetworkGraphic_RCStrEmptyChunkList,	L"Chunk list is empty"
+	Vcl_Consts_SStyleRegisterError,	L"Style '%s' already registered"
+	Vcl_Consts_SStyleClassRegisterError,	L"Style class '%s' already registered"
+	Vcl_Consts_SStyleNotFound,	L"Style '%s' not found"
+	Vcl_Consts_SStyleClassNotFound,	L"Style class '%s' not found"
+	Vcl_Consts_SStyleInvalidHandle,	L"Invalid style handle"
+	Vcl_Consts_SStyleFormatError,	L"Invalid style format"
 	Vcl_Consts_SStyleHookClassRegistered,	L"Class '%s' is already registered for '%s'"
 	Vcl_Consts_SStyleHookClassNotRegistered,	L"Class '%s' is not registered for '%s'"
 	Vcl_Consts_SStyleInvalidParameter,	L"%s parameter cannot be nil"
@@ -494,12 +496,12 @@ BEGIN
 	Vcl_Consts_sBeginInvokeNoHandle,	L"Cannot call BeginInvoke on a control with no parent or window handle"
 	System_Win_ComConst_SOleError,	L"OLE error %.8x"
 	System_Win_ComConst_SNoMethod,	L"Method '%s' not supported by automation object"
-	System_Win_ComConst_SVarNotObject,	L"Variant does not reference an automation object"
-	System_Win_ComConst_STooManyParams,	L"Dispatch methods do not support more than 64 parameters"
-	GR32_Transforms_RCStrReverseTransformationNotImplemented,	L"Reverse transformation is not implemented in %s."
-	GR32_Transforms_RCStrForwardTransformationNotImplemented,	L"Forward transformation is not implemented in %s."
-	GR32_Resamplers_SDstNil,	L"Destination bitmap is nil"
-	GR32_Resamplers_SSrcNil,	L"Source bitmap is nil"
+	Vcl_Consts_SDockZoneNotFound,	L" - Dock zone not found"
+	Vcl_Consts_SDockZoneHasNoCtl,	L" - Dock zone has no control"
+	Vcl_Consts_SDockZoneVersionConflict,	L"Error loading dock zone from the stream. Expecting version %d, but found %d."
+	Vcl_Consts_SPromptArrayTooShort,	L"Length of value array must be >= length of prompt array"
+	Vcl_Consts_SPromptArrayEmpty,	L"Prompt array must not be empty"
+	Vcl_Consts_SUsername,	L"&Username"
 	Vcl_Consts_SPassword,	L"&Password"
 	Vcl_Consts_SDomain,	L"&Domain"
 	Vcl_Consts_SLogin,	L"Login"
@@ -510,12 +512,12 @@ BEGIN
 	Vcl_Consts_SInvalidTaskDlgButtonCaption,	L"Caption cannot be empty"
 	Vcl_Consts_SStyleLoadError,	L"Unable to load style '%s'"
 	Vcl_Consts_SStyleLoadErrors,	L"Unable to load styles: %s"
-	Vcl_Consts_SStyleRegisterError,	L"Style '%s' already registered"
-	Vcl_Consts_SStyleClassRegisterError,	L"Style class '%s' already registered"
-	Vcl_Consts_SStyleNotFound,	L"Style '%s' not found"
-	Vcl_Consts_SStyleClassNotFound,	L"Style class '%s' not found"
-	Vcl_Consts_SStyleInvalidHandle,	L"Invalid style handle"
-	Vcl_Consts_SStyleFormatError,	L"Invalid style format"
+	Vcl_Consts_SmkcDown,	L"Down"
+	Vcl_Consts_SmkcIns,	L"Ins"
+	Vcl_Consts_SmkcDel,	L"Del"
+	Vcl_Consts_SmkcShift,	L"Shift+"
+	Vcl_Consts_SmkcCtrl,	L"Ctrl+"
+	Vcl_Consts_SmkcAlt,	L"Alt+"
 	Vcl_Consts_SOutOfRange,	L"Value must be between %d and %d"
 	Vcl_Consts_sAllFilter,	L"All"
 	Vcl_Consts_SInsertLineError,	L"Unable to insert a line"
@@ -526,12 +528,12 @@ BEGIN
 	Vcl_Consts_SDuplicateMenus,	L"Menu '%s' is already being used by another form"
 	Vcl_Consts_SDockedCtlNeedsName,	L"Docked control must have a name"
 	Vcl_Consts_SDockTreeRemoveError,	L"Error removing control from dock tree"
-	Vcl_Consts_SDockZoneNotFound,	L" - Dock zone not found"
-	Vcl_Consts_SDockZoneHasNoCtl,	L" - Dock zone has no control"
-	Vcl_Consts_SDockZoneVersionConflict,	L"Error loading dock zone from the stream. Expecting version %d, but found %d."
-	Vcl_Consts_SPromptArrayTooShort,	L"Length of value array must be >= length of prompt array"
-	Vcl_Consts_SPromptArrayEmpty,	L"Prompt array must not be empty"
-	Vcl_Consts_SUsername,	L"&Username"
+	Vcl_Consts_SMsgDlgAll,	L"&All"
+	Vcl_Consts_SMsgDlgNoToAll,	L"N&o to All"
+	Vcl_Consts_SMsgDlgYesToAll,	L"Yes to &All"
+	Vcl_Consts_SMsgDlgClose,	L"&Close"
+	Vcl_Consts_SmkcBkSp,	L"BkSp"
+	Vcl_Consts_SmkcTab,	L"Tab"
 	Vcl_Consts_SmkcEsc,	L"Esc"
 	Vcl_Consts_SmkcEnter,	L"Enter"
 	Vcl_Consts_SmkcSpace,	L"Space"
@@ -542,12 +544,12 @@ BEGIN
 	Vcl_Consts_SmkcLeft,	L"Left"
 	Vcl_Consts_SmkcUp,	L"Up"
 	Vcl_Consts_SmkcRight,	L"Right"
-	Vcl_Consts_SmkcDown,	L"Down"
-	Vcl_Consts_SmkcIns,	L"Ins"
-	Vcl_Consts_SmkcDel,	L"Del"
-	Vcl_Consts_SmkcShift,	L"Shift+"
-	Vcl_Consts_SmkcCtrl,	L"Ctrl+"
-	Vcl_Consts_SmkcAlt,	L"Alt+"
+	Vcl_Consts_SVEnhMetafiles,	L"Enhanced Metafiles"
+	Vcl_Consts_SVIcons,	L"Icons"
+	Vcl_Consts_SVBitmaps,	L"Bitmaps"
+	Vcl_Consts_SVTIFFImages,	L"TIFF Images"
+	Vcl_Consts_SMsgDlgWarning,	L"Warning"
+	Vcl_Consts_SMsgDlgError,	L"Error"
 	Vcl_Consts_SMsgDlgInformation,	L"Information"
 	Vcl_Consts_SMsgDlgConfirm,	L"Confirm"
 	Vcl_Consts_SMsgDlgYes,	L"&Yes"
@@ -558,28 +560,6 @@ BEGIN
 	Vcl_Consts_SMsgDlgAbort,	L"&Abort"
 	Vcl_Consts_SMsgDlgRetry,	L"&Retry"
 	Vcl_Consts_SMsgDlgIgnore,	L"&Ignore"
-	Vcl_Consts_SMsgDlgAll,	L"&All"
-	Vcl_Consts_SMsgDlgNoToAll,	L"N&o to All"
-	Vcl_Consts_SMsgDlgYesToAll,	L"Yes to &All"
-	Vcl_Consts_SMsgDlgClose,	L"&Close"
-	Vcl_Consts_SmkcBkSp,	L"BkSp"
-	Vcl_Consts_SmkcTab,	L"Tab"
-	Vcl_Consts_SYesButton,	L"&Yes"
-	Vcl_Consts_SNoButton,	L"&No"
-	Vcl_Consts_SHelpButton,	L"&Help"
-	Vcl_Consts_SCloseButton,	L"&Close"
-	Vcl_Consts_SIgnoreButton,	L"&Ignore"
-	Vcl_Consts_SRetryButton,	L"&Retry"
-	Vcl_Consts_SAbortButton,	L"Abort"
-	Vcl_Consts_SAllButton,	L"&All"
-	Vcl_Consts_SCannotDragForm,	L"Cannot drag a form"
-	Vcl_Consts_SVMetafiles,	L"Metafiles"
-	Vcl_Consts_SVEnhMetafiles,	L"Enhanced Metafiles"
-	Vcl_Consts_SVIcons,	L"Icons"
-	Vcl_Consts_SVBitmaps,	L"Bitmaps"
-	Vcl_Consts_SVTIFFImages,	L"TIFF Images"
-	Vcl_Consts_SMsgDlgWarning,	L"Warning"
-	Vcl_Consts_SMsgDlgError,	L"Error"
 	Vcl_Consts_SPropertyOutOfRange,	L"%s property out of range"
 	Vcl_Consts_SMenuIndexError,	L"Menu index out of range"
 	Vcl_Consts_SMenuReinserted,	L"Menu inserted twice"
@@ -594,8 +574,8 @@ BEGIN
 	Vcl_Consts_SNoMDIForm,	L"Cannot create form. No MDI forms are currently active"
 	Vcl_Consts_SImageCanvasNeedsBitmap,	L"Can only modify an image if it contains a bitmap"
 	Vcl_Consts_SControlParentSetToSelf,	L"A control cannot have itself as its parent"
-	Vcl_Consts_SOKButton,	L"OK"
-	Vcl_Consts_SCancelButton,	L"Cancel"
+	Vcl_Consts_SCannotDragForm,	L"Cannot drag a form"
+	Vcl_Consts_SVMetafiles,	L"Metafiles"
 	Vcl_Consts_SInvalidImageList,	L"Invalid ImageList"
 	Vcl_Consts_SReplaceImage,	L"Unable to Replace Image"
 	Vcl_Consts_SInsertImage,	L"Unable to Insert Image"
@@ -855,9 +835,7 @@ BEGIN
 END
 
 /* c:\program files (x86)\embarcadero\studio\20.0\lib\Win32\release\Controls.res */
-/* c:\program files (x86)\embarcadero\studio\20.0\lib\Win32\release\Buttons.res */
-/* C:\Users\haoshengli\Desktop\delphi-bnb\client\FormMain.dfm */
-/* C:\Users\haoshengli\Desktop\delphi-bnb\client\FormLogin.dfm */
-/* C:\Users\haoshengli\Desktop\delphi-bnb\client\FormMap.dfm */
-/* C:\Users\haoshengli\Desktop\delphi-bnb\client\ChatClient.res */
-/* C:\Users\haoshengli\Desktop\delphi-bnb\client\ChatClient.drf */
+/* D:\bnb\delphi-bnb\client\FormLogin.dfm */
+/* D:\bnb\delphi-bnb\client\FormMap.dfm */
+/* D:\bnb\delphi-bnb\client\ChatClient.res */
+/* D:\bnb\delphi-bnb\client\ChatClient.drf */

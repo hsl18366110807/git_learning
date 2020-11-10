@@ -11,7 +11,6 @@ uses
 type
   TFrmMap = class(TForm)
     pntbx: TPaintBox32;
-    tmr1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure doWork(Sender: TObject);
     procedure processAni(Sender: TObject);
