@@ -546,11 +546,14 @@ begin
   PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
   x := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
   y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-  ABomb := TBOMB.Create(x, y);
-  ABomb.BombID := FBombList.Count;
-  FBombList.AddObject(IntToStr(ABomb.BombID), ABomb);
-  FMap.Map[x][y] := 4;
-  SendAllUser;
+  if FMap.Map[x][y] <> 4 then
+  begin
+    ABomb := TBOMB.Create(x, y);
+    ABomb.BombID := FBombList.Count;
+    FBombList.AddObject(IntToStr(ABomb.BombID), ABomb);
+    FMap.Map[x][y] := 4;
+    SendAllUser;
+  end;
 end;
 
 procedure TTcpgameserver.ProcessClientIO(AClient: TTCPClient);
