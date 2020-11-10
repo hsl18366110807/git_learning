@@ -33,7 +33,8 @@ type
     bmpRoleW, bmpRoleH, piceRoleW: Integer;
     bmpBoomW, bmpBoomH, piceBoomW: Integer;
     timer: TTimer;
-    tick: Integer;
+    TickForRole: Integer;
+    TickForBomb: Integer;
     color: TColor;
     posX, posY: Integer;
     FOldMap: array of Integer;
@@ -101,7 +102,7 @@ end;
 
 procedure TFrmMap.DrawFloorCooke;
 var
-  x, y, i, j, drawY: Integer;
+  x, y, i, j, drawY, bmpBombH, PosX, PosY: Integer;
 begin
   x := 0;
   y := 0;
@@ -137,18 +138,16 @@ begin
       end
       else if FMap[i * 20 + j] = 4 then
       begin
-//        drawY := y - (FBmpBoom.Height - 40);
-//        FBmpBoom.DrawTo(pntbx.Buffer, Rect(x, drawY, piceBomeW + x, drawY + piceBomeH), Rect(piceBomeW * tick1, 0, piceRoleW * (tick1 + 1), bmpRoleH));
-//        Inc(tick1);
-//        if tick1 = 4 then
-//        begin
-//          tick1 := 0;
-//        end;
+        drawY := y - (bmp4.Height - 40);
+        FBmpBoom.DrawTo(pntbx.Buffer, rect(x, drawY, piceBoomW + x, drawY + bmpBombH), Rect(piceBoomW * TickForBomb, 0, piceBoomW * (TickForBomb + 1), bmpBombH));
+        Inc(TickForBomb);
+        if TickForBomb = 4 then
+          TickForBomb := 0;
       end
       else if FMap[i * 20 + j] = 5 then //鞋子
       begin
-         drawY := y -(FBmpShoe.Height - 40);
-         FBmpShoe.DrawTo(pntbx.Buffer, x, drawY);
+        drawY := y - (FBmpShoe.Height - 40);
+        FBmpShoe.DrawTo(pntbx.Buffer, x, drawY);
       end;
       y := y + 40;
     end;
@@ -219,8 +218,8 @@ begin
   bmp4.DrawMode := dmBlend;
   LoadBitmap32FromPNG(bmp4, 'img/box1.png');
 
-  posX := 0;
-  posY := 0;
+  PosX := 0;
+  PosY := 0;
 
   SetLength(FMap, 400);
   FillMemory(FMap, 400, 0);
@@ -241,8 +240,8 @@ begin
     ChatMgr.RequestBoom;
     exit;
   end;
-   FNewTime := Now;
-  if (tick = 0) and  (FMovingRoleIndex = -1) and (SecondsBetween(FNewTime, FOldTime) > 0.1) then
+  FNewTime := Now;
+  if (TickForRole = 0) and (FMovingRoleIndex = -1) and (SecondsBetween(FNewTime, FOldTime) > 0.1) then
   begin
     ChatMgr.RequestMove(Key);
     FOldTime := Now;
@@ -256,19 +255,19 @@ var
   PosX, PosY: Integer;
 begin
   piceRoleW := FBmpRole.Width div 6;
-  if FSrcX  < FDesX then
+  if FSrcX < FDesX then
   begin
-      bmpRoleH := FBmpRole.Height;
-      PosX := FSrcX * 40 + (tick + 1) * 40 div 6;
-      PosY := FSrcY * 40 - (bmpRoleH - 40);
-      FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
+    bmpRoleH := FBmpRole.Height;
+    PosX := FSrcX * 40 + (TickForRole + 1) * 40 div 6;
+    PosY := FSrcY * 40 - (bmpRoleH - 40);
+    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
   end
   else
   begin
-      bmpRoleH := FBmpRole.Height;
-      PosX := FSrcX * 40 - (tick + 1) * 40 div 6;
-      PosY := FSrcY * 40 - (bmpRoleH - 40);
-      FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
+    bmpRoleH := FBmpRole.Height;
+    PosX := FSrcX * 40 - (TickForRole + 1) * 40 div 6;
+    PosY := FSrcY * 40 - (bmpRoleH - 40);
+    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
   end;
 end;
 
@@ -277,20 +276,20 @@ var
   piceRoleW, bmpRoleH: Integer;
   PosX, PosY: Integer;
 begin
-   piceRoleW := FBmpRole.Width div 6;
+  piceRoleW := FBmpRole.Width div 6;
   if FSrcY < FDesY then
   begin
     bmpRoleH := FBmpRole.Height;
     PosX := FSrcX * 40;
-    PosY := FSrcY * 40 - (bmpRoleH - 40) + (tick + 1) * 40 div 6;
-    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
+    PosY := FSrcY * 40 - (bmpRoleH - 40) + (TickForRole + 1) * 40 div 6;
+    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
   end
   else
   begin
     bmpRoleH := FBmpRole.Height;
     PosX := FSrcX * 40;
-    PosY := FSrcY * 40 - (bmpRoleH - 40) - (tick + 1) * 40 div 6;
-    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
+    PosY := FSrcY * 40 - (bmpRoleH - 40) - (TickForRole + 1) * 40 div 6;
+    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
   end;
 end;
 
@@ -337,8 +336,7 @@ begin
       FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
       FUserListOld := FUserListNew;
     end
-    else if (FUserListOld[indexRoleOld].UserPosX = RoleNew.UserPosX) and (FUserListOld[indexRoleOld].UserPosY = RoleNew.UserPosY) and
-    ((FMovingRoleIndex = -1) or (indexRoleOld <> FMovingRoleIndex)) then
+    else if (FUserListOld[indexRoleOld].UserPosX = RoleNew.UserPosX) and (FUserListOld[indexRoleOld].UserPosY = RoleNew.UserPosY) and ((FMovingRoleIndex = -1) or (indexRoleOld <> FMovingRoleIndex)) then
     begin //角色存在没有动作
       case RoleNew.FaceTo of
         NORTH:
@@ -368,7 +366,7 @@ begin
           FBmpRole := bmpE;
       end;
       if FMovingRoleIndex <> indexRoleOld then
-            FMovingRoleIndex := indexRoleOld;
+        FMovingRoleIndex := indexRoleOld;
 
       if FUserListOld[indexRoleOld].UserPosX = RoleNew.UserPosX then
       begin
@@ -377,11 +375,11 @@ begin
         FDesX := RoleNew.UserPosX;
         FDesY := RoleNew.UserPosY;
         RoleMoveOneStepY;
-        tick := tick + 1;
-        if tick = 6 then
+        TickForRole := TickForRole + 1;
+        if TickForRole = 6 then
         begin
           FUserListOld[indexRoleOld] := RoleNew;
-          tick := 0;
+          TickForRole := 0;
           FMovingRoleIndex := -1;
         end;
       end
@@ -392,11 +390,11 @@ begin
         FDesX := RoleNew.UserPosX;
         FDesY := RoleNew.UserPosY;
         RoleMoveOneStepX;
-        tick := tick + 1;
-         if tick = 6 then
+        TickForRole := TickForRole + 1;
+        if TickForRole = 6 then
         begin
           FUserListOld[indexRoleOld] := RoleNew;
-          tick := 0;
+          TickForRole := 0;
           FMovingRoleIndex := -1;
         end;
       end;
@@ -412,7 +410,7 @@ begin
     if indexRoleNew = -1 then
     begin
            //角色死亡
-           FMap[RoleOld.UserPosX * 20  + RoleOld.UserPosY] := 0;
+      FMap[RoleOld.UserPosX * 20 + RoleOld.UserPosY] := 0;
     end;
   end;
   pntbx.Invalidate;
