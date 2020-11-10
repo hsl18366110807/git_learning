@@ -6,11 +6,12 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   ChatProtocol, Vcl.StdCtrls, ChatManager, GR32, GR32_Image, GR32_PNG,
-  Vcl.ExtCtrls;
+  Vcl.ExtCtrls, System.DateUtils;
 
 type
   TFrmMap = class(TForm)
     pntbx: TPaintBox32;
+    tmr1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure doWork(Sender: TObject);
     procedure processAni(Sender: TObject);
@@ -19,6 +20,7 @@ type
     procedure RoleMoveOneStepY;
     procedure RoleMoveOneStepX;
     procedure DrawFloorCooke;
+    procedure tmr1Timer(Sender: TObject);
 //    procedure tmr1Timer(Sender: TObject);
   private
     FBmpRole: TBitmap32;
@@ -26,6 +28,8 @@ type
     FBmpShoe: TBitmap32;
     Fmsgs: TChatMsgs;
     FSrcX, FSrcY, FDesX, FDesY: Integer;
+    FMovingRoleIndex: Integer;
+    FNewTime, FOldTime: TDateTime;
     bmpRoleW, bmpRoleH, piceRoleW: Integer;
     bmpBoomW, bmpBoomH, piceBoomW: Integer;
     timer: TTimer;
@@ -131,9 +135,15 @@ begin
         drawY := y - (bmp4.Height - 40);
         bmp4.DrawTo(pntbx.Buffer, x, drawY);
       end
-      else if FMap[i * 20 + j] = 3 then
+      else if FMap[i * 20 + j] = 4 then
       begin
-
+//        drawY := y - (FBmpBoom.Height - 40);
+//        FBmpBoom.DrawTo(pntbx.Buffer, Rect(x, drawY, piceBomeW + x, drawY + piceBomeH), Rect(piceBomeW * tick1, 0, piceRoleW * (tick1 + 1), bmpRoleH));
+//        Inc(tick1);
+//        if tick1 = 4 then
+//        begin
+//          tick1 := 0;
+//        end;
       end
       else if FMap[i * 20 + j] = 5 then //鞋子
       begin
@@ -219,6 +229,9 @@ begin
   timer.OnTimer := doWork;
   timer.Interval := 100;
   timer.Enabled := True;
+  FMovingRoleIndex := -1;
+  FOldTime := Now;
+  FNewTime := Now;
 end;
 
 procedure TFrmMap.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -228,7 +241,13 @@ begin
     ChatMgr.RequestBoom;
     exit;
   end;
-  ChatMgr.RequestMove(Key);
+   FNewTime := Now;
+  if (tick = 0) and  (FMovingRoleIndex = -1) and (SecondsBetween(FNewTime, FOldTime) > 0.1) then
+  begin
+    ChatMgr.RequestMove(Key);
+    FOldTime := Now;
+  end;
+
 end;
 
 procedure TFrmMap.RoleMoveOneStepX;
@@ -275,6 +294,11 @@ begin
   end;
 end;
 
+procedure TFrmMap.tmr1Timer(Sender: TObject);
+begin
+  OutputDebugString('1111111111111111111');
+end;
+
 //procedure TFrmMap.tmr1Timer(Sender: TObject);
 //begin
 //  if (tick mod 6 = 0) and (tick <> 0) then
@@ -313,7 +337,8 @@ begin
       FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
       FUserListOld := FUserListNew;
     end
-    else if (FUserListOld[indexRoleOld].UserPosX = RoleNew.UserPosX) and (FUserListOld[indexRoleOld].UserPosY = RoleNew.UserPosY) and (tick = 0) then
+    else if (FUserListOld[indexRoleOld].UserPosX = RoleNew.UserPosX) and (FUserListOld[indexRoleOld].UserPosY = RoleNew.UserPosY) and
+    ((FMovingRoleIndex = -1) or (indexRoleOld <> FMovingRoleIndex)) then
     begin //角色存在没有动作
       case RoleNew.FaceTo of
         NORTH:
@@ -342,6 +367,8 @@ begin
         EAST:
           FBmpRole := bmpE;
       end;
+      if FMovingRoleIndex <> indexRoleOld then
+            FMovingRoleIndex := indexRoleOld;
 
       if FUserListOld[indexRoleOld].UserPosX = RoleNew.UserPosX then
       begin
@@ -355,6 +382,7 @@ begin
         begin
           FUserListOld[indexRoleOld] := RoleNew;
           tick := 0;
+          FMovingRoleIndex := -1;
         end;
       end
       else if FUserListOld[indexRoleOld].UserPosY = RoleNew.UserPosY then
@@ -369,6 +397,7 @@ begin
         begin
           FUserListOld[indexRoleOld] := RoleNew;
           tick := 0;
+          FMovingRoleIndex := -1;
         end;
       end;
 
