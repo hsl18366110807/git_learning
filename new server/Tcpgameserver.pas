@@ -698,15 +698,14 @@ var
   UserName: AnsiString;
   i: integer;
 begin
-    UserName := FGamers.Strings[i];
-    FMap.head.Flag := PACK_FLAG;
-    FMap.head.Size := SizeOf(FMap);
-    FMap.head.Command := S_MAP;
-    FUserList.head.Flag := PACK_FLAG;
-    FUserList.head.Size := SizeOf(FUserList);
-    FUserList.head.Command := S_USERLIST;
-    TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@Fmap, SizeOf(FMap));
-    TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@FUserList, SizeOf(FUserList));
+  FMap.head.Flag := PACK_FLAG;
+  FMap.head.Size := SizeOf(FMap);
+  FMap.head.Command := S_MAP;
+  FUserList.head.Flag := PACK_FLAG;
+  FUserList.head.Size := SizeOf(FUserList);
+  FUserList.head.Command := S_USERLIST;
+  TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@Fmap, SizeOf(FMap));
+  TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@FUserList, SizeOf(FUserList));
   Result := 0;
 end;
 
@@ -824,6 +823,10 @@ begin
     BombEvent.head.Command := S_BOMBBOOM;
     BombEvent.Bombx := BombX;
     BombEvent.BombY := BombY;
+    BombEvent.BoomW := BoomW;
+    BombEvent.BoomA := BoomA;
+    BombEvent.BoomS := BoomS;
+    BombEvent.BoomD := BoomD;
     CopyMemory(@(BombEvent.DestoryPos), PosArray, SizeOf(BombEvent.DestoryPos));
     TGameClient(FGamers.Objects[I]).FClient.SendData(@BombEvent, SizeOf(BombEvent));
   end;
