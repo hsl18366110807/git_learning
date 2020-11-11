@@ -4,7 +4,7 @@ interface
 
 uses
   Tcpserver, System.Classes, GameProtocol, System.SysUtils, LogServer,
-  GameSqlServer, System.Math, DateUtils;
+  GameSqlServer, System.Math, DateUtils, Winapi.Windows;
 
 type
   TGameClient = class
@@ -20,6 +20,7 @@ type
 
   TTcpgameserver = class(TTcpServer)
   private
+    FDeadGamers: TStrings;
     FGamers: TStrings;
     FBombList: TStrings;
     ShoseTime: TDateTime;
@@ -45,9 +46,14 @@ type
     function PlayerMove(RequestPtr: PPlayerMove; AClient: TTCPClient): Integer;
     function PlayerSetBomb(RequestPtr: PPlayerSetBoom; AClient: TTCPClient): Integer;
     function BombEvent(BomePos: Integer): Integer;
-    function SendAllUser: Integer;
-    function SendBombEvent(BombX: Integer; BombY: Integer; BoomW: Integer; BoomA: Integer; BoomS: Integer; BoomD: Integer): Integer;
+    function SendMap: Integer;
+    function SendPlayerInfo(PlayerName: AnsiString): Integer;
+    function SendPlayerMoveInfo(PlayerName: AnsiString): Integer;
+    function SendSetBombInfo(BombX, BombY: Integer): Integer;
+    function SendBombEvent(BombX: Integer; BombY: Integer; BoomW: Integer; BoomA: Integer; BoomS: Integer; BoomD: Integer; PosArray: Pointer): Integer;
     function PlayerDead(UserName: AnsiString; PlayerPosX: Integer; PlayerPosY: Integer): Integer;
+    function SendShoesPos(x, y: Integer): Integer;
+    function SendPlaverLeave(PlayerName: AnsiString): Integer;
   end;
 
 var
@@ -62,8 +68,9 @@ function TTcpgameserver.BombEvent(BomePos: Integer): Integer;
 var
   BombX, BombY, PlayerX, PlayerY, I, J: Integer;
   BoomW, BoomA, BoomD, BoomS: Integer;
+  DestoryPos: array[0..3, 0..1] of Integer;
 begin
-
+  fillchar(DestoryPos, sizeof(DestoryPos), -1);
   BombX := TBomb(FBombList.Objects[BomePos]).FBombPosX;
   BombY := TBomb(FBombList.Objects[BomePos]).FBombPosY;
 
@@ -80,8 +87,10 @@ begin
         begin
           Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
-          FClients.Delete(J);
-          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
+          FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+          FGamers.Delete(J);
+//          FClients.Delete(J);
+//          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
         end;
       end;
     end
@@ -92,7 +101,8 @@ begin
     else if FMap.Map[BombX + I][BombY] = 2 then
     begin
       FMap.Map[BombX + I][BombY] := 0;
-      SendAllUser;
+      DestoryPos[0][0] := BombX + I;
+      DestoryPos[0][1] := BombY;
       Break;
     end;
     Inc(BoomD);
@@ -109,8 +119,10 @@ begin
         begin
           Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
-          FClients.Delete(J);
-          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
+          FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+          FGamers.Delete(J);
+//          FClients.Delete(J);
+//          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
         end;
       end;
     end
@@ -121,7 +133,8 @@ begin
     else if FMap.Map[BombX - I][BombY] = 2 then
     begin
       FMap.Map[BombX - I][BombY] := 0;
-      SendAllUser;
+      DestoryPos[1][0] := BombX - I;
+      DestoryPos[1][1] := BombY;
       Break;
     end;
     Inc(BoomA);
@@ -139,8 +152,10 @@ begin
         begin
           Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
-          FClients.Delete(J);
-          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
+          FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+          FGamers.Delete(J);
+//          FClients.Delete(J);
+//          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
         end;
       end;
     end
@@ -151,7 +166,8 @@ begin
     else if FMap.Map[BombX][BombY + I] = 2 then
     begin
       FMap.Map[BombX][BombY + I] := 0;
-      SendAllUser;
+      DestoryPos[2][0] := BombX;
+      DestoryPos[2][1] := BombY + I;
       Break;
     end;
     Inc(BoomS);
@@ -170,8 +186,10 @@ begin
         begin
           Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
-          FClients.Delete(J);
-          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
+          FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+          FGamers.Delete(J);
+//          FClients.Delete(J);
+//          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
         end;
       end;
     end
@@ -182,15 +200,15 @@ begin
     else if FMap.Map[BombX][BombY - I] = 2 then
     begin
       FMap.Map[BombX][BombY - I] := 0;
-      SendAllUser;
+      DestoryPos[0][0] := BombX;
+      DestoryPos[0][1] := BombY - I;
       Break;
     end;
     Inc(BoomW);
   end;
   Log.Info(Format('±¬Õ¨·¶Î§-> W:%d, A:%d, S:%d, D:%d', [BoomW, BoomA, BoomS, BoomD]));
-  SendBombEvent(BombX, BombY, BoomW, BoomA, BoomS, BoomD);
+  SendBombEvent(BombX, BombY, BoomW, BoomA, BoomS, BoomD, @DestoryPos);
   FMap.Map[BombX][BombY] := 0;
-  SendAllUser;
 end;
 
 procedure TTcpgameserver.CheckBombTime;
@@ -219,19 +237,26 @@ procedure TTcpgameserver.ClientRemoved(AClient: TTCPClient);
 var
   Idx: Integer;
   DeletedChatter: TGameClient;
+  I: Integer;
 begin
   DeletedChatter := FindGamer(AClient);
-  if DeletedChatter <> nil then
-  begin
-    FMap.Map[DeletedChatter.GamerPosX][DeletedChatter.GamerPosY] := 0;
-    Idx := FGamers.IndexOfObject(DeletedChatter);
-    if Idx >= 0 then
-      FGamers.Delete(Idx)
-    else
-      Exit;
-    DeletedChatter.Free;
-  end;
-  SendAllUser;
+  for I := 0 to 4 do
+
+    if DeletedChatter <> nil then
+    begin
+      FMap.Map[DeletedChatter.GamerPosX][DeletedChatter.GamerPosY] := 0;
+      Idx := FGamers.IndexOfObject(DeletedChatter);
+      if Idx >= 0 then
+      begin
+        FGamers.Delete(Idx);
+      end
+      else
+      begin
+        Exit;
+      end;
+      DeletedChatter.Free;
+    end;
+
 end;
 
 constructor TTcpgameserver.Create;
@@ -239,6 +264,7 @@ begin
   inherited Create;
   FGamers := TStringList.Create;
   FBombList := TStringList.Create;
+  FDeadGamers := TStringList.Create;
   InitGameMap;
 end;
 
@@ -307,6 +333,7 @@ var
   UserName, password, Error: AnsiString;
   sql: AnsiString;
   request: TServerMessage;
+  UserInfo: TPlayerInfo;
 begin
   UserName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
   password := StrPas(PAnsichar(@(RequestPtr.Password)[0]));
@@ -325,6 +352,7 @@ begin
       StrPCopy(FUserList.UserList[FGamers.Count - 1].UserName, UserName);
       FUserList.UserList[FGamers.Count - 1].UserPosX := AGameer.GamerPosX;
       FUserList.UserList[FGamers.Count - 1].UserPosY := AGameer.GamerPosY;
+
     end
     else
     begin
@@ -364,10 +392,10 @@ begin
   end;
 
   AClient.SendData(@request, SizeOf(request));
-//  if Result = 0 then
-//  begin
-//    SendAllUser;
-//  end;
+  if Result = 0 then
+  begin
+    SendPlayerInfo(UserName);
+  end;
   ShoseTime := Now;
 end;
 
@@ -382,6 +410,7 @@ begin
   Move(Pointer(UserName)^, PlayerDeadEvent.UserName, Length(UserName));
   PlayerDeadEvent.PlayerPosX := PlayerPosX;
   PlayerDeadEvent.PlayerPosY := PlayerPosY;
+  FMap.Map[PlayerPosX][PlayerPosY] := 0;
   for I := 0 to FGamers.Count - 1 do
   begin
     TGameClient(FGamers.Objects[I]).FClient.SendData(@PlayerDeadEvent, SizeOf(PlayerDeadEvent));
@@ -395,6 +424,10 @@ var
   PlayerName, ListPlayerName: AnsiString;
 begin
   PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
+  if FDeadGamers.IndexOf(PlayerName) <> -1 then
+  begin
+    Exit;
+  end;
   if RequestPtr.MoveType = MOVEUP then
   begin
     X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
@@ -533,7 +566,7 @@ begin
       Log.Info(Format('Íæ¼Ò %s Ïò¶«ÒÆ¶¯,µ±Ç°×ø±ê(%d, %d)', [PlayerName, X + 1, Y]));
     end;
   end;
-  SendAllUser;
+  SendPlayerMoveInfo(PlayerName);
 end;
 
 function TTcpgameserver.PlayerSetBomb(RequestPtr: PPlayerSetBoom; AClient: TTCPClient): Integer;
@@ -544,6 +577,10 @@ var
   PlayerName: AnsiString;
 begin
   PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
+  if FDeadGamers.IndexOf(PlayerName) <> -1 then
+  begin
+    Exit;
+  end;
   x := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
   y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
   if FMap.Map[x][y] <> 4 then
@@ -552,7 +589,7 @@ begin
     ABomb.BombID := FBombList.Count;
     FBombList.AddObject(IntToStr(ABomb.BombID), ABomb);
     FMap.Map[x][y] := 4;
-    SendAllUser;
+    SendSetBombInfo(x, y);
   end;
 end;
 
@@ -605,7 +642,7 @@ begin
       end;
     C_MAP:
       begin
-        SendAllUser;
+        SendMap;
       end;
     C_MOVE:
       begin
@@ -656,29 +693,125 @@ begin
   AClient.SendData(@Request, sizeof(Request));
 end;
 
-function TTcpgameserver.SendAllUser: Integer;
+function TTcpgameserver.SendMap: Integer;
 var
   UserName: AnsiString;
   i: integer;
 begin
-  for i := 0 to FGamers.Count - 1 do
-  begin
-    UserName := FGamers.Strings[i];
     FMap.head.Flag := PACK_FLAG;
     FMap.head.Size := SizeOf(FMap);
     FMap.head.Command := S_MAP;
-
     FUserList.head.Flag := PACK_FLAG;
     FUserList.head.Size := SizeOf(FUserList);
     FUserList.head.Command := S_USERLIST;
+    TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@Fmap, SizeOf(FMap));
+    TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@FUserList, SizeOf(FUserList));
+  Result := 0;
+end;
 
-    TGameClient(FGamers.Objects[i]).FClient.SendData(@Fmap, SizeOf(FMap));
-    TGameClient(FGamers.Objects[i]).FClient.SendData(@FUserList, SizeOf(FUserList));
+function TTcpgameserver.SendPlaverLeave(PlayerName: AnsiString): Integer;
+var
+  FPlayerLeave: TPlayerLeave;
+  I: Integer;
+begin
+  for I := 0 to FGamers.Count - 1 do
+  begin
+    FPlayerLeave.head.Flag := PACK_FLAG;
+    FPlayerLeave.head.Size := SizeOf(FPlayerLeave);
+    FPlayerLeave.head.Command := S_PLAYERLEAVE;
+    strpcopy(FPlayerLeave.UserName, PlayerName);
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@Fmap, SizeOf(FMap));
   end;
   Result := 0;
 end;
 
-function TTcpgameserver.SendBombEvent(BombX: Integer; BombY: Integer; BoomW: Integer; BoomA: Integer; BoomS: Integer; BoomD: Integer): Integer;
+function TTcpgameserver.SendPlayerInfo(PlayerName: AnsiString): Integer;
+var
+  I: Integer;
+  FPlayerInfo: TPlayerInfo;
+begin
+  for I := 0 to 4 do
+  begin
+    if FUserList.UserList[I].UserName = PlayerName then
+    begin
+      FPlayerInfo.UserID := FUserList.UserList[I].UserID;
+      FPlayerInfo.UserName := FUserList.UserList[I].UserName;
+      FPlayerInfo.UserPosX := FUserList.UserList[I].UserPosX;
+      FPlayerInfo.UserPosY := FUserList.UserList[I].UserPosY;
+      FPlayerInfo.FaceTo := FUserList.UserList[I].FaceTo;
+      FPlayerInfo.Speed := FUserList.UserList[I].Speed;
+    end;
+  end;
+  for I := 0 to FGamers.Count - 1 do
+  begin
+    FPlayerInfo.head.Flag := PACK_FLAG;
+    FPlayerInfo.head.Size := SizeOf(FPlayerInfo);
+    FPlayerInfo.head.Command := S_PlayerInfo;
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@FPlayerInfo, SizeOf(FPlayerInfo));
+  end;
+
+end;
+
+function TTcpgameserver.SendPlayerMoveInfo(PlayerName: AnsiString): Integer;
+var
+  I: Integer;
+  FPlayerInfo: TPlayerInfo;
+begin
+  for I := 0 to 4 do
+  begin
+    if FUserList.UserList[I].UserName = PlayerName then
+    begin
+      FPlayerInfo.UserID := FUserList.UserList[I].UserID;
+      FPlayerInfo.UserName := FUserList.UserList[I].UserName;
+      FPlayerInfo.UserPosX := FUserList.UserList[I].UserPosX;
+      FPlayerInfo.UserPosY := FUserList.UserList[I].UserPosY;
+      FPlayerInfo.FaceTo := FUserList.UserList[I].FaceTo;
+      FPlayerInfo.Speed := FUserList.UserList[I].Speed;
+    end;
+  end;
+  for I := 0 to FGamers.Count - 1 do
+  begin
+    FPlayerInfo.head.Flag := PACK_FLAG;
+    FPlayerInfo.head.Size := SizeOf(FPlayerInfo);
+    FPlayerInfo.head.Command := S_PLAYERMOVE;
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@FPlayerInfo, SizeOf(FPlayerInfo));
+  end;
+end;
+
+function TTcpgameserver.SendSetBombInfo(BombX, BombY: Integer): Integer;
+var
+  I: Integer;
+  FBombInfo: TBombSeted;
+begin
+  FBombInfo.head.Flag := PACK_FLAG;
+  FBombInfo.head.Size := SizeOf(FBombInfo);
+  FBombInfo.head.Command := S_SETBOME;
+  FBombInfo.BombPosX := BombX;
+  FBombInfo.BombPosY := BombY;
+  for I := 0 to FGamers.Count - 1 do
+  begin
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@FBombInfo, SizeOf(FBombInfo));
+  end;
+
+end;
+
+function TTcpgameserver.SendShoesPos(x, y: Integer): Integer;
+var
+  FShoesInfo: TShoesInfo;
+  I: Integer;
+begin
+  FShoesInfo.head.Flag := PACK_FLAG;
+  FShoesInfo.head.Size := SizeOf(FShoesInfo);
+  FShoesInfo.head.Command := S_SETSHOES;
+  FShoesInfo.ShoesPosX := x;
+  FShoesInfo.ShoesPosY := y;
+  for I := 0 to FGamers.Count - 1 do
+  begin
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@FShoesInfo, SizeOf(FShoesInfo));
+  end;
+end;
+
+function TTcpgameserver.SendBombEvent(BombX: Integer; BombY: Integer; BoomW: Integer; BoomA: Integer; BoomS: Integer; BoomD: Integer; PosArray: Pointer): Integer;
 var
   I: integer;
   BombEvent: TBombBoom;
@@ -690,6 +823,7 @@ begin
     BombEvent.head.Command := S_BOMBBOOM;
     BombEvent.Bombx := BombX;
     BombEvent.BombY := BombY;
+    CopyMemory(@(BombEvent.DestoryPos), PosArray, SizeOf(BombEvent.DestoryPos));
     TGameClient(FGamers.Objects[I]).FClient.SendData(@BombEvent, SizeOf(BombEvent));
   end;
 
@@ -726,7 +860,7 @@ begin
     if ShoseNum < 7 then
     begin
       FMap.Map[X][Y] := 5;
-      SendAllUser;
+      SendShoesPos(X, Y);
       Inc(ShoseNum);
     end;
     ShoseTime := NowTime;

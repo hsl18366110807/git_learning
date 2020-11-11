@@ -14,6 +14,7 @@ const
 
 type
   MoveDirect = (MOVEUP, MOVEDOWN, MOVELEFT, MOVERIGHT);
+
   FaceOrientate = (NORTH, SOUTH, WEST, EAST);
 
   PGameMsgHead = ^TGameMsgHead;
@@ -49,6 +50,7 @@ type
   end;
 
   TPlayerInfo = record
+    head: TGameMsgHead;
     UserID: Integer;
     UserName: array[0..15] of AnsiChar;
     UserPosX: Integer;
@@ -64,7 +66,7 @@ type
 
   PPlayerMove = ^TPlayerMove;
 
-  TPlayerMove = record
+  TPlayerMove = record  //客户端发给服务器的移动消息
     head: TGameMsgHead;
     UserName: array[0..15] of AnsiChar;
     MoveType: MoveDirect;
@@ -72,12 +74,18 @@ type
 
   PPlayerSetBoom = ^TPlayerSetBoom;
 
-  TPlayerSetBoom = record
+  TPlayerSetBoom = record     //客户端发给服务器的放置炸弹消息
     head: TGameMsgHead;
     UserName: array[0..15] of AnsiChar; //根据用户名寻找坐标
   end;
 
-  TBombBoom = record
+  TBombSeted = record   //服务器放置好炸弹，将炸弹坐标发给客户端
+    head: TGameMsgHead;
+    BombPosX: Integer;
+    BombPosY: Integer;
+  end;
+
+  TBombBoom = record  //炸弹爆炸，发送范围以及摧毁木箱坐标
     head: TGameMsgHead;
     Bombx: Integer;
     BombY: Integer;
@@ -85,13 +93,25 @@ type
     BoomA: Integer;
     BoomS: Integer;
     BoomD: Integer;
+    DestoryPos: array[0..3, 0..1] of Integer;
   end;
 
-  TPlayerDeadEvent = record
+  TPlayerDeadEvent = record   //被炸死玩家信息
     head: TGameMsgHead;
     UserName: array[0..15] of AnsiChar;
     PlayerPosX: Integer;
     PlayerPosY: Integer;
+  end;
+
+  TShoesInfo = record      //鞋子道具信息
+    head: TGameMsgHead;
+    ShoesPosX: Integer;
+    ShoesPosY: Integer;
+  end;
+
+  TPlayerLeave = record    //玩家离开信息
+    head: TGameMsgHead;
+    UserName: array[0..15] of AnsiChar;
   end;
 
   TBomb = class
@@ -115,10 +135,16 @@ const
   C_MAP = 5;
   S_MAP = 6;
   C_MOVE = 7;
-  C_BOOM = 8;
-  S_BOMBBOOM = 9;
-  S_PLAYERDEAD = 10;
-  S_USERLIST = 11;
+  S_PLAYERMOVE = 8;
+  S_PlayerInfo = 9;
+  C_BOOM = 10;
+  S_SETBOME = 11;
+  S_BOMBBOOM = 12;
+  S_PLAYERDEAD = 13;
+  S_USERLIST = 14;
+  S_USERLEAVE = 15;
+  S_PLAYERLEAVE = 16;
+  S_SETSHOES = 17;
 implementation
 
 { TBOMB }
