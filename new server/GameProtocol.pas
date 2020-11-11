@@ -135,15 +135,16 @@ const
   C_MAP = 5;
   S_MAP = 6;
   C_MOVE = 7;
-  S_PlayerInfo = 8;
-  C_BOOM = 9;
-  S_SETBOME = 10;
-  S_BOMBBOOM = 11;
-  S_PLAYERDEAD = 12;
-  S_USERLIST = 13;
-  S_USERLEAVE = 14;
-  S_PLAYERLEAVE = 15;
-  S_SETSHOES = 16;
+  S_PLAYERMOVE = 8;
+  S_PlayerInfo = 9;
+  C_BOOM = 10;
+  S_SETBOME = 11;
+  S_BOMBBOOM = 12;
+  S_PLAYERDEAD = 13;
+  S_USERLIST = 14;
+  S_USERLEAVE = 15;
+  S_PLAYERLEAVE = 16;
+  S_SETSHOES = 17;
 implementation
 
 { TBOMB }

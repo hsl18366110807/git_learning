@@ -48,6 +48,7 @@ type
     function BombEvent(BomePos: Integer): Integer;
     function SendMap: Integer;
     function SendPlayerInfo(PlayerName: AnsiString): Integer;
+    function SendPlayerMoveInfo(PlayerName: AnsiString): Integer;
     function SendSetBombInfo(BombX, BombY: Integer): Integer;
     function SendBombEvent(BombX: Integer; BombY: Integer; BoomW: Integer; BoomA: Integer; BoomS: Integer; BoomD: Integer; PosArray: Pointer): Integer;
     function PlayerDead(UserName: AnsiString; PlayerPosX: Integer; PlayerPosY: Integer): Integer;
@@ -565,7 +566,7 @@ begin
       Log.Info(Format('玩家 %s 向东移动,当前坐标(%d, %d)', [PlayerName, X + 1, Y]));
     end;
   end;
-  SendPlayerInfo(PlayerName);
+  SendPlayerMoveInfo(PlayerName);
 end;
 
 function TTcpgameserver.PlayerSetBomb(RequestPtr: PPlayerSetBoom; AClient: TTCPClient): Integer;
@@ -749,6 +750,32 @@ begin
     TGameClient(FGamers.Objects[I]).FClient.SendData(@FPlayerInfo, SizeOf(FPlayerInfo));
   end;
 
+end;
+
+function TTcpgameserver.SendPlayerMoveInfo(PlayerName: AnsiString): Integer;
+var
+  I: Integer;
+  FPlayerInfo: TPlayerInfo;
+begin
+  for I := 0 to 4 do
+  begin
+    if FUserList.UserList[I].UserName = PlayerName then
+    begin
+      FPlayerInfo.UserID := FUserList.UserList[I].UserID;
+      FPlayerInfo.UserName := FUserList.UserList[I].UserName;
+      FPlayerInfo.UserPosX := FUserList.UserList[I].UserPosX;
+      FPlayerInfo.UserPosY := FUserList.UserList[I].UserPosY;
+      FPlayerInfo.FaceTo := FUserList.UserList[I].FaceTo;
+      FPlayerInfo.Speed := FUserList.UserList[I].Speed;
+    end;
+  end;
+  for I := 0 to FGamers.Count - 1 do
+  begin
+    FPlayerInfo.head.Flag := PACK_FLAG;
+    FPlayerInfo.head.Size := SizeOf(FPlayerInfo);
+    FPlayerInfo.head.Command := S_PLAYERMOVE;
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@FPlayerInfo, SizeOf(FPlayerInfo));
+  end;
 end;
 
 function TTcpgameserver.SendSetBombInfo(BombX, BombY: Integer): Integer;
