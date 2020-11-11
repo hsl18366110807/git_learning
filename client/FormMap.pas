@@ -18,8 +18,14 @@ type
     function FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
     procedure RoleMoveOneStepY;
     procedure RoleMoveOneStepX;
-    procedure DrawFloorCooke;
-    procedure tmr1Timer(Sender: TObject);
+    procedure DrawMap;
+    procedure DrawPlayer;
+    procedure InitPlayerList;
+    procedure SetShoes(Ptr: PTShoesInfo);
+    procedure SetBomb(Ptr: PTBombSeted);
+    procedure SetBombBoom(Ptr: PTBombBoom);
+    procedure DrawMapAndPlayer(Sender: TObject);
+    function AddUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功 1 用户列表已满
 //    procedure tmr1Timer(Sender: TObject);
   private
     FBmpRole: TBitmap32;
@@ -41,6 +47,7 @@ type
     FUsersChanged: Boolean;
     FUserListNew: TUserList; // array[0..4] of TPlayerInfo;
     FUserListOld: TUserList;
+    FUserList: TUserList;
     { Private declarations }
   public
     { Public declarations }
@@ -61,13 +68,39 @@ var
   bmpE, bmpWW, bmpS, bmpN: TBitmap32;
   tick: Integer;
 
+function TFrmMap.AddUserToList(Ptr: PTPlayerInfo): Integer;
+var
+  I: Integer;
+begin
+  if Ptr = nil then
+  begin
+    Result := -1;
+    Exit
+  end;
+  for I := 0 to Length(FUserList) - 1 do
+  begin
+    if FUserList[I].UserID = 0 then
+    begin
+      FUserList[I] := Ptr^;
+      Result := 0;
+      Exit
+    end;
+  end;
+  if I = Length(FUserList) - 1 then
+    Result := 1;
+end;
+
 procedure TFrmMap.doWork(Sender: TObject);
 var
   MsgPtr: PChatMsg;
   ServerMsgPtr: PServerMessage;
   MapPtr: PTSMap;
-  UserPtr: PTPlayerInfoList;
+  UserPtr: PTPlayerInfo;
+  UserListPtr: PTPlayerInfoList;
   BoomFlor: PTBombBoom;
+  ShoesPtr: PTShoesInfo;
+  BombPtr: PTBombSeted;
+  BombBoomPtr: PTBombBoom;
 begin
   ChatMgr.ReadResponse(FMsgs);
   while not FMsgs.IsEmpty do
@@ -79,16 +112,36 @@ begin
       ServerMsgPtr := PServerMessage(MsgPtr);
       try
         case ServerMsgPtr^.Head.Command of
-          S_Map:
+          S_MAP:
             begin
               MapPtr := PTSMap(MsgPtr);
               CopyMemory(FMap, @MapPtr^.Map[0], 1600);
             end;
           S_USERLIST:
             begin
-              UserPtr := PTPlayerInfoList(MsgPtr);
-              FUserListNew := UserPtr^.UserList;
-              FUsersChanged := True;
+              UserListPtr := PTPlayerInfoList(MsgPtr);
+              FUserList := UserListPtr^.UserList;
+//              FUsersChanged := True;
+            end;
+          S_PlayerInfo:
+            begin
+              UserPtr := PTPlayerInfo(MsgPtr);
+              AddUserToList(UserPtr);
+            end;
+          S_SETSHOES:
+            begin
+              ShoesPtr := PTShoesInfo(MsgPtr);
+              SetShoes(ShoesPtr);
+            end;
+          S_SETBOME:
+            begin
+              BombPtr := PTBombSeted(MsgPtr);
+              SetBomb(BombPtr);
+            end;
+          S_BOMBBOOM:
+            begin
+              BombBoomPtr := PTBombBoom(MsgPtr);
+              SetBombBoom(BombBoomPtr);
             end;
         end;
       finally
@@ -96,10 +149,11 @@ begin
       end;
     end;
   end;
-  processAni(self);
+//  processAni(self);
+  DrawMapAndPlayer(self);
 end;
 
-procedure TFrmMap.DrawFloorCooke;
+procedure TFrmMap.DrawMap;
 var
   x, y, i, j, drawY, bmpBombH, PosX, PosY: Integer;
 begin
@@ -155,6 +209,41 @@ begin
   end;
 end;
 
+procedure TFrmMap.DrawMapAndPlayer(Sender: TObject);
+begin
+  DrawMap;
+  DrawPlayer;
+  pntbx.Invalidate;
+end;
+
+procedure TFrmMap.DrawPlayer;
+var
+  I: Integer;
+  PosX, PosY: Integer;
+  BmpRole: TBitmap32;
+begin
+  for I := 0 to Length(FUserList) do
+  begin
+    if FUserList[I].UserID <> 0 then
+    begin
+      case FUserList[I].FaceTo of
+        SOUTH:
+          BmpRole := bmpS;
+        NORTH:
+          BmpRole := bmpN;
+        EAST:
+          BmpRole := bmpE;
+        WEST:
+          BmpRole := bmpWW;
+      end;
+      PosX := FUserList[I].UserPosX * 40;
+      PosY := FUserList[I].UserPosY * 40 - (FBmpRole.Height - 40);
+      FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+      FUserListOld := FUserListNew;
+    end;
+  end;
+end;
+
 function TFrmMap.FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
 var
   i, j: Integer;
@@ -177,6 +266,8 @@ begin
 //
   FMsgs := TChatMsgs.Create;
   ChatMgr.RequestMap;
+//  InitPlayerList;
+//  AddUserToList(ChatMgr.ReadPlayerInfo);
   FBmpRole := TBitmap32.Create;
   bmpE := TBitmap32.Create;
   bmpWW := TBitmap32.Create;
@@ -248,6 +339,17 @@ begin
 
 end;
 
+procedure TFrmMap.InitPlayerList;
+var
+  I: Integer;
+begin
+  for I := 0 to Length(FUserList) - 1 do
+  begin
+    FUserList[I].UserID := -1;
+  end;
+
+end;
+
 procedure TFrmMap.RoleMoveOneStepX;
 var
   piceRoleW, bmpRoleH: Integer;
@@ -292,21 +394,28 @@ begin
   end;
 end;
 
-procedure TFrmMap.tmr1Timer(Sender: TObject);
+procedure TFrmMap.SetBomb(Ptr: PTBombSeted);
+var
+  PosX, PosY: Integer;
 begin
-  OutputDebugString('1111111111111111111');
+  PosX := Ptr^.BombPosX;
+  PosY := Ptr^.BombPosY;
+  FMap[PosX * 20 + PosY] := 4;
 end;
 
-//procedure TFrmMap.tmr1Timer(Sender: TObject);
-//begin
-//  if (tick mod 6 = 0) and (tick <> 0) then
-//    tmr1.Enabled := False;
-//  if FSrcX = FDesX then
-//    RoleMoveOneStepY(FSrcX, FSrcY, FDesY)
-//  else
-//    RoleMoveOneStepX(FSrcY, FSrcX, FDesX);
+procedure TFrmMap.SetBombBoom(Ptr: PTBombBoom);
+begin
 //
-//end;
+end;
+
+procedure TFrmMap.SetShoes(Ptr: PTShoesInfo);
+var
+  PosX, PosY: Integer;
+begin
+  PosX := Ptr^.ShoesPosX;
+  PosY := Ptr^.ShoesPosY;
+  FMap[PosX * 20 + PosY] := 5;
+end;
 
 procedure TFrmMap.processAni(Sender: TObject);
 var
@@ -320,7 +429,7 @@ var
 begin
 //  if FUsersChanged then
 //  begin
-  DrawFloorCooke;
+  DrawMap;
   for i := 0 to Length(FUserListNew) do
   begin
     RoleNew := FUserListNew[i];

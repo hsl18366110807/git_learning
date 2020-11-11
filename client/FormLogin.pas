@@ -216,6 +216,8 @@ procedure TFrmLogin.ProcessServerMsgs;
 var
   MsgPtr: PChatMsg;
   ServerMsgPtr: PServerMessage;
+  PlayerPtr: PTPlayerInfo;
+  Ptr: PByte;
 begin
   ChatMgr.ReadResponse(FMsgs);
   while not FMsgs.IsEmpty do
@@ -252,22 +254,21 @@ begin
             begin
               ModalResult := mrOK;
 //              OutputDebugString('login success');
-              Timer1.Enabled := False
+              Timer1.Enabled := False;
+//              Ptr := Pointer(Integer(MsgPtr) + ServerMsgPtr^.Head.Size);
+//              PlayerPtr :=  PTPlayerInfo(Ptr);
+//                Exit;
             end;
-//            ServerMsgPtr := Pointer(Integer(ServerMsgPtr) + ServerMsgPtr^.Head.Size);
-////            BufPtr := Pointer(Integer(BufPtr) + 1);
-//            if ServerMsgPtr^.Head.Command = S_Map then
-//            begin
-//              OutputDebugString('recv map');
-//            end;
-
+//           break;
           end;
-
-//          S_Map:
-//          begin
-//           ShowMessage('recv map');
-//
-//          end;
+         S_PlayerInfo:
+            begin
+//              UserPtr := PTPlayerInfo(MsgPtr);
+//              AddUserToList(UserPtr);
+//                OutputDebugString('recv playerinfo');
+                PlayerPtr := PTPlayerInfo(MsgPtr);
+                ChatMgr.WirtePlayerInfo(PlayerPtr);
+            end;
 
         end;
       finally
@@ -281,7 +282,7 @@ procedure TFrmLogin.StopWait;
 begin
   ChangeWorkState(osNone);
   Timer1.Enabled := False;
-  FMsgs.Clear;
+//  FMsgs.Clear;
 
   EnableUI(True);
   ChatMgr.Reset;

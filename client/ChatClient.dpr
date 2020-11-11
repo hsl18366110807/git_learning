@@ -3,7 +3,6 @@ program ChatClient;
 uses
   Forms,
   Controls,
-  FormMain in 'FormMain.pas' {FrmMain},
   FormLogin in 'FormLogin.pas' {FrmLogin},
   ChatManager in 'ChatManager.pas',
   TCPClient in 'TCPClient.pas',

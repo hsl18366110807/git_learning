@@ -1037,9 +1037,6 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="FormMain.pas">
-            <Form>FrmMain</Form>
-        </DCCReference>
         <DCCReference Include="FormLogin.pas">
             <Form>FrmLogin</Form>
         </DCCReference>

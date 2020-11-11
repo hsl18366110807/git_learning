@@ -13,17 +13,18 @@ type
   private
     FServerMsgs: TLockChatMsgs;
     FAccount: AnsiString;
+    FPlayerInfo: TPlayerInfo;
   protected
     procedure ProcessReadData; override;
   public
     procedure ReadResponse(Msgs: TChatMsgs);
+    procedure WirtePlayerInfo(Player: PTPlayerInfo);
     function RequestRegister(Account: string; Password: string): Integer;
     function RequestLogin(Account: string; Password: string): Integer;
-    function RequestUsers: Integer;
     function RequestMap: Integer;
     function RequestBoom: Integer;
     function RequestMove(Key: Word): Integer;
-    function RequestSendMsg(Account: string; Msg: string): Integer;
+    function ReadPlayerInfo: PTPlayerInfo;
   public
     constructor Create;
     destructor Destroy; override;
@@ -103,6 +104,16 @@ begin
   finally
     UnlockReadBuffer(FetchSize);
   end;
+end;
+
+procedure TChatMgr.WirtePlayerInfo(Player: PTPlayerInfo);
+begin
+  FPlayerInfo := Player^;
+end;
+
+function TChatMgr.ReadPlayerInfo: PTPlayerInfo;
+begin
+  Result := @FPlayerInfo;
 end;
 
 procedure TChatMgr.ReadResponse(Msgs: TChatMsgs);
@@ -187,37 +198,6 @@ begin
     Result := -3;
 end;
 
-function TChatMgr.RequestSendMsg(Account, Msg: string): Integer;
-var
-  CMChitChat: TCMChitChat;
-begin
-  Result := 0;
-
-  FillChar(CMChitChat, SizeOf(CMChitChat), 0);
-  CMChitChat.Head.Flag := PACK_FLAG;
-  CMChitChat.Head.Size := SizeOf(CMChitChat);
-  CMChitChat.Head.Command := CM_SENDMSG;
-  StrLCopy(@CMChitChat.DestAccount[0], PAnsiChar(Account), Length(CMChitChat.DestAccount));
-  StrLCopy(@CMChitChat.Msg[0], PAnsiChar(Msg), Length(CMChitChat.Msg));
-
-  if WriteSendData(@CMChitChat, SizeOf(CMChitChat)) < 0 then
-    Result := -3;
-end;
-
-function TChatMgr.RequestUsers: Integer;
-var
-  CMUserState: TCMUserState;
-begin
-  Result := 0;
-
-  FillChar(CMUserState, SizeOf(CMUserState), 0);
-  CMUserState.Head.Flag := PACK_FLAG;
-  CMUserState.Head.Size := SizeOf(CMUserState);
-  CMUserState.Head.Command := CM_USER_STATE;
-
-  if WriteSendData(@CMUserState, SizeOf(CMUserState)) < 0 then
-    Result := -3;
-end;
 
 function TChatMgr.RequestMap: Integer;
 var

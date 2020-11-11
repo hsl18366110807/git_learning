@@ -12,6 +12,7 @@ const
 
 type
   MoveDirect = (MOVEUP, MOVEDOWN, MOVELEFT, MOVERIGHT);
+
   FaceOrientate = (NORTH, SOUTH, WEST, EAST);
 
   TUserAccount = array[0..15] of AnsiChar;
@@ -108,8 +109,10 @@ type
     ErrorInfo: array[0..31] of AnsiChar;
   end;
 
-  PTPlayerInfo  = ^TPlayerInfo;
+  PTPlayerInfo = ^TPlayerInfo;
+
   TPlayerInfo = record
+    Head: TChatMsgHead;
     UserID: Integer;
     UserName: array[0..15] of AnsiChar;
     UserPosX: Integer;
@@ -121,6 +124,7 @@ type
   TUserList = array[0..4] of TPlayerInfo;
 
   PTPlayerInfoList = ^TPlayerInfoList;
+
   TPlayerInfoList = record
     head: TChatMsgHead;
     UserList: TUserList; //array[0..4] of TPlayerInfo;
@@ -129,14 +133,29 @@ type
  // 地图 为二维数组
   MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, PSHOES); //可移动，障碍物，木箱，有角色，炸弹
 
-   TPlayerSetBoom = record
+  TPlayerSetBoom = record
     head: TChatMsgHead;
     PlayerName: TUserAccount; //根据用户名寻找坐标
   end;
 
+  PTShoesInfo = ^TShoesInfo;
+
+   TShoesInfo = record      //鞋子道具信息
+    head: TChatMsgHead;
+    ShoesPosX: Integer;
+    ShoesPosY: Integer;
+  end;
+
+   PTBombSeted = ^TBombSeted;
+   TBombSeted = record   //服务器放置好炸弹，将炸弹坐标发给客户端
+    head: TChatMsgHead;
+    BombPosX: Integer;
+    BombPosY: Integer;
+  end;
 
   PTBombBoom = ^TBombBoom;
-  TBombBoom = record
+
+  TBombBoom = record  //炸弹爆炸，发送范围以及摧毁木箱坐标
     head: TChatMsgHead;
     Bombx: Integer;
     BombY: Integer;
@@ -144,8 +163,8 @@ type
     BoomA: Integer;
     BoomS: Integer;
     BoomD: Integer;
+    DestoryPos: array[0..3, 0..1] of Integer;
   end;
-
 
 type
   PChatMsgNode = ^TChatMsgNode;
@@ -192,16 +211,19 @@ const
   S_REGISTER = 2;
   C_LOGIN = 3;
   S_LOGIN = 4;
-  C_Map = 5;
-  S_Map = 6;
+  C_MAP = 5;
+  S_MAP = 6;
   C_MOVE = 7;
-  C_BOOM = 8;
-  S_BOMBBOOM = 9;
-  S_USERLIST = 11;
-  CM_USER_STATE = 5;
-  SM_USER_STATE = 6;
-  CM_SENDMSG = 7;
-  SM_SENDMSG = 8;
+  S_PLAYERMOVE = 8;
+  S_PlayerInfo = 9;
+  C_BOOM = 10;
+  S_SETBOME = 11;
+  S_BOMBBOOM = 12;
+  S_PLAYERDEAD = 13;
+  S_USERLIST = 14;
+  S_USERLEAVE = 15;
+  S_PLAYERLEAVE = 16;
+  S_SETSHOES = 17;
 
 implementation
 
