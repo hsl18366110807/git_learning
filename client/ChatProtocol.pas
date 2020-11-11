@@ -131,7 +131,7 @@ type
   end;
 
  // 地图 为二维数组
-  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, PSHOES); //可移动，障碍物，木箱，有角色，炸弹
+  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, PSHOES); //0 可移动，1 饼干，2 木箱，3有角色，4炸弹, 5鞋子
 
   TPlayerSetBoom = record
     head: TChatMsgHead;
@@ -164,6 +164,18 @@ type
     BoomS: Integer;
     BoomD: Integer;
     DestoryPos: array[0..3, 0..1] of Integer;
+  end;
+
+  PTOneMove = ^TOneMove;
+
+  TOneMove = record
+    Next: PTOneMove;
+    UserId: Integer;
+    SrcX: Integer;
+    SrcY: Integer;
+    DesX: Integer;
+    DesY: Integer;
+    FaceTo: FaceOrientate;
   end;
 
 type

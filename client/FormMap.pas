@@ -16,16 +16,25 @@ type
     procedure processAni(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     function FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
-    procedure RoleMoveOneStepY;
-    procedure RoleMoveOneStepX;
+//    procedure RoleMoveOneStepY;
+    procedure RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY: Integer);
+//    procedure RoleMoveOneStepX;
+    procedure RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX: Integer);
     procedure DrawMap;
     procedure DrawPlayer;
     procedure InitPlayerList;
     procedure SetShoes(Ptr: PTShoesInfo);
     procedure SetBomb(Ptr: PTBombSeted);
     procedure SetBombBoom(Ptr: PTBombBoom);
+    procedure PlayerMove(DesPlayer: PTPlayerInfo);
     procedure DrawMapAndPlayer(Sender: TObject);
+    procedure AddMoveList(MovePtr: PTOneMove);
+    procedure processMove;
+    function FindUserFromList(Id: Integer): PTPlayerInfo;
     function AddUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功 1 用户列表已满
+    function UpdateUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功  1 失败，没有找到要更新的用户
+    function IsInMoveList(Id: Integer): Boolean;
+    function IsMoveListEmpty: Boolean;
 //    procedure tmr1Timer(Sender: TObject);
   private
     FBmpRole: TBitmap32;
@@ -48,6 +57,8 @@ type
     FUserListNew: TUserList; // array[0..4] of TPlayerInfo;
     FUserListOld: TUserList;
     FUserList: TUserList;
+    FMoveListBegin: PTOneMove;
+    FMoveListEnd: PTOneMove;
     { Private declarations }
   public
     { Public declarations }
@@ -67,6 +78,19 @@ var
   bmp2, bmp3, bmp4: TBitmap32;
   bmpE, bmpWW, bmpS, bmpN: TBitmap32;
   tick: Integer;
+
+procedure TFrmMap.AddMoveList(MovePtr: PTOneMove);
+begin
+  if FMoveListBegin = nil then
+  begin
+    FMoveListBegin := MovePtr;
+    FMoveListEnd := MovePtr;
+  end
+  else
+  begin
+    FMoveListEnd.Next := MovePtr;
+  end;
+end;
 
 function TFrmMap.AddUserToList(Ptr: PTPlayerInfo): Integer;
 var
@@ -127,6 +151,11 @@ begin
             begin
               UserPtr := PTPlayerInfo(MsgPtr);
               AddUserToList(UserPtr);
+            end;
+          S_PLAYERMOVE:
+            begin
+              UserPtr := PTPlayerInfo(MsgPtr);
+              PlayerMove(UserPtr);
             end;
           S_SETSHOES:
             begin
@@ -221,27 +250,34 @@ var
   I: Integer;
   PosX, PosY: Integer;
   BmpRole: TBitmap32;
+  tick: Integer;
 begin
   for I := 0 to Length(FUserList) do
   begin
     if FUserList[I].UserID <> 0 then
     begin
-      case FUserList[I].FaceTo of
-        SOUTH:
-          BmpRole := bmpS;
-        NORTH:
-          BmpRole := bmpN;
-        EAST:
-          BmpRole := bmpE;
-        WEST:
-          BmpRole := bmpWW;
+      if not IsInMoveList(FUserList[I].UserID) then
+      begin
+        case FUserList[I].FaceTo of
+          SOUTH:
+            BmpRole := bmpS;
+          NORTH:
+            BmpRole := bmpN;
+          EAST:
+            BmpRole := bmpE;
+          WEST:
+            BmpRole := bmpWW;
+        end;
+        PosX := FUserList[I].UserPosX * 40;
+        PosY := FUserList[I].UserPosY * 40 - (FBmpRole.Height - 40);
+        BmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+        FUserListOld := FUserListNew;
       end;
-      PosX := FUserList[I].UserPosX * 40;
-      PosY := FUserList[I].UserPosY * 40 - (FBmpRole.Height - 40);
-      FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
-      FUserListOld := FUserListNew;
     end;
   end;
+  if not IsMoveListEmpty then
+    processMove;
+
 end;
 
 function TFrmMap.FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
@@ -259,6 +295,22 @@ begin
     if j = Length(role.UserName) then
       Result := i;
   end;
+end;
+
+function TFrmMap.FindUserFromList(Id: Integer): PTPlayerInfo;
+var
+  I: Integer;
+begin
+  for I := 0 to Length(FUserList) - 1 do
+  begin
+    if FUserList[I].UserID = Id then
+    begin
+      Result := @FUserList[I];
+      Exit
+    end;
+  end;
+  if I = Length(FUserList) - 1 then
+    Result := nil;
 end;
 
 procedure TFrmMap.FormCreate(Sender: TObject);
@@ -350,47 +402,144 @@ begin
 
 end;
 
-procedure TFrmMap.RoleMoveOneStepX;
+function TFrmMap.IsInMoveList(Id: Integer): Boolean;
 var
-  piceRoleW, bmpRoleH: Integer;
-  PosX, PosY: Integer;
+  ptr: PTOneMove;
 begin
-  piceRoleW := FBmpRole.Width div 6;
-  if FSrcX < FDesX then
+//
+  Result := False;
+  if FMoveListBegin = nil then
+    Exit;
+  ptr := FMoveListBegin;
+  while ptr <> nil do
   begin
-    bmpRoleH := FBmpRole.Height;
-    PosX := FSrcX * 40 + (TickForRole + 1) * 40 div 6;
-    PosY := FSrcY * 40 - (bmpRoleH - 40);
-    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
-  end
-  else
-  begin
-    bmpRoleH := FBmpRole.Height;
-    PosX := FSrcX * 40 - (TickForRole + 1) * 40 div 6;
-    PosY := FSrcY * 40 - (bmpRoleH - 40);
-    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
+    if ptr^.UserId = Id then
+    begin
+      Result := True;
+      Exit;
+    end
+    else
+      ptr := ptr^.Next;
   end;
 end;
 
-procedure TFrmMap.RoleMoveOneStepY;
+function TFrmMap.IsMoveListEmpty: Boolean;
+begin
+  Result := False;
+  if FMoveListBegin = nil then
+    Result := True;
+end;
+
+procedure TFrmMap.PlayerMove(DesPlayer: PTPlayerInfo);
+var
+  id: Integer;
+  SrcPlayerPtr: PTPlayerInfo;
+  SrcX, SrcY, DesX, DesY: Integer;
+  MovePtr: PTOneMove;
+begin
+  id := DesPlayer^.UserID;
+  SrcPlayerPtr := FindUserFromList(id);
+  FSrcX := SrcPlayerPtr^.UserPosX;
+  FSrcY := SrcPlayerPtr^.UserPosY;
+  FDesX := DesPlayer^.UserPosX;
+  FDesY := DesPlayer^.UserPosY;
+  MovePtr := AllocMem(SizeOf(TOneMove));
+  MovePtr^.Next := nil;
+  MovePtr^.UserId := id;
+  MovePtr^.SrcX := FSrcX;
+  MovePtr^.SrcY := FSrcY;
+  MovePtr^.DesX := FDesX;
+  MovePtr^.DesY := FDesY;
+  MovePtr^.FaceTo := DesPlayer^.FaceTo;
+  AddMoveList(MovePtr);
+  UpdateUserToList(DesPlayer);
+end;
+
+//procedure TFrmMap.RoleMoveOneStepX;
+//var
+//  piceRoleW, bmpRoleH: Integer;
+//  PosX, PosY: Integer;
+//begin
+//  piceRoleW := FBmpRole.Width div 6;
+//  if FSrcX < FDesX then
+//  begin
+//    bmpRoleH := FBmpRole.Height;
+//    PosX := FSrcX * 40 + (TickForRole + 1) * 40 div 6;
+//    PosY := FSrcY * 40 - (bmpRoleH - 40);
+//    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
+//  end
+//  else
+//  begin
+//    bmpRoleH := FBmpRole.Height;
+//    PosX := FSrcX * 40 - (TickForRole + 1) * 40 div 6;
+//    PosY := FSrcY * 40 - (bmpRoleH - 40);
+//    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
+//  end;
+//end;
+
+//procedure TFrmMap.RoleMoveOneStepY;
+//var
+//  piceRoleW, bmpRoleH: Integer;
+//  PosX, PosY: Integer;
+//begin
+//  piceRoleW := FBmpRole.Width div 6;
+//  if FSrcY < FDesY then
+//  begin
+//    bmpRoleH := FBmpRole.Height;
+//    PosX := FSrcX * 40;
+//    PosY := FSrcY * 40 - (bmpRoleH - 40) + (TickForRole + 1) * 40 div 6;
+//    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
+//  end
+//  else
+//  begin
+//    bmpRoleH := FBmpRole.Height;
+//    PosX := FSrcX * 40;
+//    PosY := FSrcY * 40 - (bmpRoleH - 40) - (TickForRole + 1) * 40 div 6;
+//    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
+//  end;
+//end;
+
+procedure TFrmMap.RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY: Integer);
 var
   piceRoleW, bmpRoleH: Integer;
   PosX, PosY: Integer;
 begin
-  piceRoleW := FBmpRole.Width div 6;
-  if FSrcY < FDesY then
+  piceRoleW := Role.Width div 6;
+  if SrcY < DesY then
   begin
-    bmpRoleH := FBmpRole.Height;
-    PosX := FSrcX * 40;
-    PosY := FSrcY * 40 - (bmpRoleH - 40) + (TickForRole + 1) * 40 div 6;
-    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
+    bmpRoleH := Role.Height;
+    PosX := SrcX * 40;
+    PosY := SrcY * 40 - (bmpRoleH - 40) + (tick + 1) * 40 div 6;
+    Role.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
   end
   else
   begin
-    bmpRoleH := FBmpRole.Height;
-    PosX := FSrcX * 40;
-    PosY := FSrcY * 40 - (bmpRoleH - 40) - (TickForRole + 1) * 40 div 6;
-    FBmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * TickForRole, 0, piceRoleW * (TickForRole + 1), bmpRoleH));
+    bmpRoleH := Role.Height;
+    PosX := SrcX * 40;
+    PosY := SrcY * 40 - (bmpRoleH - 40) - (tick + 1) * 40 div 6;
+    Role.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
+  end;
+end;
+
+procedure TFrmMap.RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX: Integer);
+var
+  piceRoleW, bmpRoleH: Integer;
+  PosX, PosY: Integer;
+begin
+  piceRoleW := Role.Width div 6;
+  if SrcX < DesX then
+  begin
+    bmpRoleH := Role.Height;
+    PosX := SrcX * 40 + (tick + 1) * 40 div 6;
+    PosY := SrcY * 40 - (bmpRoleH - 40);
+    Role.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
+  end
+  else
+  begin
+    bmpRoleH := Role.Height;
+    PosX := SrcX * 40 - (tick + 1) * 40 div 6;
+    PosY := SrcY * 40 - (bmpRoleH - 40);
+    Role.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
   end;
 end;
 
@@ -415,6 +564,28 @@ begin
   PosX := Ptr^.ShoesPosX;
   PosY := Ptr^.ShoesPosY;
   FMap[PosX * 20 + PosY] := 5;
+end;
+
+function TFrmMap.UpdateUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功  1 失败，没有找到要更新的用户
+var
+  I: Integer;
+begin
+  if Ptr = nil then
+  begin
+    Result := -1;
+    Exit
+  end;
+  for I := 0 to Length(FUserList) - 1 do
+  begin
+    if FUserList[I].UserID = Ptr^.UserID then
+    begin
+      FUserList[I] := Ptr^;
+      Result := 0;
+      Exit
+    end;
+  end;
+  if I = Length(FUserList) - 1 then
+    Result := 1;
 end;
 
 procedure TFrmMap.processAni(Sender: TObject);
@@ -482,7 +653,7 @@ begin
         FSrcY := FUserListOld[indexRoleOld].UserPosY;
         FDesX := RoleNew.UserPosX;
         FDesY := RoleNew.UserPosY;
-        RoleMoveOneStepY;
+//        RoleMoveOneStepY;
         TickForRole := TickForRole + 1;
         if TickForRole = 6 then
         begin
@@ -497,7 +668,7 @@ begin
         FSrcY := FUserListOld[indexRoleOld].UserPosY;
         FDesX := RoleNew.UserPosX;
         FDesY := RoleNew.UserPosY;
-        RoleMoveOneStepX;
+//        RoleMoveOneStepX;
         TickForRole := TickForRole + 1;
         if TickForRole = 6 then
         begin
@@ -522,6 +693,35 @@ begin
     end;
   end;
   pntbx.Invalidate;
+end;
+
+procedure TFrmMap.processMove;
+var
+  Ptr: PTOneMove;
+  Role: TBitmap32;
+begin
+  Ptr := FMoveListBegin;
+  case Ptr^.FaceTo of
+    NORTH:
+      Role := bmpN;
+    SOUTH:
+      Role := bmpS;
+    WEST:
+      Role := bmpWW;
+    EAST:
+      Role := bmpE;
+  end;
+  if Ptr^.SrcX = Ptr^.DesX then
+    RoleMoveOneStepY(Role, Ptr^.SrcX, Ptr^.SrcY, Ptr^.DesY);
+  if Ptr^.SrcY = Ptr^.DesY then
+    RoleMoveOneStepX(Role, Ptr^.SrcY, Ptr^.SrcX, Ptr^.DesX);
+  Inc(tick);
+  if tick = 6 then
+  begin
+    FMoveListBegin := Ptr.Next;
+    tick := 0;
+  end;
+
 end;
 
 end.
