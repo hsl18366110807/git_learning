@@ -352,7 +352,7 @@ begin
       StrPCopy(FUserList.UserList[FGamers.Count - 1].UserName, UserName);
       FUserList.UserList[FGamers.Count - 1].UserPosX := AGameer.GamerPosX;
       FUserList.UserList[FGamers.Count - 1].UserPosY := AGameer.GamerPosY;
-      SendPlayerInfo(UserName);
+
     end
     else
     begin
@@ -392,10 +392,10 @@ begin
   end;
 
   AClient.SendData(@request, SizeOf(request));
-//  if Result = 0 then
-//  begin
-//    SendAllUser;
-//  end;
+  if Result = 0 then
+  begin
+    SendPlayerInfo(UserName);
+  end;
   ShoseTime := Now;
 end;
 
@@ -698,14 +698,15 @@ var
   UserName: AnsiString;
   i: integer;
 begin
-  for i := 0 to FGamers.Count - 1 do
-  begin
     UserName := FGamers.Strings[i];
     FMap.head.Flag := PACK_FLAG;
     FMap.head.Size := SizeOf(FMap);
     FMap.head.Command := S_MAP;
-    TGameClient(FGamers.Objects[i]).FClient.SendData(@Fmap, SizeOf(FMap));
-  end;
+    FUserList.head.Flag := PACK_FLAG;
+    FUserList.head.Size := SizeOf(FUserList);
+    FUserList.head.Command := S_USERLIST;
+    TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@Fmap, SizeOf(FMap));
+    TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@FUserList, SizeOf(FUserList));
   Result := 0;
 end;
 
