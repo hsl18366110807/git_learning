@@ -17,6 +17,8 @@ type
 
   TUserAccount = array[0..15] of AnsiChar;
 
+  TArrayOfBoomDestroy = array[0..3, 0..1] of Integer;
+
   PChatMsgHead = ^TChatMsgHead;
 
   TChatMsgHead = record
@@ -163,7 +165,19 @@ type
     BoomA: Integer;
     BoomS: Integer;
     BoomD: Integer;
-    DestoryPos: array[0..3, 0..1] of Integer;
+    DestoryPos: TArrayOfBoomDestroy;
+  end;
+
+  PTBoomFirePic = ^TBoomFirePic;
+  TBoomFirePic = record
+    Next:  PTBoomFirePic;
+    BombX: Integer;
+    BombY: Integer;
+    BoomW: Integer;
+    BoomA: Integer;
+    BoomS: Integer;
+    BoomD: Integer;
+    Tick: Integer;
   end;
 
   PTOneMove = ^TOneMove;
