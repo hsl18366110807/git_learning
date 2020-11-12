@@ -38,6 +38,7 @@ type
     procedure CheckBombTime; override;
     procedure SetShoesProp; override;
   private
+    procedure DeleteUserList(Pos: Integer);
     function FindGamer(AClient: TTCPClient): TGameClient;
     procedure InitGameMap;
     procedure SetGamerPos(AGamer: TGameClient);
@@ -45,6 +46,7 @@ type
     function LoginUser(RequestPtr: PLoginMsg; AClient: TTCPClient): Integer;
     function PlayerMove(RequestPtr: PPlayerMove; AClient: TTCPClient): Integer;
     function PlayerSetBomb(RequestPtr: PPlayerSetBoom; AClient: TTCPClient): Integer;
+    function PlayerUseProp(RequestPtr: PUseProp; AClient: TTCPClient): Integer;
     function BombEvent(BomePos: Integer): Integer;
     function SendMap: Integer;
     function SendPlayerInfo(PlayerName: AnsiString): Integer;
@@ -54,6 +56,9 @@ type
     function PlayerDead(UserName: AnsiString; PlayerPosX: Integer; PlayerPosY: Integer): Integer;
     function SendShoesPos(x, y: Integer): Integer;
     function SendPlaverLeave(PlayerName: AnsiString): Integer;
+    function FindKillerPlayerMelee(RequestPtr: PUseProp): Integer;
+    function FindKillerPlayerRanged(RequestPtr: PUseProp): Integer;
+    function SendRangedPropInfo(PropPosX: Integer; PropPosY: Integer; DestoryPos: DestoryTypes): Integer;
   end;
 
 var
@@ -89,8 +94,7 @@ begin
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
           FGamers.Delete(J);
-//          FClients.Delete(J);
-//          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
+          DeleteUserList(J);
         end;
       end;
     end
@@ -121,8 +125,7 @@ begin
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
           FGamers.Delete(J);
-//          FClients.Delete(J);
-//          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
+          DeleteUserList(J);
         end;
       end;
     end
@@ -154,8 +157,7 @@ begin
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
           FGamers.Delete(J);
-//          FClients.Delete(J);
-//          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
+          DeleteUserList(J);
         end;
       end;
     end
@@ -188,8 +190,7 @@ begin
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
           FGamers.Delete(J);
-//          FClients.Delete(J);
-//          ClientRemoved(TGameClient(FGamers.Objects[J]).FClient);
+          DeleteUserList(J);
         end;
       end;
     end
@@ -200,8 +201,8 @@ begin
     else if FMap.Map[BombX][BombY - I] = 2 then
     begin
       FMap.Map[BombX][BombY - I] := 0;
-      DestoryPos[0][0] := BombX;
-      DestoryPos[0][1] := BombY - I;
+      DestoryPos[3][0] := BombX;
+      DestoryPos[3][1] := BombY - I;
       Break;
     end;
     Inc(BoomW);
@@ -249,6 +250,7 @@ begin
       if Idx >= 0 then
       begin
         FGamers.Delete(Idx);
+        DeleteUserList(Idx);
       end
       else
       begin
@@ -266,6 +268,17 @@ begin
   FBombList := TStringList.Create;
   FDeadGamers := TStringList.Create;
   InitGameMap;
+end;
+
+procedure TTcpgameserver.DeleteUserList(Pos: Integer);
+var
+  i: Integer;
+begin
+  for i := Pos to Length(FUserList.UserList) - 1 do
+  begin
+    FUserList.UserList[Pos] := FUserList.UserList[Pos + 1];
+    FillMemory(@(FUserList.UserList[Pos + 1]), SizeOf(FUserList.UserList[Pos + 1]), 0);
+  end;
 end;
 
 destructor TTcpgameserver.Destroy;
@@ -298,6 +311,228 @@ begin
       Result := TGameClient(FGamers.Objects[i]);
       break;
     end;
+  end;
+end;
+
+function TTcpgameserver.FindKillerPlayerMelee(RequestPtr: PUseProp): Integer;
+var
+  UserName: AnsiString;
+  UserNumber: Integer;
+  PosX, PosY, I: Integer;
+begin
+  UserName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
+  UserNumber := FGamers.IndexOf(UserName);
+  if FUserList.UserList[UserNumber].FaceTo = NORTH then
+  begin
+    PosY := TGameClient(FGamers.Objects[UserNumber]).GamerPosY + 1;
+    PosX := TGameClient(FGamers.Objects[UserNumber]).GamerPosX;
+    if FMap.Map[PosX][PosY] = 3 then
+    begin
+      for I := 0 to FGamers.Count - 1 do
+      begin
+        if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosY = PosY) then
+        begin
+          PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY);
+          Log.Info(Format('Íæ¼Ò %s ±»¿³ËÀ', [TGameClient(FGamers.Objects[I]).FUsername]));
+          FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
+          FGamers.Delete(I);
+          DeleteUserList(I);
+        end;
+      end;
+    end;
+  end
+  else if FUserList.UserList[UserNumber].FaceTo = SOUTH then
+  begin
+    PosY := TGameClient(FGamers.Objects[UserNumber]).GamerPosY - 1;
+    PosX := TGameClient(FGamers.Objects[UserNumber]).GamerPosX;
+    if FMap.Map[PosX][PosY] = 3 then
+    begin
+      for I := 0 to FGamers.Count - 1 do
+      begin
+        if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosY = PosY) then
+        begin
+          PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY);
+          Log.Info(Format('Íæ¼Ò %s ±»¿³ËÀ', [TGameClient(FGamers.Objects[I]).FUsername]));
+          FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
+          FGamers.Delete(I);
+          DeleteUserList(I);
+        end;
+      end;
+    end;
+  end
+  else if FUserList.UserList[UserNumber].FaceTo = WEST then
+  begin
+    PosY := TGameClient(FGamers.Objects[UserNumber]).GamerPosY;
+    PosX := TGameClient(FGamers.Objects[UserNumber]).GamerPosX - 1;
+    if FMap.Map[PosX][PosY] = 3 then
+    begin
+      for I := 0 to FGamers.Count - 1 do
+      begin
+        if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosY = PosY) then
+        begin
+          PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY);
+          Log.Info(Format('Íæ¼Ò %s ±»¿³ËÀ', [TGameClient(FGamers.Objects[I]).FUsername]));
+          FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
+          FGamers.Delete(I);
+          DeleteUserList(I);
+        end;
+      end;
+    end;
+  end
+  else if FUserList.UserList[UserNumber].FaceTo = EAST then
+  begin
+    PosY := TGameClient(FGamers.Objects[UserNumber]).GamerPosY;
+    PosX := TGameClient(FGamers.Objects[UserNumber]).GamerPosX + 1;
+    if FMap.Map[PosX][PosY] = 3 then
+    begin
+      for I := 0 to FGamers.Count - 1 do
+      begin
+        if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosY = PosY) then
+        begin
+          PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY);
+          Log.Info(Format('Íæ¼Ò %s ±»¿³ËÀ', [TGameClient(FGamers.Objects[I]).FUsername]));
+          FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
+          FGamers.Delete(I);
+          DeleteUserList(I);
+        end;
+      end;
+    end;
+  end;
+end;
+
+function TTcpgameserver.FindKillerPlayerRanged(RequestPtr: PUseProp): Integer;
+var
+  UserName: AnsiString;
+  UserNumber: Integer;
+  PosX, PosY, PropPosX, PropPosY, I: Integer;
+begin
+  UserName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
+  UserNumber := FGamers.IndexOf(UserName);
+  PropPosX := TGameClient(FGamers.Objects[UserNumber]).GamerPosX;
+  PropPosY := TGameClient(FGamers.Objects[UserNumber]).GamerPosY;
+  if FUserList.UserList[UserNumber].FaceTo = NORTH then
+  begin
+    for I := PropPosY - 1 downto 0 do
+    begin
+      if FMap.Map[PropPosX][I] = 0 then
+      begin
+        Dec(PropPosY);
+      end
+      else if FMap.Map[PropPosX][I] = 1 then   //Åö×²Ç½±Ú
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Block);
+        Exit;
+      end
+      else if FMap.Map[PropPosX][I] = 2 then   //Åö×²Ä¾Ïä
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Box);
+        Exit;
+      end
+      else if FMap.Map[PropPosX][I] = 3 then   //Åö×²ÈËÎï
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Player);
+        Exit;
+      end
+      else if FMap.Map[PropPosX][I] = 4 then    //Åö×²Õ¨µ¯
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Bomb);
+        Exit;
+      end;
+    end;
+    SendRangedPropInfo(PropPosX, PropPosY, NoDestory);
+  end
+  else if FUserList.UserList[UserNumber].FaceTo = SOUTH then
+  begin
+    for I := PropPosY + 1 to 19 do
+    begin
+      if FMap.Map[PropPosX][I] = 0 then
+      begin
+        Inc(PropPosY);
+      end
+      else if FMap.Map[PropPosX][I] = 1 then   //Åö×²Ç½±Ú
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Block);
+        Exit;
+      end
+      else if FMap.Map[PropPosX][I] = 2 then   //Åö×²Ä¾Ïä
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Box);
+        Exit;
+      end
+      else if FMap.Map[PropPosX][I] = 3 then   //Åö×²ÈËÎï
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Player);
+        Exit;
+      end
+      else if FMap.Map[PropPosX][I] = 4 then    //Åö×²Õ¨µ¯
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Bomb);
+        Exit;
+      end;
+    end;
+    SendRangedPropInfo(PropPosX, PropPosY, NoDestory);
+  end
+  else if FUserList.UserList[UserNumber].FaceTo = WEST then
+  begin
+    for I := PropPosX - 1 downto 0 do
+    begin
+      if FMap.Map[I][PropPosY] = 0 then
+      begin
+        Dec(PropPosX);
+      end
+      else if FMap.Map[I][PropPosY] = 1 then   //Åö×²Ç½±Ú
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Block);
+        Exit;
+      end
+      else if FMap.Map[I][PropPosY] = 2 then   //Åö×²Ä¾Ïä
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Box);
+        Exit;
+      end
+      else if FMap.Map[I][PropPosY] = 3 then   //Åö×²ÈËÎï
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Player);
+        Exit;
+      end
+      else if FMap.Map[I][PropPosY] = 4 then    //Åö×²Õ¨µ¯
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Bomb);
+        Exit;
+      end;
+    end;
+    SendRangedPropInfo(PropPosX, PropPosY, NoDestory);
+  end
+  else if FUserList.UserList[UserNumber].FaceTo = EAST then
+  begin
+    for I := PropPosX + 1 to 19 do
+    begin
+      if FMap.Map[I][PropPosY] = 0 then
+      begin
+        Inc(PropPosX);
+      end
+      else if FMap.Map[I][PropPosY] = 1 then   //Åö×²Ç½±Ú
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Block);
+        Exit;
+      end
+      else if FMap.Map[I][PropPosY] = 2 then   //Åö×²Ä¾Ïä
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Box);
+        Exit;
+      end
+      else if FMap.Map[I][PropPosY] = 3 then   //Åö×²ÈËÎï
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Player);
+        Exit;
+      end
+      else if FMap.Map[I][PropPosY] = 4 then    //Åö×²Õ¨µ¯
+      begin
+        SendRangedPropInfo(PropPosX, PropPosY, Bomb);
+        Exit;
+      end;
+    end;
+    SendRangedPropInfo(PropPosX, PropPosY, NoDestory);
   end;
 end;
 
@@ -593,6 +828,24 @@ begin
   end;
 end;
 
+function TTcpgameserver.PlayerUseProp(RequestPtr: PUseProp; AClient: TTCPClient): Integer;
+begin
+  case RequestPtr.PropType of
+    NoProp:
+      begin
+        Exit;
+      end;
+    MeleeWeapon:
+      begin
+        FindKillerPlayerMelee(RequestPtr);
+      end;
+    RangedWeapon:
+      begin
+        FindKillerPlayerRanged(RequestPtr);
+      end
+  end;
+end;
+
 procedure TTcpgameserver.ProcessClientIO(AClient: TTCPClient);
 var
   BufPtr: PByte;
@@ -651,6 +904,10 @@ begin
     C_BOOM:
       begin
         PlayerSetBomb(PPlayerSetBoom(RequestPtr), AClient);
+      end;
+    C_USEPROP:
+      begin
+        PlayerUseProp(PUseProp(RequestPtr), AClient);
       end;
 
   end;
@@ -775,6 +1032,23 @@ begin
     FPlayerInfo.head.Size := SizeOf(FPlayerInfo);
     FPlayerInfo.head.Command := S_PLAYERMOVE;
     TGameClient(FGamers.Objects[I]).FClient.SendData(@FPlayerInfo, SizeOf(FPlayerInfo));
+  end;
+end;
+
+function TTcpgameserver.SendRangedPropInfo(PropPosX, PropPosY: Integer; DestoryPos: DestoryTypes): Integer;
+var
+  FRangedPropInfo: TRangedPropInfo;
+  I: Integer;
+begin
+  FRangedPropInfo.head.Flag := PACK_FLAG;
+  FRangedPropInfo.head.Size := SizeOf(FRangedPropInfo);
+  FRangedPropInfo.head.Command := S_RANGEDPROP;
+  FRangedPropInfo.DestoryType := DestoryPos;
+  FRangedPropInfo.DestoryPosX := PropPosX;
+  FRangedPropInfo.DestoryPosY := PropPosY;
+  for I := 0 to FGamers.Count - 1 do
+  begin
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@FRangedPropInfo, SizeOf(FRangedPropInfo));
   end;
 end;
 

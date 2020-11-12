@@ -17,6 +17,8 @@ type
 
   FaceOrientate = (NORTH, SOUTH, WEST, EAST);
 
+  DestoryTypes = (NoDestory, Block, Box, Player, Bomb);
+
   PGameMsgHead = ^TGameMsgHead;
 
   TGameMsgHead = record
@@ -42,7 +44,16 @@ type
     ErrorInfo: array[0..31] of AnsiChar;
   end;
 
+  TRangedPropInfo = record  //远程武器摧毁信息
+    head: TGameMsgHead;
+    DestoryType: DestoryTypes;
+    DestoryPosX: Integer;
+    DestoryPosY: Integer;
+  end;
+
   MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, SHOES); //可移动，障碍物，木箱，有角色，炸弹，鞋子
+
+  PropTypes = (NoProp, MeleeWeapon, RangedWeapon); //无武器，近身武器，远程武器
 
   TMap = record
     head: TGameMsgHead;
@@ -114,6 +125,15 @@ type
     UserName: array[0..15] of AnsiChar;
   end;
 
+  PUseProp = ^TUseProp;
+
+  TUseProp = record   //玩家使用道具
+    head: TGameMsgHead;
+    PropType: PropTypes;
+    UserName: array[0..15] of AnsiChar;
+    FaceTo: FaceOrientate;
+  end;
+
   TBomb = class
   public
     BombID: Integer;
@@ -145,6 +165,9 @@ const
   S_USERLEAVE = 15;
   S_PLAYERLEAVE = 16;
   S_SETSHOES = 17;
+  C_USEPROP = 18;
+  S_RANGEDPROP = 19;
+
 implementation
 
 { TBOMB }
