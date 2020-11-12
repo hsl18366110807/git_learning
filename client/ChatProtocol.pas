@@ -178,6 +178,15 @@ type
     FaceTo: FaceOrientate;
   end;
 
+  PTBoomPic = ^TBoomPic;
+  TBoomPic = record
+    Next: PTBoomPic;
+    PosX: Integer;
+    PosY: Integer;
+    Tick : Integer;
+  end;
+
+
 type
   PChatMsgNode = ^TChatMsgNode;
 
