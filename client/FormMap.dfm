@@ -31,8 +31,8 @@ object FrmMap: TFrmMap
     TabOrder = 0
   end
   object pnl1: TPanel
-    Left = 8
-    Top = 8
+    Left = 672
+    Top = 0
     Width = 129
     Height = 97
     TabOrder = 1

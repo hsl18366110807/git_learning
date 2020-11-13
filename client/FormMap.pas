@@ -550,7 +550,7 @@ var
   BmpRole: TBitmap32;
   tick: Integer;
 begin
-  for I := 0 to Length(FUserList) do
+  for I := 0 to Length(FUserList) - 1 do
   begin
     if FUserList[I].UserID <> 0 then
     begin
@@ -585,7 +585,6 @@ begin
         PosX := FUserList[I].UserPosX * 40;
         PosY := FUserList[I].UserPosY * 40 - (FBmpRole.Height - 40);
         BmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
-        FUserListOld := FUserListNew;
       end;
     end;
   end;
@@ -1078,10 +1077,10 @@ begin
     TickForDead := ptr^.Tick;
     x := ptr^.PlayerPosX * 40;
     y := ptr^.PlayerPosY * 40;
-    bmpPlayerDead.DrawTo(pntbx.Buffer, x, y);
+    bmpPlayerDead.DrawTo(pntbx.Buffer, x, y - 10);
     Inc(ptr^.Tick);
     PtrNext := Ptr^.Next;
-    if Ptr^.tick = 6 then
+    if Ptr^.tick = 60 then
       DeleteDeadPlayerListBegin;
     Ptr := PtrNext;
   end;
