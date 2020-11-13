@@ -93,7 +93,7 @@ begin
           Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
-          FGamers.Delete(J);
+//          FGamers.Delete(J);
           DeleteUserList(J);
         end;
       end;
@@ -124,7 +124,7 @@ begin
           Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
-          FGamers.Delete(J);
+//          FGamers.Delete(J);
           DeleteUserList(J);
         end;
       end;
@@ -156,7 +156,7 @@ begin
           Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
-          FGamers.Delete(J);
+//          FGamers.Delete(J);
           DeleteUserList(J);
         end;
       end;
@@ -189,7 +189,7 @@ begin
           Log.Info(Format('Íæ¼Ò: %s ËÀÍö', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
-          FGamers.Delete(J);
+//          FGamers.Delete(J);
           DeleteUserList(J);
         end;
       end;
