@@ -38,12 +38,17 @@ type
     procedure AddMoveList(MovePtr: PTOneMove);
     procedure AddBoomList(BoomPtr: PTBoomPic);
     procedure AddBoomFireList(FirePtr: PTBoomFirePic);
+    procedure AddDeadPlayer(PlayerPtr: PTPlayerDead);
     procedure DeleteBoomFireListBegin;
     procedure processMove;
+    procedure processDeadPlayer;
     procedure MoveCheckMap(X, Y: Integer);
     procedure DrawBoom;
     procedure DrawBoomFire;
     procedure CheckBoomRange(Ptr: PTBombBoom);
+    procedure SetPlayerDead(Ptr: PTPlayerDeadEvent);
+    procedure DeleteFromUserList(Ptr: PTPlayerDeadEvent);
+    procedure DeleteDeadPlayerListBegin;
     function FindUserFromList(Id: Integer): PTPlayerInfo;
     function AddUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功 1 用户列表已满
     function UpdateUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功  1 失败，没有找到要更新的用户
@@ -51,6 +56,7 @@ type
     function IsMoveListEmpty: Boolean;
     function IsBoomListEmpty: Boolean;
     function IsBoomFireListEmpty: Boolean;
+    function IsDeadPlayerListEmpty: Boolean;
 //    procedure tmr1Timer(Sender: TObject);
   private
     FBmpRole: TBitmap32;
@@ -79,6 +85,8 @@ type
     FBoomListEnd: PTBoomPic;
     FBoomFireListBegin: PTBoomFirePic;
     FBoomFireListEnd: PTBoomFirePic;
+    FPlayerDeadListBegin: PTPlayerDead;
+    FplayerDeadListEnd: PTPlayerDead;
     { Private declarations }
   public
     { Public declarations }
@@ -99,7 +107,7 @@ var
   bmpE, bmpWW, bmpS, bmpN: TBitmap32;
   tick: Integer;
   bmpFireE, bmpFireW, bmpFireN, bmpFireS: TBitmap32;
-  bmpFireCenter, bmpFireEEnd, bmpFireWEnd, bmpFireNEnd, bmpFireSEnd: TBitmap32;
+  bmpFireCenter, bmpFireEEnd, bmpFireWEnd, bmpFireNEnd, bmpFireSEnd, bmpPlayerDead: TBitmap32;
 
 procedure TFrmMap.AddBoomList(BoomPtr: PTBoomPic);
 begin
@@ -114,6 +122,20 @@ begin
     FBoomListEnd := FBoomListEnd.Next;
   end;
 
+end;
+
+procedure TFrmMap.AddDeadPlayer(PlayerPtr: PTPlayerDead);
+begin
+  if FPlayerDeadListBegin = nil then
+  begin
+    FPlayerDeadListBegin := PlayerPtr;
+    FplayerDeadListEnd := PlayerPtr;
+  end
+  else
+  begin
+    FplayerDeadListEnd.Next := PlayerPtr;
+    FplayerDeadListEnd := FplayerDeadListEnd.Next;
+  end;
 end;
 
 procedure TFrmMap.AddBoomFireList(FirePtr: PTBoomFirePic);
@@ -193,6 +215,30 @@ begin
   FreeMem(Ptr);
 end;
 
+procedure TFrmMap.DeleteDeadPlayerListBegin;
+var
+  Ptr: PTPlayerDead;
+begin
+  Ptr := FPlayerDeadListBegin;
+  FPlayerDeadListBegin := FPlayerDeadListBegin^.Next;
+  FreeMem(Ptr);
+end;
+
+procedure TFrmMap.DeleteFromUserList(Ptr: PTPlayerDeadEvent);
+var
+  I: Integer;
+begin
+//
+  for I := 0 to Length(FUserList) do
+  begin
+    if FUserList[I].UserName = Ptr^.UserName then
+    begin
+      FillMemory(@FUserList[I], SizeOf(TPlayerInfo), 0);
+      Exit;
+    end;
+  end;
+end;
+
 procedure TFrmMap.doWork(Sender: TObject);
 var
   MsgPtr: PChatMsg;
@@ -204,6 +250,7 @@ var
   ShoesPtr: PTShoesInfo;
   BombPtr: PTBombSeted;
   BombBoomPtr: PTBombBoom;
+  PlayerDeadPtr: PTPlayerDeadEvent;
 begin
   ChatMgr.ReadResponse(FMsgs);
   while not FMsgs.IsEmpty do
@@ -250,6 +297,11 @@ begin
             begin
               BombBoomPtr := PTBombBoom(MsgPtr);
               SetBombBoom(BombBoomPtr);
+            end;
+          S_PLAYERDEAD:
+            begin
+              PlayerDeadPtr := PTPlayerDeadEvent(MsgPtr);
+              SetPlayerDead(PlayerDeadPtr);
             end;
         end;
       finally
@@ -539,6 +591,8 @@ begin
   end;
   if not IsMoveListEmpty then
     processMove;
+  if not IsDeadPlayerListEmpty then
+    processDeadPlayer;
 end;
 
 function TFrmMap.FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
@@ -597,6 +651,7 @@ begin
   bmpFireNEnd := TBitmap32.Create;
   bmpFireSEnd := TBitmap32.Create;
   bmpFireCenter := TBitmap32.Create;
+  bmpPlayerDead := TBitmap32.Create;
   FBmpRole.DrawMode := dmTransparent;
   bmpE.DrawMode := dmBlend;
   bmpN.DrawMode := dmBlend;
@@ -604,6 +659,7 @@ begin
   bmpWW.DrawMode := dmBlend;
   FBmpShoe.DrawMode := dmBlend;
   FBmpBoom.DrawMode := dmBlend;
+  bmpPlayerDead.DrawMode := dmBlend;
   bmpFireCenter.DrawMode := dmBlend;
   bmpFireW.DrawMode := dmBlend;
   bmpFireN.DrawMode := dmBlend;
@@ -629,6 +685,7 @@ begin
   LoadBitmap32FromPNG(bmpFireSEnd, 'img/bbf_south_end.png');
   LoadBitmap32FromPNG(bmpFireE, 'img/bbf_east.png');
   LoadBitmap32FromPNG(bmpFireEEnd, 'img/bbf_east_end.png');
+  LoadBitmap32FromPNG(bmpPlayerDead, 'img/grave.png');
   bmpRoleW := FBmpRole.Width;
   bmpRoleH := FBmpRole.Height;
   piceRoleW := bmpRoleW div 6;
@@ -735,6 +792,13 @@ function TFrmMap.IsBoomListEmpty: Boolean;
 begin
   Result := False;
   if FBoomListBegin = nil then
+    Result := True;
+end;
+
+function TFrmMap.IsDeadPlayerListEmpty: Boolean;
+begin
+  Result := False;
+  if FPlayerDeadListBegin = nil then
     Result := True;
 end;
 
@@ -845,6 +909,23 @@ begin
   AddBoomFireList(BoomFirePtr);
 // 被炸到的箱子消失
   CheckBoomRange(Ptr);
+end;
+
+procedure TFrmMap.SetPlayerDead(Ptr: PTPlayerDeadEvent);
+var
+  PlayerDeadPtr: PTPlayerDead;
+begin
+// 列表移除玩家
+  DeleteFromUserList(Ptr);
+  PlayerDeadPtr := AllocMem(SizeOf(TPlayerDead));
+  PlayerDeadPtr^.Next := nil;
+  PlayerDeadPtr^.PlayerPosX := Ptr^.PlayerPosX;
+  PlayerDeadPtr^.PlayerPosY := Ptr^.PlayerPosY;
+//  PlayerDeadPtr^.PlayerName := ptr^.UserName;
+  CopyMemory(@PlayerDeadPtr^.PlayerName[0], @Ptr^.UserName, Length(Ptr^.UserName));
+  PlayerDeadPtr^.tick := 0;
+  AddDeadPlayer(PlayerDeadPtr);
+//播放死亡动画
 end;
 
 procedure TFrmMap.SetShoes(Ptr: PTShoesInfo);
@@ -982,6 +1063,29 @@ begin
     end;
   end;
   pntbx.Invalidate;
+end;
+
+procedure TFrmMap.processDeadPlayer;
+var
+  Ptr: PTPlayerDead;
+  PtrNext: PTPlayerDead;
+  TickForDead: Integer;
+  x, y: Integer;
+begin
+  Ptr := FPlayerDeadListBegin;
+  while Ptr <> nil do
+  begin
+    TickForDead := ptr^.Tick;
+    x := ptr^.PlayerPosX * 40;
+    y := ptr^.PlayerPosY * 40;
+    bmpPlayerDead.DrawTo(pntbx.Buffer, x, y);
+    Inc(ptr^.Tick);
+    PtrNext := Ptr^.Next;
+    if Ptr^.tick = 6 then
+      DeleteDeadPlayerListBegin;
+    Ptr := PtrNext;
+  end;
+
 end;
 
 procedure TFrmMap.processMove;

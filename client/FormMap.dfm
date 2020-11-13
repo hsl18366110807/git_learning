@@ -29,8 +29,6 @@ object FrmMap: TFrmMap
     Height = 800
     Align = alClient
     TabOrder = 0
-    ExplicitLeft = -8
-    ExplicitTop = -32
   end
   object pnl1: TPanel
     Left = 8

@@ -142,14 +142,15 @@ type
 
   PTShoesInfo = ^TShoesInfo;
 
-   TShoesInfo = record      //鞋子道具信息
+  TShoesInfo = record      //鞋子道具信息
     head: TChatMsgHead;
     ShoesPosX: Integer;
     ShoesPosY: Integer;
   end;
 
-   PTBombSeted = ^TBombSeted;
-   TBombSeted = record   //服务器放置好炸弹，将炸弹坐标发给客户端
+  PTBombSeted = ^TBombSeted;
+
+  TBombSeted = record   //服务器放置好炸弹，将炸弹坐标发给客户端
     head: TChatMsgHead;
     BombPosX: Integer;
     BombPosY: Integer;
@@ -169,8 +170,9 @@ type
   end;
 
   PTBoomFirePic = ^TBoomFirePic;
+
   TBoomFirePic = record
-    Next:  PTBoomFirePic;
+    Next: PTBoomFirePic;
     BombX: Integer;
     BombY: Integer;
     BoomW: Integer;
@@ -193,13 +195,33 @@ type
   end;
 
   PTBoomPic = ^TBoomPic;
+
   TBoomPic = record
     Next: PTBoomPic;
     PosX: Integer;
     PosY: Integer;
-    Tick : Integer;
+    Tick: Integer;
   end;
 
+  PTPlayerDeadEvent = ^TPlayerDeadEvent;
+
+  TPlayerDeadEvent = record   //被炸死玩家信息
+    head: TChatMsgHead;
+    UserName: array[0..15] of AnsiChar;
+    PlayerPosX: Integer;
+    PlayerPosY: Integer;
+  end;
+
+  PTPlayerDead = ^TPlayerDead;
+
+  TPlayerDead = record
+    Next: PTPlayerDead;
+    PlayerPosX: Integer;
+    PlayerPosY: Integer;
+    PlayerId: Integer;
+    PlayerName: TUserAccount;
+    Tick: Integer;
+  end;
 
 type
   PChatMsgNode = ^TChatMsgNode;
