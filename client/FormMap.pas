@@ -1077,7 +1077,7 @@ begin
     TickForDead := ptr^.Tick;
     x := ptr^.PlayerPosX * 40;
     y := ptr^.PlayerPosY * 40;
-    bmpPlayerDead.DrawTo(pntbx.Buffer, x, y - 10);
+    bmpPlayerDead.DrawTo(pntbx.Buffer, x + 10, y - 10);
     Inc(ptr^.Tick);
     PtrNext := Ptr^.Next;
     if Ptr^.tick = 60 then
