@@ -71,13 +71,33 @@ implementation
 
 function TTcpgameserver.BombEvent(BomePos: Integer): Integer;
 var
-  BombX, BombY, PlayerX, PlayerY, I, J: Integer;
+  BombX, BombY, PlayerX, PlayerY, I, J, Z: Integer;
   BoomW, BoomA, BoomD, BoomS: Integer;
   DestoryPos: array[0..3, 0..1] of Integer;
 begin
   fillchar(DestoryPos, sizeof(DestoryPos), -1);
   BombX := TBomb(FBombList.Objects[BomePos]).FBombPosX;
   BombY := TBomb(FBombList.Objects[BomePos]).FBombPosY;
+
+  for Z := 0 to Length(FUserList.UserList) - 1 do
+  begin
+    if (BombX = FUserList.UserList[Z].UserPosX) and (BombY = FUserList.UserList[Z].UserPosY) then
+    begin
+      PlayerX := BombX + I;
+      PlayerY := BombY;
+      for J := FGamers.Count - 1 downto 0 do
+      begin
+        if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
+        begin
+          Log.Info(Format('玩家: %s 死亡', [TGameClient(FGamers.Objects[J]).FUsername]));
+          PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
+          FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+//          FGamers.Delete(J);
+          DeleteUserList(J);
+        end;
+      end;
+    end;
+  end;
 
   for I := 0 to BoomScope - 1 do   //判定是否爆破到人
   begin
@@ -583,7 +603,7 @@ begin
       SetGamerPos(AGameer);
       FGamers.AddObject(UserName, AGameer);
       Result := 0;
-      FUserList.UserList[FGamers.Count - 1].UserID := FGamers.Count - 1;
+      FUserList.UserList[FGamers.Count - 1].UserID := FGamers.Count;
       StrPCopy(FUserList.UserList[FGamers.Count - 1].UserName, UserName);
       FUserList.UserList[FGamers.Count - 1].UserPosX := AGameer.GamerPosX;
       FUserList.UserList[FGamers.Count - 1].UserPosY := AGameer.GamerPosY;
@@ -642,6 +662,7 @@ begin
   PlayerDeadEvent.head.Flag := PACK_FLAG;
   PlayerDeadEvent.head.Size := SizeOf(PlayerDeadEvent);
   PlayerDeadEvent.head.Command := S_PlayerDead;
+  FillMemory(@PlayerDeadEvent.UserName, Length(PlayerDeadEvent.UserName), 0);
   Move(Pointer(UserName)^, PlayerDeadEvent.UserName, Length(UserName));
   PlayerDeadEvent.PlayerPosX := PlayerPosX;
   PlayerDeadEvent.PlayerPosY := PlayerPosY;
