@@ -24,9 +24,9 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     function FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
 //    procedure RoleMoveOneStepY;
-    procedure RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY: Integer);
+    procedure RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY, tick: Integer);
 //    procedure RoleMoveOneStepX;
-    procedure RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX: Integer);
+    procedure RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX, tick: Integer);
     procedure DrawMap;
     procedure DrawPlayer;
     procedure InitPlayerList;
@@ -49,6 +49,7 @@ type
     procedure SetPlayerDead(Ptr: PTPlayerDeadEvent);
     procedure DeleteFromUserList(Ptr: PTPlayerDeadEvent);
     procedure DeleteDeadPlayerListBegin;
+    procedure DeleteMoveListBegin;
     function FindUserFromList(Id: Integer): PTPlayerInfo;
     function AddUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功 1 用户列表已满
     function UpdateUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功  1 失败，没有找到要更新的用户
@@ -237,6 +238,14 @@ begin
       Exit;
     end;
   end;
+end;
+
+procedure TFrmMap.DeleteMoveListBegin;
+var Ptr: PTOneMove;
+begin
+  Ptr := FMoveListBegin;
+  FMoveListBegin := FMoveListBegin.Next;
+  FreeMem(Ptr);
 end;
 
 procedure TFrmMap.doWork(Sender: TObject);
@@ -585,6 +594,8 @@ begin
         PosX := FUserList[I].UserPosX * 40;
         PosY := FUserList[I].UserPosY * 40 - (FBmpRole.Height - 40);
         BmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+        if FMap[PosX * 20 + PosY] <> 1 then
+
       end;
     end;
   end;
@@ -820,11 +831,11 @@ begin
   MovePtr^.Next := nil;
   MovePtr^.UserId := id;
   MovePtr^.SrcX := SrcPlayerPtr^.UserPosX;
-  ;
   MovePtr^.SrcY := SrcPlayerPtr^.UserPosY;
   MovePtr^.DesX := DesPlayer^.UserPosX;
   MovePtr^.DesY := DesPlayer^.UserPosY;
   MovePtr^.FaceTo := DesPlayer^.FaceTo;
+  MovePtr^.Tick := 0;
   AddMoveList(MovePtr);
   UpdateUserToList(DesPlayer);
 end;
@@ -842,7 +853,7 @@ begin
   AddBoomList(BoomPtr);
 end;
 
-procedure TFrmMap.RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY: Integer);
+procedure TFrmMap.RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY, tick: Integer);
 var
   piceRoleW, bmpRoleH: Integer;
   PosX, PosY: Integer;
@@ -864,7 +875,7 @@ begin
   end;
 end;
 
-procedure TFrmMap.RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX: Integer);
+procedure TFrmMap.RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX, tick: Integer);
 var
   piceRoleW, bmpRoleH: Integer;
   PosX, PosY: Integer;
@@ -1074,11 +1085,11 @@ begin
   Ptr := FPlayerDeadListBegin;
   while Ptr <> nil do
   begin
-    TickForDead := ptr^.Tick;
-    x := ptr^.PlayerPosX * 40;
-    y := ptr^.PlayerPosY * 40;
-    bmpPlayerDead.DrawTo(pntbx.Buffer, x + 10, y - 10);
-    Inc(ptr^.Tick);
+    TickForDead := Ptr^.tick;
+    x := Ptr^.PlayerPosX * 40;
+    y := Ptr^.PlayerPosY * 40;
+    bmpPlayerDead.DrawTo(pntbx.Buffer, x + 5, y - 10);
+    Inc(Ptr^.tick);
     PtrNext := Ptr^.Next;
     if Ptr^.tick = 60 then
       DeleteDeadPlayerListBegin;
@@ -1091,29 +1102,35 @@ procedure TFrmMap.processMove;
 var
   Ptr: PTOneMove;
   Role: TBitmap32;
+  PtrNext: PTOneMove;
 begin
   Ptr := FMoveListBegin;
-  case Ptr^.FaceTo of
-    NORTH:
-      Role := bmpN;
-    SOUTH:
-      Role := bmpS;
-    WEST:
-      Role := bmpWW;
-    EAST:
-      Role := bmpE;
-  end;
-  if Ptr^.SrcX = Ptr^.DesX then
-    RoleMoveOneStepY(Role, Ptr^.SrcX, Ptr^.SrcY, Ptr^.DesY);
-  if Ptr^.SrcY = Ptr^.DesY then
-    RoleMoveOneStepX(Role, Ptr^.SrcY, Ptr^.SrcX, Ptr^.DesX);
-  Inc(tick);
-  if tick = 6 then
+  while Ptr <> nil do
   begin
-    FMoveListBegin := Ptr.Next;
-    FreeMem(Ptr);
-    tick := 0;
-    MoveCheckMap(Ptr^.DesX, Ptr^.DesY);
+    case Ptr^.FaceTo of
+      NORTH:
+        Role := bmpN;
+      SOUTH:
+        Role := bmpS;
+      WEST:
+        Role := bmpWW;
+      EAST:
+        Role := bmpE;
+    end;
+    if Ptr^.SrcX = Ptr^.DesX then
+      RoleMoveOneStepY(Role, Ptr^.SrcX, Ptr^.SrcY, Ptr^.DesY, Ptr^.Tick);
+    if Ptr^.SrcY = Ptr^.DesY then
+      RoleMoveOneStepX(Role, Ptr^.SrcY, Ptr^.SrcX, Ptr^.DesX, Ptr^.Tick);
+    Inc(Ptr^.Tick);
+    PtrNext := Ptr^.Next;
+    if Ptr^.Tick = 6 then
+    begin
+      MoveCheckMap(Ptr^.DesX, Ptr^.DesY);
+//      FMoveListBegin := Ptr.Next;
+//      FreeMem(Ptr);
+      DeleteMoveListBegin;
+    end;
+    Ptr := PtrNext;
   end;
 end;
 

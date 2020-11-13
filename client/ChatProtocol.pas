@@ -192,6 +192,7 @@ type
     DesX: Integer;
     DesY: Integer;
     FaceTo: FaceOrientate;
+    Tick: Integer;
   end;
 
   PTBoomPic = ^TBoomPic;
