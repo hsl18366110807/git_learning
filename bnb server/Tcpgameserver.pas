@@ -448,7 +448,7 @@ begin
   timer := TTimer.Create(timer);
   timer.OnTimer := ControlBots;
   timer.Interval := 100;
-  timer.Enabled := True;
+  timer.Enabled := False;
 end;
 
 procedure TTcpgameserver.DeleteUserList(Pos: Integer);
@@ -1211,6 +1211,7 @@ begin
   FUserList.head.Command := S_USERLIST;
   TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@Fmap, SizeOf(FMap));
   TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@FUserList, SizeOf(FUserList));
+  timer.Enabled := True;
   Result := 0;
 end;
 
