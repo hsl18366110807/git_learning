@@ -24,11 +24,12 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     function FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
 //    procedure RoleMoveOneStepY;
-    procedure RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY: Integer);
+    procedure RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY, tick: Integer);
 //    procedure RoleMoveOneStepX;
-    procedure RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX: Integer);
+    procedure RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX, tick: Integer);
     procedure DrawMap;
     procedure DrawPlayer;
+    procedure DrawOnePlayer(PosX, PosY: Integer);
     procedure InitPlayerList;
     procedure SetShoes(Ptr: PTShoesInfo);
     procedure SetBomb(Ptr: PTBombSeted);
@@ -38,19 +39,27 @@ type
     procedure AddMoveList(MovePtr: PTOneMove);
     procedure AddBoomList(BoomPtr: PTBoomPic);
     procedure AddBoomFireList(FirePtr: PTBoomFirePic);
+    procedure AddDeadPlayer(PlayerPtr: PTPlayerDead);
     procedure DeleteBoomFireListBegin;
     procedure processMove;
+    procedure processDeadPlayer;
     procedure MoveCheckMap(X, Y: Integer);
     procedure DrawBoom;
     procedure DrawBoomFire;
     procedure CheckBoomRange(Ptr: PTBombBoom);
+    procedure SetPlayerDead(Ptr: PTPlayerDeadEvent);
+    procedure DeleteFromUserList(Ptr: PTPlayerDeadEvent);
+    procedure DeleteDeadPlayerListBegin;
+    procedure DeleteMoveListBegin;
     function FindUserFromList(Id: Integer): PTPlayerInfo;
     function AddUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功 1 用户列表已满
     function UpdateUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功  1 失败，没有找到要更新的用户
+    function FindUseInfoFromList(PosX, PosY: Integer): PTPlayerInfo;
     function IsInMoveList(Id: Integer): Boolean;
     function IsMoveListEmpty: Boolean;
     function IsBoomListEmpty: Boolean;
     function IsBoomFireListEmpty: Boolean;
+    function IsDeadPlayerListEmpty: Boolean;
 //    procedure tmr1Timer(Sender: TObject);
   private
     FBmpRole: TBitmap32;
@@ -79,6 +88,8 @@ type
     FBoomListEnd: PTBoomPic;
     FBoomFireListBegin: PTBoomFirePic;
     FBoomFireListEnd: PTBoomFirePic;
+    FPlayerDeadListBegin: PTPlayerDead;
+    FplayerDeadListEnd: PTPlayerDead;
     { Private declarations }
   public
     { Public declarations }
@@ -99,7 +110,7 @@ var
   bmpE, bmpWW, bmpS, bmpN: TBitmap32;
   tick: Integer;
   bmpFireE, bmpFireW, bmpFireN, bmpFireS: TBitmap32;
-  bmpFireCenter, bmpFireEEnd, bmpFireWEnd, bmpFireNEnd, bmpFireSEnd: TBitmap32;
+  bmpFireCenter, bmpFireEEnd, bmpFireWEnd, bmpFireNEnd, bmpFireSEnd, bmpPlayerDead: TBitmap32;
 
 procedure TFrmMap.AddBoomList(BoomPtr: PTBoomPic);
 begin
@@ -114,6 +125,20 @@ begin
     FBoomListEnd := FBoomListEnd.Next;
   end;
 
+end;
+
+procedure TFrmMap.AddDeadPlayer(PlayerPtr: PTPlayerDead);
+begin
+  if FPlayerDeadListBegin = nil then
+  begin
+    FPlayerDeadListBegin := PlayerPtr;
+    FplayerDeadListEnd := PlayerPtr;
+  end
+  else
+  begin
+    FplayerDeadListEnd.Next := PlayerPtr;
+    FplayerDeadListEnd := FplayerDeadListEnd.Next;
+  end;
 end;
 
 procedure TFrmMap.AddBoomFireList(FirePtr: PTBoomFirePic);
@@ -193,6 +218,39 @@ begin
   FreeMem(Ptr);
 end;
 
+procedure TFrmMap.DeleteDeadPlayerListBegin;
+var
+  Ptr: PTPlayerDead;
+begin
+  Ptr := FPlayerDeadListBegin;
+  FPlayerDeadListBegin := FPlayerDeadListBegin^.Next;
+  FreeMem(Ptr);
+end;
+
+procedure TFrmMap.DeleteFromUserList(Ptr: PTPlayerDeadEvent);
+var
+  I: Integer;
+begin
+//
+  for I := 0 to Length(FUserList) do
+  begin
+    if FUserList[I].UserName = Ptr^.UserName then
+    begin
+      FillMemory(@FUserList[I], SizeOf(TPlayerInfo), 0);
+      Exit;
+    end;
+  end;
+end;
+
+procedure TFrmMap.DeleteMoveListBegin;
+var
+  Ptr: PTOneMove;
+begin
+  Ptr := FMoveListBegin;
+  FMoveListBegin := FMoveListBegin.Next;
+  FreeMem(Ptr);
+end;
+
 procedure TFrmMap.doWork(Sender: TObject);
 var
   MsgPtr: PChatMsg;
@@ -204,6 +262,7 @@ var
   ShoesPtr: PTShoesInfo;
   BombPtr: PTBombSeted;
   BombBoomPtr: PTBombBoom;
+  PlayerDeadPtr: PTPlayerDeadEvent;
 begin
   ChatMgr.ReadResponse(FMsgs);
   while not FMsgs.IsEmpty do
@@ -250,6 +309,11 @@ begin
             begin
               BombBoomPtr := PTBombBoom(MsgPtr);
               SetBombBoom(BombBoomPtr);
+            end;
+          S_PLAYERDEAD:
+            begin
+              PlayerDeadPtr := PTPlayerDeadEvent(MsgPtr);
+              SetPlayerDead(PlayerDeadPtr);
             end;
         end;
       finally
@@ -301,43 +365,118 @@ begin
     if Ptr^.BoomW - 1 > 0 then
     begin
        //画北面的图
-       for I := 1 to Ptr^.BoomW - 1 do
-          begin
-            if I = Ptr^.BoomW - 1 then
-            begin
+      for I := 1 to Ptr^.BoomW - 1 do
+      begin
+        if I = Ptr^.BoomW - 1 then
+        begin
               //画end
-              PosX := Ptr^.BombX;
-              PosY := ptr^.BombY + I;
-              bmpH := bmpFireWEnd.Height;
-              x := PosX * 40;
-              y := PosY * 40;
-              pice := bmpFireWEnd.Width div 4;
-              bmpFireWEnd.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
-            end
-            else
-            begin
+          PosX := Ptr^.BombX;
+          PosY := Ptr^.BombY - I;
+          bmpH := bmpFireNEnd.Height;
+          x := PosX * 40;
+          y := PosY * 40;
+          pice := bmpFireNEnd.Width div 4;
+          bmpFireNEnd.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
+        end
+        else
+        begin
               //画中间
-              PosX := Ptr^.BombX;
-              PosY := ptr^.BombY + I;
-              bmpH := bmpFireW.Height;
-              x := PosX * 40;
-              y := PosY * 40;
-              pice := bmpFireW.Width div 4;
-              bmpFireW.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
-            end;
-          end;
+          PosX := Ptr^.BombX;
+          PosY := Ptr^.BombY - I;
+          bmpH := bmpFireN.Height;
+          x := PosX * 40;
+          y := PosY * 40;
+          pice := bmpFireN.Width div 4;
+          bmpFireN.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
+        end;
+      end;
     end;
     if Ptr^.BoomA - 1 > 0 then
     begin
        //画西面的图
+      for I := 1 to Ptr^.BoomA - 1 do
+      begin
+        if I = Ptr^.BoomA - 1 then
+        begin
+              //画end
+          PosX := Ptr^.BombX - I;
+          PosY := Ptr^.BombY;
+          bmpH := bmpFireWEnd.Height;
+          x := PosX * 40;
+          y := PosY * 40;
+          pice := bmpFireWEnd.Width div 4;
+          bmpFireWEnd.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
+        end
+        else
+        begin
+              //画中间
+          PosX := Ptr^.BombX - I;
+          PosY := Ptr^.BombY;
+          bmpH := bmpFireW.Height;
+          x := PosX * 40;
+          y := PosY * 40;
+          pice := bmpFireW.Width div 4;
+          bmpFireW.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
+        end;
+      end;
     end;
     if Ptr^.BoomD - 1 > 0 then
     begin
        //画东面的图
+      for I := 1 to Ptr^.BoomD - 1 do
+      begin
+        if I = Ptr^.BoomD - 1 then
+        begin
+              //画end
+          PosX := Ptr^.BombX + I;
+          PosY := Ptr^.BombY;
+          bmpH := bmpFireEEnd.Height;
+          x := PosX * 40;
+          y := PosY * 40;
+          pice := bmpFireEEnd.Width div 4;
+          bmpFireEEnd.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
+        end
+        else
+        begin
+              //画中间
+          PosX := Ptr^.BombX + I;
+          PosY := Ptr^.BombY;
+          bmpH := bmpFireE.Height;
+          x := PosX * 40;
+          y := PosY * 40;
+          pice := bmpFireE.Width div 4;
+          bmpFireE.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
+        end;
+      end;
     end;
     if Ptr^.BoomS - 1 > 0 then
     begin
        //画南面的图
+      for I := 1 to Ptr^.BoomS - 1 do
+      begin
+        if I = Ptr^.BoomS - 1 then
+        begin
+              //画end
+          PosX := Ptr^.BombX;
+          PosY := Ptr^.BombY + I;
+          bmpH := bmpFireSEnd.Height;
+          x := PosX * 40;
+          y := PosY * 40;
+          pice := bmpFireSEnd.Width div 4;
+          bmpFireSEnd.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
+        end
+        else
+        begin
+              //画中间
+          PosX := Ptr^.BombX;
+          PosY := Ptr^.BombY + I;
+          bmpH := bmpFireS.Height;
+          x := PosX * 40;
+          y := PosY * 40;
+          pice := bmpFireS.Width div 4;
+          bmpFireS.DrawTo(pntbx.Buffer, Rect(x, y, pice + x, bmpH + y), Rect(pice * TickForBoomFire, 0, pice * (TickForBoomFire + 1), bmpH));
+        end;
+      end;
     end;
     PtrNext := Ptr^.Next;
     Inc(Ptr^.Tick);
@@ -351,7 +490,7 @@ end;
 
 procedure TFrmMap.DrawMap;
 var
-  x, y, i, j, drawY, bmpBombH, PosX, PosY: Integer;
+  x, y, i, j, drawY, bmpBombH, PosX, PosY, RoleId: Integer;
 begin
   x := 0;
   y := 0;
@@ -375,7 +514,7 @@ begin
     begin
       i := x div 40;
       j := y div 40;
-      if FMap[i * 20 + j] = 1 then //地板//
+      if FMap[i * 20 + j] = 1 then //cookie//
       begin
         drawY := y - (bmp3.Height - 40);
         bmp3.DrawTo(pntbx.Buffer, x, drawY);
@@ -385,13 +524,18 @@ begin
         drawY := y - (bmp4.Height - 40);
         bmp4.DrawTo(pntbx.Buffer, x, drawY);
       end
-      else if FMap[i * 20 + j] = 4 then
+      else if FMap[i * 20 + j] = 3 then
       begin
 //        drawY := y - (bmp4.Height - 40);
 //        FBmpBoom.DrawTo(pntbx.Buffer, rect(x, drawY, piceBoomW + x, drawY + bmpBombH), Rect(piceBoomW * TickForBomb, 0, piceBoomW * (TickForBomb + 1), bmpBombH));
 //        Inc(TickForBomb);
 //        if TickForBomb = 4 then
 //          TickForBomb := 0;
+//          RoleId := FindFirstVolume()
+        DrawOnePlayer(i, j);
+
+//        if not IsMoveListEmpty then
+//          processMove;
       end
       else if FMap[i * 20 + j] = 5 then //鞋子
       begin
@@ -407,13 +551,104 @@ begin
     DrawBoom;
   if not IsBoomFireListEmpty then
     DrawBoomFire;
+//  if not IsMoveListEmpty then
+//    processMove;
+  if not IsDeadPlayerListEmpty then
+    processDeadPlayer;
 end;
 
 procedure TFrmMap.DrawMapAndPlayer(Sender: TObject);
 begin
   DrawMap;
-  DrawPlayer;
+//  DrawPlayer;
+//   if not IsMoveListEmpty then
+//    processMove;
+//  if not IsDeadPlayerListEmpty then
+//    processDeadPlayer;
   pntbx.Invalidate;
+end;
+
+procedure TFrmMap.DrawOnePlayer(PosX, PosY: Integer);
+var
+  UserPtr: PTPlayerInfo;
+  BmpRole, Role: TBitmap32;
+  Ptr, PtrNext: PTOneMove;
+  x,y : Integer;
+begin
+  UserPtr := FindUseInfoFromList(PosX, PosY);
+  if UserPtr = nil then
+    Exit;
+  if UserPtr.UserID <> 0 then
+  begin
+    if not IsInMoveList(UserPtr.UserID) then
+    begin
+      case UserPtr.FaceTo of
+        SOUTH:
+          BmpRole := bmpS;
+        NORTH:
+          BmpRole := bmpN;
+        EAST:
+          BmpRole := bmpE;
+        WEST:
+          BmpRole := bmpWW;
+      end;
+      if UserPtr.UserID = ChatMgr.ReadPlayerInfo^.UserID then
+      begin
+        case UserPtr.FaceTo of
+          SOUTH:
+            lbl5.Caption := 'SOUTH';
+          NORTH:
+            lbl5.Caption := 'NORTH';
+          EAST:
+            lbl5.Caption := 'EAST';
+          WEST:
+            lbl5.Caption := 'WEST';
+        end;
+        lbl3.Caption := IntToStr(UserPtr.Speed);
+        lbl7.Caption := IntToStr(UserPtr.UserID);
+      end;
+
+      x := UserPtr.UserPosX * 40;
+      y := UserPtr.UserPosY * 40 - (FBmpRole.Height - 40);
+      BmpRole.DrawTo(pntbx.Buffer, rect(x, y, W + x, y + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+    end
+    else
+    begin
+  Ptr := FMoveListBegin;
+  while Ptr <> nil do
+  begin
+    if (Ptr.SrcX = PosX) and (Ptr.SrcY = PosY) then
+    begin
+    case Ptr^.FaceTo of
+      NORTH:
+        Role := bmpN;
+      SOUTH:
+        Role := bmpS;
+      WEST:
+        Role := bmpWW;
+      EAST:
+        Role := bmpE;
+    end;
+    if Ptr^.SrcX = Ptr^.DesX then
+      RoleMoveOneStepY(Role, Ptr^.SrcX, Ptr^.SrcY, Ptr^.DesY, Ptr^.tick);
+    if Ptr^.SrcY = Ptr^.DesY then
+      RoleMoveOneStepX(Role, Ptr^.SrcY, Ptr^.SrcX, Ptr^.DesX, Ptr^.tick);
+    Inc(Ptr^.tick);
+    end;
+    PtrNext := Ptr^.Next;
+    if Ptr^.tick = 6 then
+    begin
+      MoveCheckMap(Ptr^.DesX, Ptr^.DesY);
+      FMap[Ptr^.SrcX * 20 + Ptr^.SrcY] := 0;
+      FMap[Ptr^.DesX * 20 + Ptr^.DesY] := 3;
+      FindUserFromList(UserPtr.UserID).UserPosX := Ptr.DesX;
+      FindUserFromList(UserPtr.UserID).UserPosY := Ptr.DesY;
+      DeleteMoveListBegin;
+    end;
+    Ptr := PtrNext;
+  end;
+end;
+  end;
 end;
 
 procedure TFrmMap.DrawPlayer;
@@ -423,7 +658,7 @@ var
   BmpRole: TBitmap32;
   tick: Integer;
 begin
-  for I := 0 to Length(FUserList) do
+  for I := 0 to Length(FUserList) - 1 do
   begin
     if FUserList[I].UserID <> 0 then
     begin
@@ -458,12 +693,24 @@ begin
         PosX := FUserList[I].UserPosX * 40;
         PosY := FUserList[I].UserPosY * 40 - (FBmpRole.Height - 40);
         BmpRole.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
-        FUserListOld := FUserListNew;
+//        if FMap[FUserList[I].UserPosX  * 20 + FUserList[I].UserPosY + 1] <> 0 then
+//        begin
+//          case FMap[FUserList[I].UserPosX  * 20 + FUserList[I].UserPosY + 1] of
+//            1:
+//              bmp3.DrawTo(pntbx.Buffer, FUserList[I].UserPosX   * 40, (FUserList[I].UserPosY + 1) * 40 - (bmp3.Height - 40));
+//            2:
+//              bmp4.DrawTo(pntbx.Buffer, FUserList[I].UserPosX   * 40, (FUserList[I].UserPosY + 1) * 40 - (bmp4.Height - 40));
+//          end;
+//
+//        end;
+//         DrawMap;
       end;
     end;
   end;
   if not IsMoveListEmpty then
     processMove;
+  if not IsDeadPlayerListEmpty then
+    processDeadPlayer;
 end;
 
 function TFrmMap.FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
@@ -499,6 +746,22 @@ begin
     Result := nil;
 end;
 
+function TFrmMap.FindUseInfoFromList(PosX, PosY: Integer): PTPlayerInfo;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to Length(FUserList) - 1 do
+  begin
+    if (FUserList[I].UserPosX = PosX) and (FUserList[I].UserPosY = PosY) then
+    begin
+      Result := @FUserList[I];
+      Exit;
+    end;
+
+  end;
+end;
+
 procedure TFrmMap.FormCreate(Sender: TObject);
 begin
 //
@@ -522,6 +785,7 @@ begin
   bmpFireNEnd := TBitmap32.Create;
   bmpFireSEnd := TBitmap32.Create;
   bmpFireCenter := TBitmap32.Create;
+  bmpPlayerDead := TBitmap32.Create;
   FBmpRole.DrawMode := dmTransparent;
   bmpE.DrawMode := dmBlend;
   bmpN.DrawMode := dmBlend;
@@ -529,6 +793,7 @@ begin
   bmpWW.DrawMode := dmBlend;
   FBmpShoe.DrawMode := dmBlend;
   FBmpBoom.DrawMode := dmBlend;
+  bmpPlayerDead.DrawMode := dmBlend;
   bmpFireCenter.DrawMode := dmBlend;
   bmpFireW.DrawMode := dmBlend;
   bmpFireN.DrawMode := dmBlend;
@@ -554,6 +819,7 @@ begin
   LoadBitmap32FromPNG(bmpFireSEnd, 'img/bbf_south_end.png');
   LoadBitmap32FromPNG(bmpFireE, 'img/bbf_east.png');
   LoadBitmap32FromPNG(bmpFireEEnd, 'img/bbf_east_end.png');
+  LoadBitmap32FromPNG(bmpPlayerDead, 'img/grave.png');
   bmpRoleW := FBmpRole.Width;
   bmpRoleH := FBmpRole.Height;
   piceRoleW := bmpRoleW div 6;
@@ -663,6 +929,13 @@ begin
     Result := True;
 end;
 
+function TFrmMap.IsDeadPlayerListEmpty: Boolean;
+begin
+  Result := False;
+  if FPlayerDeadListBegin = nil then
+    Result := True;
+end;
+
 procedure TFrmMap.PlayerMove(DesPlayer: PTPlayerInfo);
 var
   id: Integer;
@@ -682,13 +955,13 @@ begin
   MovePtr^.Next := nil;
   MovePtr^.UserId := id;
   MovePtr^.SrcX := SrcPlayerPtr^.UserPosX;
-  ;
   MovePtr^.SrcY := SrcPlayerPtr^.UserPosY;
   MovePtr^.DesX := DesPlayer^.UserPosX;
   MovePtr^.DesY := DesPlayer^.UserPosY;
   MovePtr^.FaceTo := DesPlayer^.FaceTo;
+  MovePtr^.tick := 0;
   AddMoveList(MovePtr);
-  UpdateUserToList(DesPlayer);
+//  UpdateUserToList(DesPlayer);
 end;
 
 procedure TFrmMap.SetBomb(Ptr: PTBombSeted);
@@ -704,7 +977,7 @@ begin
   AddBoomList(BoomPtr);
 end;
 
-procedure TFrmMap.RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY: Integer);
+procedure TFrmMap.RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY, tick: Integer);
 var
   piceRoleW, bmpRoleH: Integer;
   PosX, PosY: Integer;
@@ -726,7 +999,7 @@ begin
   end;
 end;
 
-procedure TFrmMap.RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX: Integer);
+procedure TFrmMap.RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX, tick: Integer);
 var
   piceRoleW, bmpRoleH: Integer;
   PosX, PosY: Integer;
@@ -770,6 +1043,23 @@ begin
   AddBoomFireList(BoomFirePtr);
 // 被炸到的箱子消失
   CheckBoomRange(Ptr);
+end;
+
+procedure TFrmMap.SetPlayerDead(Ptr: PTPlayerDeadEvent);
+var
+  PlayerDeadPtr: PTPlayerDead;
+begin
+// 列表移除玩家
+  DeleteFromUserList(Ptr);
+  PlayerDeadPtr := AllocMem(SizeOf(TPlayerDead));
+  PlayerDeadPtr^.Next := nil;
+  PlayerDeadPtr^.PlayerPosX := Ptr^.PlayerPosX;
+  PlayerDeadPtr^.PlayerPosY := Ptr^.PlayerPosY;
+//  PlayerDeadPtr^.PlayerName := ptr^.UserName;
+  CopyMemory(@PlayerDeadPtr^.PlayerName[0], @Ptr^.UserName, Length(Ptr^.UserName));
+  PlayerDeadPtr^.tick := 0;
+  AddDeadPlayer(PlayerDeadPtr);
+//播放死亡动画
 end;
 
 procedure TFrmMap.SetShoes(Ptr: PTShoesInfo);
@@ -909,33 +1199,62 @@ begin
   pntbx.Invalidate;
 end;
 
+procedure TFrmMap.processDeadPlayer;
+var
+  Ptr: PTPlayerDead;
+  PtrNext: PTPlayerDead;
+  TickForDead: Integer;
+  x, y: Integer;
+begin
+  Ptr := FPlayerDeadListBegin;
+  while Ptr <> nil do
+  begin
+    TickForDead := Ptr^.tick;
+    x := Ptr^.PlayerPosX * 40;
+    y := Ptr^.PlayerPosY * 40;
+    bmpPlayerDead.DrawTo(pntbx.Buffer, x + 5, y - 10);
+    Inc(Ptr^.tick);
+    PtrNext := Ptr^.Next;
+    if Ptr^.tick = 60 then
+      DeleteDeadPlayerListBegin;
+    Ptr := PtrNext;
+  end;
+
+end;
+
 procedure TFrmMap.processMove;
 var
   Ptr: PTOneMove;
   Role: TBitmap32;
+  PtrNext: PTOneMove;
 begin
   Ptr := FMoveListBegin;
-  case Ptr^.FaceTo of
-    NORTH:
-      Role := bmpN;
-    SOUTH:
-      Role := bmpS;
-    WEST:
-      Role := bmpWW;
-    EAST:
-      Role := bmpE;
-  end;
-  if Ptr^.SrcX = Ptr^.DesX then
-    RoleMoveOneStepY(Role, Ptr^.SrcX, Ptr^.SrcY, Ptr^.DesY);
-  if Ptr^.SrcY = Ptr^.DesY then
-    RoleMoveOneStepX(Role, Ptr^.SrcY, Ptr^.SrcX, Ptr^.DesX);
-  Inc(tick);
-  if tick = 6 then
+  while Ptr <> nil do
   begin
-    FMoveListBegin := Ptr.Next;
-    FreeMem(Ptr);
-    tick := 0;
-    MoveCheckMap(Ptr^.DesX, Ptr^.DesY);
+    case Ptr^.FaceTo of
+      NORTH:
+        Role := bmpN;
+      SOUTH:
+        Role := bmpS;
+      WEST:
+        Role := bmpWW;
+      EAST:
+        Role := bmpE;
+    end;
+    if Ptr^.SrcX = Ptr^.DesX then
+      RoleMoveOneStepY(Role, Ptr^.SrcX, Ptr^.SrcY, Ptr^.DesY, Ptr^.tick);
+    if Ptr^.SrcY = Ptr^.DesY then
+      RoleMoveOneStepX(Role, Ptr^.SrcY, Ptr^.SrcX, Ptr^.DesX, Ptr^.tick);
+    Inc(Ptr^.tick);
+    PtrNext := Ptr^.Next;
+    if Ptr^.tick = 6 then
+    begin
+      MoveCheckMap(Ptr^.DesX, Ptr^.DesY);
+      FMap[Ptr^.SrcX * 20 + Ptr^.SrcY] := 0;
+      FMap[Ptr^.DesX * 20 + Ptr^.DesY] := 3;
+      DeleteMoveListBegin;
+    end;
+    Ptr := PtrNext;
   end;
 end;
 
