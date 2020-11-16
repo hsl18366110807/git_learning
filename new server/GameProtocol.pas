@@ -51,7 +51,7 @@ type
     DestoryPosY: Integer;
   end;
 
-  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, SHOES); //可移动，障碍物，木箱，有角色，炸弹，鞋子
+  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, PSHOES, PBOT); //可移动，障碍物，木箱，有角色，炸弹，鞋子
 
   PropTypes = (NoProp, MeleeWeapon, RangedWeapon); //无武器，近身武器，远程武器
 
@@ -147,6 +147,19 @@ type
     property FBombPosY: Integer read BombPosY;
   end;
 
+  TBots = record
+    RoBotID: Integer;
+    BotPosX: Integer;
+    BotPosY: Integer;
+    BotFaceTo: Integer;
+  end;
+
+  TRoBotInfoList = record
+    head: TGameMsgHead;
+    BotNums: Integer;
+    BotList: array[0..4] of TBots;
+  end;
+
 const
   C_REGISTER = 1;
   S_REGISTER = 2;
@@ -167,6 +180,7 @@ const
   S_SETSHOES = 17;
   C_USEPROP = 18;
   S_RANGEDPROP = 19;
+  S_BOTLIST = 20;
 
 implementation
 

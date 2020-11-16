@@ -4,7 +4,7 @@ interface
 
 uses
   Tcpserver, System.Classes, GameProtocol, System.SysUtils, LogServer,
-  GameSqlServer, System.Math, DateUtils, Winapi.Windows;
+  GameSqlServer, System.Math, DateUtils, Winapi.Windows, Vcl.ExtCtrls;
 
 type
   TGameClient = class
@@ -22,12 +22,14 @@ type
   private
     FDeadGamers: TStrings;
     FGamers: TStrings;
+    FBots: TStrings;
     FBombList: TStrings;
     ShoseTime: TDateTime;
     ShoseNum: Integer;
   public
     FMap: TMap;
     FUserList: TPlayerInfoList;
+    FBotList: TRoBotInfoList;
     procedure ProcessRequests(RequestPtr: PLoginMsg; AClient: TTCPClient);
     constructor Create;
     destructor Destroy; override;
@@ -38,9 +40,14 @@ type
     procedure CheckBombTime; override;
     procedure SetShoesProp; override;
   private
+    timer: TTimer;
+    procedure ControlBots(Sender: TObject);
+    procedure BotMove(BotId: Integer);
     procedure DeleteUserList(Pos: Integer);
     function FindGamer(AClient: TTCPClient): TGameClient;
+    function FindDeadGamer(AClient: TTCPClient): TGameClient;
     procedure InitGameMap;
+    procedure InitBot;
     procedure SetGamerPos(AGamer: TGameClient);
     function RegisterNewUser(RequestPtr: PLoginMsg; AClient: TTCPClient): Integer;
     function LoginUser(RequestPtr: PLoginMsg; AClient: TTCPClient): Integer;
@@ -59,6 +66,7 @@ type
     function FindKillerPlayerMelee(RequestPtr: PUseProp): Integer;
     function FindKillerPlayerRanged(RequestPtr: PUseProp): Integer;
     function SendRangedPropInfo(PropPosX: Integer; PropPosY: Integer; DestoryPos: DestoryTypes): Integer;
+    function SendBotList:Integer;
   end;
 
 var
@@ -79,9 +87,9 @@ begin
   BombX := TBomb(FBombList.Objects[BomePos]).FBombPosX;
   BombY := TBomb(FBombList.Objects[BomePos]).FBombPosY;
 
-  for Z := 0 to Length(FUserList.UserList) - 1 do
+  for Z := 0 to FGamers.Count - 1 do
   begin
-    if (BombX = FUserList.UserList[Z].UserPosX) and (BombY = FUserList.UserList[Z].UserPosY) then
+    if (BombX = TGameClient(FGamers.Objects[Z]).GamerPosX) and (BombY = TGameClient(FGamers.Objects[Z]).GamerPosY) then
     begin
       PlayerX := BombX + I;
       PlayerY := BombY;
@@ -232,6 +240,76 @@ begin
   FMap.Map[BombX][BombY] := 0;
 end;
 
+procedure TTcpgameserver.ControlBots(Sender: TObject);
+var
+  I: Integer;
+begin
+  if FBotList.BotNums <> 0 then
+  begin
+    for I := 0 to FBotList.BotNums do
+    begin
+      BotMove(FBotList.BotNums);
+    end;
+  end;
+  SendBotList;
+end;
+
+procedure TTcpgameserver.BotMove(BotId: Integer);
+var
+  PosX, PosY: Integer;
+begin
+  PosX := FBotList.BotList[BotId - 1].BotPosX;
+  PosY := FBotList.BotList[BotId - 1].BotPosY;
+  if FBotList.BotList[BotId - 1].BotFaceTo = 0 then
+  begin
+    if FMap.Map[PosX][PosY - 1] = 0 then
+    begin
+      FBotList.BotList[BotId - 1].BotPosY := PosY - 1;
+    end
+    else
+    begin
+      FBotList.BotList[BotId - 1].BotFaceTo := RandomRange(0, 3);
+    end;
+    Exit;
+  end
+  else if FBotList.BotList[BotId - 1].BotFaceTo = 1 then
+  begin
+    if FMap.Map[PosX][PosY + 1] = 0 then
+    begin
+      FBotList.BotList[BotId - 1].BotPosY := PosY + 1;
+    end
+    else
+    begin
+      FBotList.BotList[BotId - 1].BotFaceTo := RandomRange(0, 3);
+    end;
+    Exit;
+  end
+  else if FBotList.BotList[BotId - 1].BotFaceTo = 2 then
+  begin
+    if FMap.Map[PosX - 1][PosY] = 0 then
+    begin
+      FBotList.BotList[BotId - 1].BotPosX := PosX - 1;
+    end
+    else
+    begin
+      FBotList.BotList[BotId - 1].BotFaceTo := RandomRange(0, 3);
+    end;
+    Exit;
+  end
+  else if FBotList.BotList[BotId - 1].BotFaceTo = 3 then
+  begin
+    if FMap.Map[PosX + 1][PosY] = 0 then
+    begin
+      FBotList.BotList[BotId - 1].BotPosX := PosX + 1;
+    end
+    else
+    begin
+      FBotList.BotList[BotId - 1].BotFaceTo := RandomRange(0, 3);
+    end;
+    Exit;
+  end;
+end;
+
 procedure TTcpgameserver.CheckBombTime;
 var
   i: Integer;
@@ -258,9 +336,11 @@ procedure TTcpgameserver.ClientRemoved(AClient: TTCPClient);
 var
   Idx: Integer;
   DeletedChatter: TGameClient;
+  DeletedDeadChatter: TGameClient;
   I: Integer;
 begin
   DeletedChatter := FindGamer(AClient);
+  DeletedDeadChatter := FindDeadGamer(AClient);
   for I := 0 to 4 do
 
     if DeletedChatter <> nil then
@@ -274,11 +354,25 @@ begin
       end
       else
       begin
+        if DeletedDeadChatter <> nil then
+        begin
+          FMap.Map[DeletedDeadChatter.GamerPosX][DeletedDeadChatter.GamerPosY] := 0;
+          Idx := FGamers.IndexOfObject(DeletedDeadChatter);
+          if Idx >= 0 then
+          begin
+            FDeadGamers.Delete(Idx);
+            DeleteUserList(Idx);
+          end
+          else
+          begin
+            Exit;
+          end;
+          DeletedChatter.Free;
+        end;
         Exit;
       end;
       DeletedChatter.Free;
     end;
-
 end;
 
 constructor TTcpgameserver.Create;
@@ -288,6 +382,11 @@ begin
   FBombList := TStringList.Create;
   FDeadGamers := TStringList.Create;
   InitGameMap;
+  InitBot;
+  timer := TTimer.Create(timer);
+  timer.OnTimer := ControlBots;
+  timer.Interval := 100;
+  timer.Enabled := True;
 end;
 
 procedure TTcpgameserver.DeleteUserList(Pos: Integer);
@@ -317,6 +416,21 @@ procedure TTcpgameserver.Execute;
 begin
   inherited;
 
+end;
+
+function TTcpgameserver.FindDeadGamer(AClient: TTCPClient): TGameClient;
+var
+  i: Integer;
+begin
+  Result := nil;
+  for i := 0 to FDeadGamers.Count - 1 do
+  begin
+    if TGameClient(FDeadGamers.Objects[i]).FClient = AClient then
+    begin
+      Result := TGameClient(FDeadGamers.Objects[i]);
+      break;
+    end;
+  end;
 end;
 
 function TTcpgameserver.FindGamer(AClient: TTCPClient): TGameClient;
@@ -556,6 +670,24 @@ begin
   end;
 end;
 
+procedure TTcpgameserver.InitBot;
+var
+  X, Y: Integer;
+  Faceto: Integer;
+begin
+  repeat
+    X := randomrange(0, 19);
+    Y := RandomRange(0, 19);
+  until FMap.Map[X][Y] = 0;
+  Faceto := randomrange(0, 3);
+  FBotList.BotList[FBotList.BotNums].RoBotID := FBotList.BotNums;
+  FBotList.BotList[FBotList.BotNums].BotPosX := X;
+  FBotList.BotList[FBotList.BotNums].BotPosY := Y;
+  FBotList.BotList[FBotList.BotNums].BotFaceTo := Faceto;
+  Inc(FBotList.BotList[FBotList.BotNums].RoBotID);
+  FMap.Map[X][Y] := 6;
+end;
+
 procedure TTcpgameserver.InitGameMap;
 var
   I: Integer;
@@ -700,9 +832,9 @@ begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
         if (ListPlayerName = PlayerName) then
         begin
-          if FUserList.UserList[I].FaceTo <> NORTH then
+          if FUserList.UserList[I].Faceto <> NORTH then
           begin
-            FUserList.UserList[I].FaceTo := NORTH;
+            FUserList.UserList[I].Faceto := NORTH;
           end;
           FUserList.UserList[I].UserPosX := X;
           FuserList.UserList[I].UserPosY := Y - 1;
@@ -735,9 +867,9 @@ begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
         if (ListPlayerName = PlayerName) then
         begin
-          if FUserList.UserList[I].FaceTo <> SOUTH then
+          if FUserList.UserList[I].Faceto <> SOUTH then
           begin
-            FUserList.UserList[I].FaceTo := SOUTH;
+            FUserList.UserList[I].Faceto := SOUTH;
           end;
           FUserList.UserList[I].UserPosX := X;
           FuserList.UserList[I].UserPosY := Y + 1;
@@ -769,9 +901,9 @@ begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
         if (ListPlayerName = PlayerName) then
         begin
-          if FUserList.UserList[I].FaceTo <> WEST then
+          if FUserList.UserList[I].Faceto <> WEST then
           begin
-            FUserList.UserList[I].FaceTo := WEST;
+            FUserList.UserList[I].Faceto := WEST;
           end;
           FUserList.UserList[I].UserPosX := X - 1;
           FuserList.UserList[I].UserPosY := Y;
@@ -803,9 +935,9 @@ begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
         if (ListPlayerName = PlayerName) then
         begin
-          if FUserList.UserList[I].FaceTo <> EAST then
+          if FUserList.UserList[I].Faceto <> EAST then
           begin
-            FUserList.UserList[I].FaceTo := EAST;
+            FUserList.UserList[I].Faceto := EAST;
           end;
           FUserList.UserList[I].UserPosX := X + 1;
           FuserList.UserList[I].UserPosY := Y;
@@ -1016,7 +1148,7 @@ begin
       FPlayerInfo.UserName := FUserList.UserList[I].UserName;
       FPlayerInfo.UserPosX := FUserList.UserList[I].UserPosX;
       FPlayerInfo.UserPosY := FUserList.UserList[I].UserPosY;
-      FPlayerInfo.FaceTo := FUserList.UserList[I].FaceTo;
+      FPlayerInfo.FaceTo := FUserList.UserList[I].Faceto;
       FPlayerInfo.Speed := FUserList.UserList[I].Speed;
     end;
   end;
@@ -1043,7 +1175,7 @@ begin
       FPlayerInfo.UserName := FUserList.UserList[I].UserName;
       FPlayerInfo.UserPosX := FUserList.UserList[I].UserPosX;
       FPlayerInfo.UserPosY := FUserList.UserList[I].UserPosY;
-      FPlayerInfo.FaceTo := FUserList.UserList[I].FaceTo;
+      FPlayerInfo.FaceTo := FUserList.UserList[I].Faceto;
       FPlayerInfo.Speed := FUserList.UserList[I].Speed;
     end;
   end;
@@ -1124,6 +1256,20 @@ begin
     BombEvent.BoomD := BoomD;
     CopyMemory(@(BombEvent.DestoryPos), PosArray, SizeOf(BombEvent.DestoryPos));
     TGameClient(FGamers.Objects[I]).FClient.SendData(@BombEvent, SizeOf(BombEvent));
+  end;
+
+end;
+
+function TTcpgameserver.SendBotList: Integer;
+var
+  I: Integer;
+begin
+  for I := 0 to FGamers.Count - 1  do
+  begin
+    FBotList.head.Flag := PACK_FLAG;
+    FBotList.head.Size := SizeOf(FBotList);
+    FBotList.head.Command := S_BOTLIST;
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@FBotList, SizeOf(FBotList));
   end;
 
 end;
