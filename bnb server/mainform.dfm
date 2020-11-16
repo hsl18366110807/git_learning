@@ -45,7 +45,7 @@ object FormMain: TFormMain
     Width = 121
     Height = 21
     TabOrder = 1
-    Text = '10.246.54.171'
+    Text = '10.246.54.151'
   end
   object PortEdit: TEdit
     Left = 278
@@ -90,10 +90,6 @@ object FormMain: TFormMain
     object TabSheet2: TTabSheet
       Caption = #20107#20214
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
   end
   object Timer1: TTimer
