@@ -90,10 +90,6 @@ object FormMain: TFormMain
     object TabSheet2: TTabSheet
       Caption = #20107#20214
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
   end
   object Timer1: TTimer
