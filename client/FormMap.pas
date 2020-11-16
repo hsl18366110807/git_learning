@@ -183,6 +183,8 @@ begin
     if FUserList[I].UserID = 0 then
     begin
       FUserList[I] := Ptr^;
+       FMap[Ptr.UserPosX * 20 + Ptr.UserPosY] := 3;
+
       Result := 0;
       Exit
     end;
@@ -526,16 +528,7 @@ begin
       end
       else if FMap[i * 20 + j] = 3 then
       begin
-//        drawY := y - (bmp4.Height - 40);
-//        FBmpBoom.DrawTo(pntbx.Buffer, rect(x, drawY, piceBoomW + x, drawY + bmpBombH), Rect(piceBoomW * TickForBomb, 0, piceBoomW * (TickForBomb + 1), bmpBombH));
-//        Inc(TickForBomb);
-//        if TickForBomb = 4 then
-//          TickForBomb := 0;
-//          RoleId := FindFirstVolume()
         DrawOnePlayer(i, j);
-
-//        if not IsMoveListEmpty then
-//          processMove;
       end
       else if FMap[i * 20 + j] = 5 then //аЌзг
       begin
@@ -913,7 +906,6 @@ procedure TFrmMap.MoveCheckMap(X, Y: Integer);
 begin
   if FMap[X * 20 + Y] = 5 then
     FMap[X * 20 + Y] := 0;
-
 end;
 
 function TFrmMap.IsBoomFireListEmpty: Boolean;
@@ -962,7 +954,7 @@ begin
   MovePtr^.FaceTo := DesPlayer^.FaceTo;
   MovePtr^.tick := 0;
   AddMoveList(MovePtr);
-//  UpdateUserToList(DesPlayer);
+  UpdateUserToList(DesPlayer);
 end;
 
 procedure TFrmMap.SetBomb(Ptr: PTBombSeted);
@@ -1085,7 +1077,7 @@ begin
   begin
     if FUserList[I].UserID = Ptr^.UserID then
     begin
-      FUserList[I] := Ptr^;
+      FUserList[I].Speed := Ptr^.Speed;
       Result := 0;
       Exit
     end;
