@@ -835,7 +835,7 @@ BEGIN
 END
 
 /* c:\program files (x86)\embarcadero\studio\20.0\lib\Win32\release\Controls.res */
-/* C:\Users\haoshengli\Desktop\delphi-bnb\client\FormLogin.dfm */
-/* C:\Users\haoshengli\Desktop\delphi-bnb\client\FormMap.dfm */
-/* C:\Users\haoshengli\Desktop\delphi-bnb\client\ChatClient.res */
-/* C:\Users\haoshengli\Desktop\delphi-bnb\client\ChatClient.drf */
+/* C:\Users\haoshengli\Desktop\client\FormLogin.dfm */
+/* C:\Users\haoshengli\Desktop\client\FormMap.dfm */
+/* C:\Users\haoshengli\Desktop\client\ChatClient.res */
+/* C:\Users\haoshengli\Desktop\client\ChatClient.drf */

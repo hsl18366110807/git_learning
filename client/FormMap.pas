@@ -183,7 +183,7 @@ begin
     if FUserList[I].UserID = 0 then
     begin
       FUserList[I] := Ptr^;
-       FMap[Ptr.UserPosX * 20 + Ptr.UserPosY] := 3;
+      FMap[Ptr.UserPosX * 20 + Ptr.UserPosY] := 3;
 
       Result := 0;
       Exit
@@ -296,6 +296,7 @@ begin
             begin
               UserPtr := PTPlayerInfo(MsgPtr);
               PlayerMove(UserPtr); //以我现在写的move逻辑的话，多人同时动的话可能存在问题
+              OutputDebugString('move');
             end;
           S_SETSHOES:
             begin
@@ -316,6 +317,14 @@ begin
             begin
               PlayerDeadPtr := PTPlayerDeadEvent(MsgPtr);
               SetPlayerDead(PlayerDeadPtr);
+            end;
+          S_BOTINFO:
+            begin
+              OutputDebugString('111111111111111111');
+            end;
+          S_BOTMOVE:
+            begin
+              OutputDebugString('2222222222222222');
             end;
         end;
       finally
@@ -512,11 +521,11 @@ begin
   y := 0;
   while y < 800 do
   begin
-    while x< 800 do
+    while x < 800 do
     begin
       i := x div 40;
       j := y div 40;
-      if FMap[i *20   + j] = 1 then //cookie//
+      if FMap[i * 20 + j] = 1 then //cookie//
       begin
         drawY := y - (bmp3.Height - 40);
         bmp3.DrawTo(pntbx.Buffer, x, drawY);
@@ -566,7 +575,7 @@ var
   UserPtr: PTPlayerInfo;
   BmpRole, Role: TBitmap32;
   Ptr, PtrNext: PTOneMove;
-  x,y : Integer;
+  x, y: Integer;
 begin
   UserPtr := FindUseInfoFromList(PosX, PosY);
   if UserPtr = nil then
@@ -607,41 +616,41 @@ begin
     end
     else
     begin
-  Ptr := FMoveListBegin;
-  while Ptr <> nil do
-  begin
-    if (Ptr.SrcX = PosX) and (Ptr.SrcY = PosY) then
-    begin
-    case Ptr^.FaceTo of
-      NORTH:
-        Role := bmpN;
-      SOUTH:
-        Role := bmpS;
-      WEST:
-        Role := bmpWW;
-      EAST:
-        Role := bmpE;
+      Ptr := FMoveListBegin;
+      while Ptr <> nil do
+      begin
+        if (Ptr.SrcX = PosX) and (Ptr.SrcY = PosY) then
+        begin
+          case Ptr^.FaceTo of
+            NORTH:
+              Role := bmpN;
+            SOUTH:
+              Role := bmpS;
+            WEST:
+              Role := bmpWW;
+            EAST:
+              Role := bmpE;
+          end;
+          if Ptr^.SrcX = Ptr^.DesX then
+            RoleMoveOneStepY(Role, Ptr^.SrcX, Ptr^.SrcY, Ptr^.DesY, Ptr^.tick);
+          if Ptr^.SrcY = Ptr^.DesY then
+            RoleMoveOneStepX(Role, Ptr^.SrcY, Ptr^.SrcX, Ptr^.DesX, Ptr^.tick);
+          Inc(Ptr^.tick);
+        end;
+        PtrNext := Ptr^.Next;
+        if Ptr^.tick = 6 then
+        begin
+          MoveCheckMap(Ptr^.DesX, Ptr^.DesY);
+          FMap[Ptr^.SrcX * 20 + Ptr^.SrcY] := 0;
+          FMap[Ptr^.DesX * 20 + Ptr^.DesY] := 3;
+          FindUserFromList(UserPtr.UserID).UserPosX := Ptr.DesX;
+          FindUserFromList(UserPtr.UserID).UserPosY := Ptr.DesY;
+          FindUserFromList(UserPtr.UserID).FaceTo := Ptr.FaceTo;
+          DeleteMoveListBegin;
+        end;
+        Ptr := PtrNext;
+      end;
     end;
-    if Ptr^.SrcX = Ptr^.DesX then
-      RoleMoveOneStepY(Role, Ptr^.SrcX, Ptr^.SrcY, Ptr^.DesY, Ptr^.tick);
-    if Ptr^.SrcY = Ptr^.DesY then
-      RoleMoveOneStepX(Role, Ptr^.SrcY, Ptr^.SrcX, Ptr^.DesX, Ptr^.tick);
-    Inc(Ptr^.tick);
-    end;
-    PtrNext := Ptr^.Next;
-    if Ptr^.tick = 6 then
-    begin
-      MoveCheckMap(Ptr^.DesX, Ptr^.DesY);
-      FMap[Ptr^.SrcX * 20 + Ptr^.SrcY] := 0;
-      FMap[Ptr^.DesX * 20 + Ptr^.DesY] := 3;
-      FindUserFromList(UserPtr.UserID).UserPosX := Ptr.DesX;
-      FindUserFromList(UserPtr.UserID).UserPosY := Ptr.DesY;
-      FindUserFromList(UserPtr.UserID).FaceTo := Ptr.FaceTo;
-      DeleteMoveListBegin;
-    end;
-    Ptr := PtrNext;
-  end;
-end;
   end;
 end;
 

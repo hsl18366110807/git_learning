@@ -133,7 +133,7 @@ type
   end;
 
  // 地图 为二维数组
-  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, PSHOES); //0 可移动，1 饼干，2 木箱，3有角色，4炸弹, 5鞋子
+  MapSign = (PMOVE, PBLOCK, PBOX, PCHARACTRT, PBOMB, PSHOES, PBOT); //0 可移动，1 饼干，2 木箱，3有角色，4炸弹, 5鞋子
 
   TPlayerSetBoom = record
     head: TChatMsgHead;
@@ -265,7 +265,7 @@ type
   end;
 
 const
-  C_REGISTER = 1;
+    C_REGISTER = 1;
   S_REGISTER = 2;
   C_LOGIN = 3;
   S_LOGIN = 4;
@@ -282,6 +282,10 @@ const
   S_USERLEAVE = 15;
   S_PLAYERLEAVE = 16;
   S_SETSHOES = 17;
+  C_USEPROP = 18;
+  S_RANGEDPROP = 19;
+  S_BOTINFO = 20;
+  S_BOTMOVE = 21;
 
 implementation
 
