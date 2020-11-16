@@ -444,7 +444,6 @@ begin
   FBombList := TStringList.Create;
   FDeadGamers := TStringList.Create;
   InitGameMap;
-  InitBot;
   timer := TTimer.Create(timer);
   timer.OnTimer := ControlBots;
   timer.Interval := 100;
@@ -1211,6 +1210,7 @@ begin
   FUserList.head.Command := S_USERLIST;
   TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@Fmap, SizeOf(FMap));
   TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@FUserList, SizeOf(FUserList));
+  InitBot;
   timer.Enabled := True;
   Result := 0;
 end;
@@ -1370,7 +1370,7 @@ begin
     FBotInfo.BotPosX := PosX;
     FBotInfo.BotPosY := PosY;
     FBotInfo.BotFaceTo := FaceTo;
-    TGameClient(FGamers.Objects[I]).FClient.SendData(@FBotInfo, SizeOf(FBotInfo));
+    TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@FBotInfo, SizeOf(FBotInfo));
   end;
 
 end;
