@@ -160,6 +160,14 @@ type
     BotList: array[0..4] of TBots;
   end;
 
+  TBotInfo = record
+    head: TGameMsgHead;
+    BotID: Integer;
+    BotPosX: Integer;
+    BotPosY: Integer;
+    BotFaceTo: Integer;
+  end;
+
 const
   C_REGISTER = 1;
   S_REGISTER = 2;
@@ -180,7 +188,8 @@ const
   S_SETSHOES = 17;
   C_USEPROP = 18;
   S_RANGEDPROP = 19;
-  S_BOTLIST = 20;
+  S_BOTINFO = 20;
+  S_BOTMOVE = 21;
 
 implementation
 

@@ -66,7 +66,8 @@ type
     function FindKillerPlayerMelee(RequestPtr: PUseProp): Integer;
     function FindKillerPlayerRanged(RequestPtr: PUseProp): Integer;
     function SendRangedPropInfo(PropPosX: Integer; PropPosY: Integer; DestoryPos: DestoryTypes): Integer;
-    function SendBotList:Integer;
+    function SendBotInfo(BotID: Integer; PosX: Integer; PosY: Integer; FaceTo: Integer): Integer;
+    function SendBotMove(BotID, PosX, PosY, faceto: Integer): Integer;
   end;
 
 var
@@ -243,6 +244,7 @@ end;
 procedure TTcpgameserver.ControlBots(Sender: TObject);
 var
   I: Integer;
+  PosX, PosY, FaceTo, BotID: Integer;
 begin
   if FBotList.BotNums <> 0 then
   begin
@@ -251,7 +253,14 @@ begin
       BotMove(FBotList.BotNums);
     end;
   end;
-  SendBotList;
+  if FBotList.BotNums <> 0 then
+  begin
+    for I := 0 to FBotList.BotNums do
+    begin
+      SendBotMove(FBotList.BotList[FBotList.BotNums - 1].RoBotID, FBotList.BotList[FBotList.BotNums - 1].BotPosX, FBotList.BotList[FBotList.BotNums - 1].BotPosY, FBotList.BotList[FBotList.BotNums - 1].BotFaceTo);
+    end;
+  end;
+
 end;
 
 procedure TTcpgameserver.BotMove(BotId: Integer);
@@ -680,12 +689,14 @@ begin
     Y := RandomRange(0, 19);
   until FMap.Map[X][Y] = 0;
   Faceto := randomrange(0, 3);
-  FBotList.BotList[FBotList.BotNums].RoBotID := FBotList.BotNums;
+  FBotList.BotList[FBotList.BotNums].RoBotID := FBotList.BotNums + 1;
   FBotList.BotList[FBotList.BotNums].BotPosX := X;
   FBotList.BotList[FBotList.BotNums].BotPosY := Y;
   FBotList.BotList[FBotList.BotNums].BotFaceTo := Faceto;
-  Inc(FBotList.BotList[FBotList.BotNums].RoBotID);
+  Inc(FBotList.BotNums);
+
   FMap.Map[X][Y] := 6;
+  SendBotInfo(FBotList.BotList[FBotList.BotNums].RoBotID, X, Y, Faceto);
 end;
 
 procedure TTcpgameserver.InitGameMap;
@@ -832,9 +843,9 @@ begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
         if (ListPlayerName = PlayerName) then
         begin
-          if FUserList.UserList[I].Faceto <> NORTH then
+          if FUserList.UserList[I].FaceTo <> NORTH then
           begin
-            FUserList.UserList[I].Faceto := NORTH;
+            FUserList.UserList[I].FaceTo := NORTH;
           end;
           FUserList.UserList[I].UserPosX := X;
           FuserList.UserList[I].UserPosY := Y - 1;
@@ -867,9 +878,9 @@ begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
         if (ListPlayerName = PlayerName) then
         begin
-          if FUserList.UserList[I].Faceto <> SOUTH then
+          if FUserList.UserList[I].FaceTo <> SOUTH then
           begin
-            FUserList.UserList[I].Faceto := SOUTH;
+            FUserList.UserList[I].FaceTo := SOUTH;
           end;
           FUserList.UserList[I].UserPosX := X;
           FuserList.UserList[I].UserPosY := Y + 1;
@@ -901,9 +912,9 @@ begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
         if (ListPlayerName = PlayerName) then
         begin
-          if FUserList.UserList[I].Faceto <> WEST then
+          if FUserList.UserList[I].FaceTo <> WEST then
           begin
-            FUserList.UserList[I].Faceto := WEST;
+            FUserList.UserList[I].FaceTo := WEST;
           end;
           FUserList.UserList[I].UserPosX := X - 1;
           FuserList.UserList[I].UserPosY := Y;
@@ -935,9 +946,9 @@ begin
         ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
         if (ListPlayerName = PlayerName) then
         begin
-          if FUserList.UserList[I].Faceto <> EAST then
+          if FUserList.UserList[I].FaceTo <> EAST then
           begin
-            FUserList.UserList[I].Faceto := EAST;
+            FUserList.UserList[I].FaceTo := EAST;
           end;
           FUserList.UserList[I].UserPosX := X + 1;
           FuserList.UserList[I].UserPosY := Y;
@@ -1148,7 +1159,7 @@ begin
       FPlayerInfo.UserName := FUserList.UserList[I].UserName;
       FPlayerInfo.UserPosX := FUserList.UserList[I].UserPosX;
       FPlayerInfo.UserPosY := FUserList.UserList[I].UserPosY;
-      FPlayerInfo.FaceTo := FUserList.UserList[I].Faceto;
+      FPlayerInfo.FaceTo := FUserList.UserList[I].FaceTo;
       FPlayerInfo.Speed := FUserList.UserList[I].Speed;
     end;
   end;
@@ -1175,7 +1186,7 @@ begin
       FPlayerInfo.UserName := FUserList.UserList[I].UserName;
       FPlayerInfo.UserPosX := FUserList.UserList[I].UserPosX;
       FPlayerInfo.UserPosY := FUserList.UserList[I].UserPosY;
-      FPlayerInfo.FaceTo := FUserList.UserList[I].Faceto;
+      FPlayerInfo.FaceTo := FUserList.UserList[I].FaceTo;
       FPlayerInfo.Speed := FUserList.UserList[I].Speed;
     end;
   end;
@@ -1260,18 +1271,41 @@ begin
 
 end;
 
-function TTcpgameserver.SendBotList: Integer;
+function TTcpgameserver.SendBotInfo(BotID: Integer; PosX: Integer; PosY: Integer; FaceTo: Integer): Integer;
 var
   I: Integer;
+  FBotInfo: TBotInfo;
 begin
-  for I := 0 to FGamers.Count - 1  do
+  for I := 0 to FGamers.Count - 1 do
   begin
-    FBotList.head.Flag := PACK_FLAG;
-    FBotList.head.Size := SizeOf(FBotList);
-    FBotList.head.Command := S_BOTLIST;
-    TGameClient(FGamers.Objects[I]).FClient.SendData(@FBotList, SizeOf(FBotList));
+    FBotInfo.head.Flag := PACK_FLAG;
+    FBotInfo.head.Size := SizeOf(FBotList);
+    FBotInfo.head.Command := S_BOTINFO;
+    FBotInfo.BotID := BotID;
+    FBotInfo.BotPosX := PosX;
+    FBotInfo.BotPosY := PosY;
+    FBotInfo.BotFaceTo := FaceTo;
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@FBotInfo, SizeOf(FBotInfo));
   end;
 
+end;
+
+function TTcpgameserver.SendBotMove(BotID, PosX, PosY, faceto: Integer): Integer;
+var
+  I: Integer;
+  FBotInfo: TBotInfo;
+begin
+  for I := 0 to FGamers.Count - 1 do
+  begin
+    FBotInfo.head.Flag := PACK_FLAG;
+    FBotInfo.head.Size := SizeOf(FBotList);
+    FBotInfo.head.Command := S_BOTMOVE;
+    FBotInfo.BotID := BotID;
+    FBotInfo.BotPosX := PosX;
+    FBotInfo.BotPosY := PosY;
+    FBotInfo.BotFaceTo := faceto;
+    TGameClient(FGamers.Objects[I]).FClient.SendData(@FBotInfo, SizeOf(FBotInfo));
+  end;
 end;
 
 procedure TTcpgameserver.SetGamerPos(AGamer: TGameClient);
