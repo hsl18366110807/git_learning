@@ -24,6 +24,7 @@ type
     function RequestMap: Integer;
     function RequestBoom: Integer;
     function RequestMove(Key: Word): Integer;
+    function RequestStopMove(Key: Word): Integer;
     function ReadPlayerInfo: PTPlayerInfo;
   public
     constructor Create;
@@ -198,6 +199,33 @@ begin
     Result := -3;
 end;
 
+
+function TChatMgr.RequestStopMove(Key: Word): Integer;
+var
+  CReqMove: TPlayerMove;
+begin
+  Result := 0;
+  FillChar(CReqMove, SizeOf(CReqMove), 0);
+  CReqMove.head.Flag := PACK_FLAG;
+  CReqMove.head.Size := SizeOf(CReqMove);
+  CReqMove.head.Command := C_STOPMOVE;
+  CopyMemory(@CReqMove.PlayerName[0], Pointer(FAccount), Length(FAccount));
+
+  case Key of
+     Word('A'):
+      CReqMove.MoveType := MOVELEFT;
+    Word('S'):
+      CReqMove.MoveType := MOVEDOWN;
+    Word('W'):
+      CReqMove.MoveType := MOVEUP;
+    Word('D'):
+      CReqMove.MoveType := MOVERIGHT;
+  end;
+
+  if WriteSendData(@CReqMove, SizeOf(CReqMove)) < 0 then
+    Result := -3;
+
+end;
 
 function TChatMgr.RequestMap: Integer;
 var

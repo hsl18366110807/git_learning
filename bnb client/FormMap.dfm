@@ -2,8 +2,8 @@ object FrmMap: TFrmMap
   Left = 0
   Top = 0
   Caption = 'FrmMap'
-  ClientHeight = 800
-  ClientWidth = 801
+  ClientHeight = 808
+  ClientWidth = 904
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,25 +13,23 @@ object FrmMap: TFrmMap
   OldCreateOrder = False
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
+  OnKeyUp = FormKeyUp
   PixelsPerInch = 96
   TextHeight = 13
-  object lbl1: TLabel
-    Left = 392
-    Top = 416
-    Width = 16
-    Height = 13
-    Caption = 'lbl1'
-  end
   object pntbx: TPaintBox32
     Left = 0
     Top = 0
-    Width = 801
-    Height = 800
+    Width = 904
+    Height = 808
     Align = alClient
     TabOrder = 0
+    ExplicitLeft = -216
+    ExplicitTop = -96
+    ExplicitWidth = 649
+    ExplicitHeight = 481
   end
   object pnl1: TPanel
-    Left = 672
+    Left = 799
     Top = 0
     Width = 129
     Height = 97
@@ -58,7 +56,7 @@ object FrmMap: TFrmMap
       Caption = 'faceto :'
     end
     object lbl5: TLabel
-      Left = 66
+      Left = 61
       Top = 56
       Width = 16
       Height = 13
@@ -77,6 +75,20 @@ object FrmMap: TFrmMap
       Width = 16
       Height = 13
       Caption = 'lbl7'
+    end
+    object lbl1: TLabel
+      Left = 8
+      Top = 75
+      Width = 47
+      Height = 13
+      Caption = 'MsgNum :'
+    end
+    object lbl8: TLabel
+      Left = 61
+      Top = 75
+      Width = 6
+      Height = 13
+      Caption = '0'
     end
   end
 end

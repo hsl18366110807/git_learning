@@ -243,6 +243,7 @@ type
     procedure AddTail(ChatMsgPtr: PChatMsg); virtual;
     procedure FetchTo(Dest: TChatMsgs); virtual;
     function IsEmpty: Boolean; virtual;
+    function MsgNum:Integer;
     procedure Clear; virtual;
   public
     constructor Create; virtual;
@@ -286,6 +287,7 @@ const
   S_RANGEDPROP = 19;
   S_BOTINFO = 20;
   S_BOTMOVE = 21;
+  C_STOPMOVE = 22;
 
 implementation
 
@@ -386,6 +388,22 @@ end;
 function TChatMsgs.IsEmpty: Boolean;
 begin
   Result := (FHeadPtr = nil);
+end;
+
+function TChatMsgs.MsgNum: Integer;
+var num:Integer;
+  Ptr: PChatMsgNode;
+begin
+//
+  Result := 0;
+  num := 0;
+  Ptr := FHeadPtr;
+  while Ptr <> nil do
+  begin
+    Inc(num);
+    Ptr := Ptr.Next;
+  end;
+  Result := num;
 end;
 
 { TLockChatMsgs }

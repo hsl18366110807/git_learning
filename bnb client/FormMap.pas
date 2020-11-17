@@ -18,6 +18,8 @@ type
     lbl5: TLabel;
     lbl6: TLabel;
     lbl7: TLabel;
+    lbl1: TLabel;
+    lbl8: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure doWork(Sender: TObject);
     procedure processAni(Sender: TObject);
@@ -25,6 +27,7 @@ type
     function FindInList(const UserList: TUserList; role: TPlayerInfo): Integer;
 //    procedure RoleMoveOneStepY;
     procedure RoleMoveOneStepY(Role: TBitmap32; SrcX, SrcY, DesY, tick: Integer);
+    procedure RoleMoveStepsY(Role: TBitmap32; SrcX, SrcY, DesY, tick: Integer);
 //    procedure RoleMoveOneStepX;
     procedure RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX, tick: Integer);
     procedure DrawMap;
@@ -60,6 +63,7 @@ type
     function IsBoomListEmpty: Boolean;
     function IsBoomFireListEmpty: Boolean;
     function IsDeadPlayerListEmpty: Boolean;
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 //    procedure tmr1Timer(Sender: TObject);
   private
     FBmpRole: TBitmap32;
@@ -74,14 +78,14 @@ type
     timer: TTimer;
     TickForRole: Integer;
     TickForBomb: Integer;
-    color: TColor;
+    FMsgNum: Integer;
     posX, posY: Integer;
     FOldMap: array of Integer;
-    FMap: array of Integer;
+//    FMap: array of Integer;
     FUsersChanged: Boolean;
     FUserListNew: TUserList; // array[0..4] of TPlayerInfo;
     FUserListOld: TUserList;
-    FUserList: TUserList;
+//    FUserList: TUserList;
     FMoveListBegin: PTOneMove;
     FMoveListEnd: PTOneMove;
     FBoomListBegin: PTBoomPic;
@@ -95,9 +99,23 @@ type
     { Public declarations }
   end;
 
+  TRecv = class(TThread)
+  protected
+    procedure Execute; override;
+  public
+    procedure doRecvWork;
+    constructor Create;
+  private
+    FMsgs: TChatMsgs;
+  public
+    FMsgNum: Integer;
+  end;
+
 var
   FrmMap: TFrmMap;
-
+  RecvThread: TRecv;
+    FMap: array of Integer;
+    FUserList: TUserList;
 implementation
 
 {$R *.dfm}
@@ -267,10 +285,10 @@ var
   PlayerDeadPtr: PTPlayerDeadEvent;
 begin
   ChatMgr.ReadResponse(FMsgs);
+//   FMsgNum := Fmsgs.MsgNum;
   while not FMsgs.IsEmpty do
   begin
     FMsgs.FetchNext(MsgPtr);
-
     if MsgPtr <> nil then
     begin
       ServerMsgPtr := PServerMessage(MsgPtr);
@@ -327,6 +345,7 @@ begin
               OutputDebugString('2222222222222222');
             end;
         end;
+        Inc(FMsgNum);
       finally
         FreeMem(MsgPtr);
       end;
@@ -608,6 +627,9 @@ begin
         end;
         lbl3.Caption := IntToStr(UserPtr.Speed);
         lbl7.Caption := IntToStr(UserPtr.UserID);
+        if FMsgNum <> StrToInt(lbl8.Caption) then
+          lbl8.Caption := IntToStr(FMsgNum);
+
       end;
 
       x := UserPtr.UserPosX * 40;
@@ -768,6 +790,8 @@ end;
 procedure TFrmMap.FormCreate(Sender: TObject);
 begin
 //
+
+
   FMsgs := TChatMsgs.Create;
   ChatMgr.RequestMap;
 //  InitPlayerList;
@@ -854,6 +878,9 @@ begin
   FMovingRoleIndex := -1;
   FOldTime := Now;
   FNewTime := Now;
+
+//  RecvThread := TRecv.Create;
+
 end;
 
 procedure TFrmMap.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -870,6 +897,11 @@ begin
     FOldTime := Now;
   end;
 
+end;
+
+procedure TFrmMap.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  ChatMgr.RequestStopMove(Key);
 end;
 
 procedure TFrmMap.InitPlayerList;
@@ -999,6 +1031,17 @@ begin
     PosY := SrcY * 40 - (bmpRoleH - 40) - (tick + 1) * 40 div 6;
     Role.DrawTo(pntbx.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * tick, 0, piceRoleW * (tick + 1), bmpRoleH));
   end;
+end;
+
+procedure TFrmMap.RoleMoveStepsY(Role: TBitmap32; SrcX, SrcY, DesY,
+  tick: Integer);
+begin
+//
+//   if SrcY < DesY then
+//   begin
+//     RoleMoveStepsY(Role, SrcX, SrcY, srcy+1, tick);
+//   end;
+
 end;
 
 procedure TFrmMap.RoleMoveOneStepX(Role: TBitmap32; SrcY, SrcX, DesX, tick: Integer);
@@ -1258,6 +1301,109 @@ begin
     end;
     Ptr := PtrNext;
   end;
+end;
+
+{ TRecv }
+
+constructor TRecv.Create;
+begin
+  FMsgs := TChatMsgs.Create;
+   SetLength(FMap, 400);
+  FillMemory(FMap, 400, 0);
+  inherited Create(False);
+end;
+
+procedure TRecv.doRecvWork;
+var
+  MsgPtr: PChatMsg;
+  ServerMsgPtr: PServerMessage;
+  MapPtr: PTSMap;
+  UserPtr: PTPlayerInfo;
+  UserListPtr: PTPlayerInfoList;
+  BoomFlor: PTBombBoom;
+  ShoesPtr: PTShoesInfo;
+  BombPtr: PTBombSeted;
+  BombBoomPtr: PTBombBoom;
+  PlayerDeadPtr: PTPlayerDeadEvent;
+begin
+  ChatMgr.ReadResponse(FMsgs);
+//   FMsgNum := Fmsgs.MsgNum;
+  while not FMsgs.IsEmpty do
+  begin
+    FMsgs.FetchNext(MsgPtr);
+    if MsgPtr <> nil then
+    begin
+      ServerMsgPtr := PServerMessage(MsgPtr);
+      try
+        case ServerMsgPtr^.Head.Command of
+          S_MAP:
+            begin
+              MapPtr := PTSMap(MsgPtr);
+              CopyMemory(FMap, @MapPtr^.Map[0], 1600);
+            end;
+          S_USERLIST:
+            begin
+              UserListPtr := PTPlayerInfoList(MsgPtr);
+              FUserList := UserListPtr^.UserList;
+//              FUsersChanged := True;
+            end;
+          S_PlayerInfo:
+            begin
+              UserPtr := PTPlayerInfo(MsgPtr);
+              FrmMap.AddUserToList(UserPtr);
+            end;
+          S_PLAYERMOVE:
+            begin
+              UserPtr := PTPlayerInfo(MsgPtr);
+              FrmMap.PlayerMove(UserPtr); //以我现在写的move逻辑的话，多人同时动的话可能存在问题
+              OutputDebugString('move');
+            end;
+          S_SETSHOES:
+            begin
+              ShoesPtr := PTShoesInfo(MsgPtr);
+              FrmMap.SetShoes(ShoesPtr);   //鞋子的动画还要加上
+            end;
+          S_SETBOME:
+            begin
+              BombPtr := PTBombSeted(MsgPtr);
+              FrmMap.SetBomb(BombPtr);
+            end;
+          S_BOMBBOOM:
+            begin
+              BombBoomPtr := PTBombBoom(MsgPtr);
+              FrmMap.SetBombBoom(BombBoomPtr);
+            end;
+          S_PLAYERDEAD:
+            begin
+              PlayerDeadPtr := PTPlayerDeadEvent(MsgPtr);
+              FrmMap.SetPlayerDead(PlayerDeadPtr);
+            end;
+          S_BOTINFO:
+            begin
+              OutputDebugString('111111111111111111');
+            end;
+          S_BOTMOVE:
+            begin
+              OutputDebugString('2222222222222222');
+            end;
+        end;
+        Inc(FMsgNum);
+      finally
+        FreeMem(MsgPtr);
+      end;
+    end;
+  end;
+//  processAni(self);
+end;
+
+procedure TRecv.Execute;
+begin
+//  inherited;
+//
+  while not Terminated do
+   begin
+  doRecvWork;
+   end;
 end;
 
 end.
