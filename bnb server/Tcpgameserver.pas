@@ -873,179 +873,197 @@ function TTcpgameserver.PlayerMove(RequestPtr: PPlayerMove; AClient: TTCPClient)
 var
   X, Y, I: Integer;
   PlayerName, ListPlayerName: AnsiString;
+  SpeedToMove: Integer;
 begin
   PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
   if FDeadGamers.IndexOf(PlayerName) <> -1 then
   begin
     Exit;
   end;
+  SpeedToMove := FUserList.UserList[FGamers.IndexOf(PlayerName)].Speed + 1;
   if RequestPtr.MoveType = MOVEUP then
   begin
-    X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
-    Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if (FMap.Map[X][Y - 1] = 0) or (FMap.Map[X][Y - 1] = 5) then
+    while SpeedToMove <> 0 do
     begin
-      TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEUP);
-      if FMap.Map[X][Y] <> 4 then
+      X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
+      Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
+      if (FMap.Map[X][Y - 1] = 0) or (FMap.Map[X][Y - 1] = 5) then
       begin
-        FMap.Map[X][Y] := 0;
-      end;
-      for I := 0 to FGamers.Count - 1 do
-      begin
-        ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
-        if (ListPlayerName = PlayerName) then
+        TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEUP);
+        if FMap.Map[X][Y] <> 4 then
         begin
-          if FUserList.UserList[I].FaceTo <> NORTH then
+          FMap.Map[X][Y] := 0;
+        end;
+        for I := 0 to FGamers.Count - 1 do
+        begin
+          ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
+          if (ListPlayerName = PlayerName) then
           begin
-            FUserList.UserList[I].FaceTo := NORTH;
-          end;
-          FUserList.UserList[I].UserPosX := X;
-          FuserList.UserList[I].UserPosY := Y - 1;
-          if FMap.Map[X][Y - 1] = 5 then
-          begin
-            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
-            Dec(ShoseNum);
+            if FUserList.UserList[I].FaceTo <> NORTH then
+            begin
+              FUserList.UserList[I].FaceTo := NORTH;
+            end;
+            FUserList.UserList[I].UserPosX := X;
+            FuserList.UserList[I].UserPosY := Y - 1;
+            if FMap.Map[X][Y - 1] = 5 then
+            begin
+              FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+              Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
+              Dec(ShoseNum);
+            end;
           end;
         end;
+        FMap.Map[X][Y - 1] := 3;
+        Log.Info(Format('玩家 %s 向北移动,当前坐标(%d, %d)', [PlayerName, X, Y - 1]));
+      end
+      else if FMap.Map[X][Y - 1] = 6 then
+      begin
+        Log.Info(Format('玩家: %s 被怪物杀死', [PlayerName]));
+        PlayerDead(PlayerName, X, Y - 1);
+        FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
+        DeleteUserList(FGamers.IndexOf(PlayerName));
+        Exit;
       end;
-      FMap.Map[X][Y - 1] := 3;
-      Log.Info(Format('玩家 %s 向北移动,当前坐标(%d, %d)', [PlayerName, X, Y - 1]));
-    end
-    else if FMap.Map[X][Y - 1] = 6 then
-    begin
-      Log.Info(Format('玩家: %s 被怪物杀死', [PlayerName]));
-      PlayerDead(PlayerName, X, Y - 1);
-      FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
-      DeleteUserList(FGamers.IndexOf(PlayerName));
-      Exit;
+      Dec(SpeedToMove);
     end;
   end
   else if RequestPtr.MoveType = MOVEDOWN then
   begin
-    X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
-    Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if (FMap.Map[X][Y + 1] = 0) or (FMap.Map[X][Y + 1] = 5) then
+    while SpeedToMove <> 0 do
     begin
-      TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEDOWN);
-      if FMap.Map[X][Y] <> 4 then
+      X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
+      Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
+      if (FMap.Map[X][Y + 1] = 0) or (FMap.Map[X][Y + 1] = 5) then
       begin
-        FMap.Map[X][Y] := 0;
-      end;
-      for I := 0 to FGamers.Count - 1 do
-      begin
-        ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
-        if (ListPlayerName = PlayerName) then
+        TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVEDOWN);
+        if FMap.Map[X][Y] <> 4 then
         begin
-          if FUserList.UserList[I].FaceTo <> SOUTH then
+          FMap.Map[X][Y] := 0;
+        end;
+        for I := 0 to FGamers.Count - 1 do
+        begin
+          ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
+          if (ListPlayerName = PlayerName) then
           begin
-            FUserList.UserList[I].FaceTo := SOUTH;
-          end;
-          FUserList.UserList[I].UserPosX := X;
-          FuserList.UserList[I].UserPosY := Y + 1;
-          if FMap.Map[X][Y + 1] = 5 then
-          begin
-            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
-            Dec(ShoseNum);
+            if FUserList.UserList[I].FaceTo <> SOUTH then
+            begin
+              FUserList.UserList[I].FaceTo := SOUTH;
+            end;
+            FUserList.UserList[I].UserPosX := X;
+            FuserList.UserList[I].UserPosY := Y + 1;
+            if FMap.Map[X][Y + 1] = 5 then
+            begin
+              FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+              Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
+              Dec(ShoseNum);
+            end;
           end;
         end;
+        FMap.Map[X][Y + 1] := 3;
+        Log.Info(Format('玩家 %s 向南移动,当前坐标(%d, %d)', [PlayerName, X, Y + 1]));
+      end
+      else if FMap.Map[X][Y + 1] = 6 then
+      begin
+        Log.Info(Format('玩家: %s 被怪物杀死', [PlayerName]));
+        PlayerDead(PlayerName, X, Y + 1);
+        FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
+        DeleteUserList(FGamers.IndexOf(PlayerName));
+        Exit;
       end;
-      FMap.Map[X][Y + 1] := 3;
-      Log.Info(Format('玩家 %s 向南移动,当前坐标(%d, %d)', [PlayerName, X, Y + 1]));
-    end
-    else if FMap.Map[X][Y + 1] = 6 then
-    begin
-      Log.Info(Format('玩家: %s 被怪物杀死', [PlayerName]));
-      PlayerDead(PlayerName, X, Y + 1);
-      FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
-      DeleteUserList(FGamers.IndexOf(PlayerName));
-      Exit;
+      Dec(SpeedToMove);
     end;
   end
   else if RequestPtr.MoveType = MOVELEFT then
   begin
-    X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
-    Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if (FMap.Map[X - 1][Y] = 0) or (FMap.Map[X - 1][Y] = 5) then
+    while SpeedToMove <> 0 do
     begin
-      TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVELEFT);
-      if FMap.Map[X][Y] <> 4 then
+      X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
+      Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
+      if (FMap.Map[X - 1][Y] = 0) or (FMap.Map[X - 1][Y] = 5) then
       begin
-        FMap.Map[X][Y] := 0;
-      end;
-      for I := 0 to FGamers.Count - 1 do
-      begin
-        ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
-        if (ListPlayerName = PlayerName) then
+        TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVELEFT);
+        if FMap.Map[X][Y] <> 4 then
         begin
-          if FUserList.UserList[I].FaceTo <> WEST then
+          FMap.Map[X][Y] := 0;
+        end;
+        for I := 0 to FGamers.Count - 1 do
+        begin
+          ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
+          if (ListPlayerName = PlayerName) then
           begin
-            FUserList.UserList[I].FaceTo := WEST;
-          end;
-          FUserList.UserList[I].UserPosX := X - 1;
-          FuserList.UserList[I].UserPosY := Y;
-          if FMap.Map[X - 1][Y] = 5 then
-          begin
-            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
-            Dec(ShoseNum);
+            if FUserList.UserList[I].FaceTo <> WEST then
+            begin
+              FUserList.UserList[I].FaceTo := WEST;
+            end;
+            FUserList.UserList[I].UserPosX := X - 1;
+            FuserList.UserList[I].UserPosY := Y;
+            if FMap.Map[X - 1][Y] = 5 then
+            begin
+              FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+              Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
+              Dec(ShoseNum);
+            end;
           end;
         end;
+        FMap.Map[X - 1][Y] := 3;
+        Log.Info(Format('玩家 %s 向西移动,当前坐标(%d, %d)', [PlayerName, X - 1, Y]));
+      end
+      else if FMap.Map[X - 1][Y] = 6 then
+      begin
+        Log.Info(Format('玩家: %s 被怪物杀死', [PlayerName]));
+        PlayerDead(PlayerName, X - 1, Y);
+        FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
+        DeleteUserList(FGamers.IndexOf(PlayerName));
+        Exit;
       end;
-      FMap.Map[X - 1][Y] := 3;
-      Log.Info(Format('玩家 %s 向西移动,当前坐标(%d, %d)', [PlayerName, X - 1, Y]));
-    end
-    else if FMap.Map[X - 1][Y] = 6 then
-    begin
-      Log.Info(Format('玩家: %s 被怪物杀死', [PlayerName]));
-      PlayerDead(PlayerName, X - 1, Y);
-      FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
-      DeleteUserList(FGamers.IndexOf(PlayerName));
-      Exit;
+      Dec(SpeedToMove);
     end;
   end
   else if RequestPtr.MoveType = MOVERIGHT then
   begin
-    X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
-    Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
-    if (FMap.Map[X + 1][Y] = 0) or (FMap.Map[X + 1][Y] = 5) then
+    while SpeedToMove <> 0 do
     begin
-      TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVERIGHT);
-      if FMap.Map[X][Y] <> 4 then
+      X := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosX;
+      Y := TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).GamerPosY;
+      if (FMap.Map[X + 1][Y] = 0) or (FMap.Map[X + 1][Y] = 5) then
       begin
-        FMap.Map[X][Y] := 0;
-      end;
-      for I := 0 to FGamers.Count - 1 do
-      begin
-        ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
-        if (ListPlayerName = PlayerName) then
+        TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]).ChangeGamerPos(MOVERIGHT);
+        if FMap.Map[X][Y] <> 4 then
         begin
-          if FUserList.UserList[I].FaceTo <> EAST then
-          begin
-            FUserList.UserList[I].FaceTo := EAST;
-          end;
-          FUserList.UserList[I].UserPosX := X + 1;
-          FuserList.UserList[I].UserPosY := Y;
-          if FMap.Map[X + 1][Y] = 5 then
-          begin
-            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
-            Dec(ShoseNum);
-          end;
-
+          FMap.Map[X][Y] := 0;
         end;
+        for I := 0 to FGamers.Count - 1 do
+        begin
+          ListPlayerName := StrPas(PAnsichar(@(FUserList.UserList[I].UserName)[0]));
+          if (ListPlayerName = PlayerName) then
+          begin
+            if FUserList.UserList[I].FaceTo <> EAST then
+            begin
+              FUserList.UserList[I].FaceTo := EAST;
+            end;
+            FUserList.UserList[I].UserPosX := X + 1;
+            FuserList.UserList[I].UserPosY := Y;
+            if FMap.Map[X + 1][Y] = 5 then
+            begin
+              FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+              Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
+              Dec(ShoseNum);
+            end;
+
+          end;
+        end;
+        FMap.Map[X + 1][Y] := 3;
+        Log.Info(Format('玩家 %s 向东移动,当前坐标(%d, %d)', [PlayerName, X + 1, Y]));
+      end
+      else if FMap.Map[X + 1][Y] = 6 then
+      begin
+        Log.Info(Format('玩家: %s 被怪物杀死', [PlayerName]));
+        PlayerDead(PlayerName, X + 1, Y);
+        FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
+        DeleteUserList(FGamers.IndexOf(PlayerName));
+        Exit;
       end;
-      FMap.Map[X + 1][Y] := 3;
-      Log.Info(Format('玩家 %s 向东移动,当前坐标(%d, %d)', [PlayerName, X + 1, Y]));
-    end
-    else if FMap.Map[X + 1][Y] = 6 then
-    begin
-      Log.Info(Format('玩家: %s 被怪物杀死', [PlayerName]));
-      PlayerDead(PlayerName, X + 1, Y);
-      FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
-      DeleteUserList(FGamers.IndexOf(PlayerName));
-      Exit;
+      Dec(SpeedToMove);
     end;
   end;
   SendPlayerMoveInfo(PlayerName);
