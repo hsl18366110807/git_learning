@@ -96,6 +96,7 @@ begin
   FMovePlayer.Timer := GetTickCount;
   FMovePlayer.MoveType := RequestPtr.MoveType;
   FMoveUserList.AddObject(playername, FMovePlayer);
+  Log.Info('add move');
 end;
 
 function TTcpgameserver.BombEvent(BomePos: Integer): Integer;
@@ -1178,6 +1179,7 @@ begin
     C_STOPMOVE:
       begin
         RemoveUser(PPlayerStopMove(RequestPtr), AClient);
+        Log.Info('stop move!');
       end;
     C_BOOM:
       begin
@@ -1235,6 +1237,7 @@ begin
   PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
   if FMoveUserList.Count > 0 then
   FMoveUserList.Delete(FMoveUserList.IndexOf(PlayerName));
+  Log.Info(IntToStr(FMoveUserList.Count));
 end;
 
 function TTcpgameserver.SendMap: Integer;

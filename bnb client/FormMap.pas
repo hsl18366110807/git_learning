@@ -899,7 +899,7 @@ begin
 
   timer := TTimer.Create(Self);
   timer.OnTimer := doWork;
-  timer.Interval := 10;
+  timer.Interval := 40;
   timer.Enabled := true;
   FMovingRoleIndex := -1;
   FOldTime := Now;
