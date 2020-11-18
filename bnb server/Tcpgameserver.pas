@@ -467,7 +467,8 @@ begin
   InitGameMap;
   timer := TTimer.Create(timer);
   timer.OnTimer := ControlBots;
-  timer.Interval := 100;
+  timer.Enabled := False;
+  timer.Interval := 800;
   timer.Enabled := False;
 end;
 
@@ -1265,7 +1266,7 @@ begin
     nowtime := GetTickCount;
     for I := 0 to FMoveUserList.Count - 1 do
     begin
-      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (1000 div (TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
+      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (100 div (TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
       begin
         PlayerMove(TMovePlayer(FMoveUserList.Objects[I]));
         TMovePlayer(FMoveUserList.Objects[I]).Timer := nowtime;
