@@ -468,7 +468,7 @@ begin
   timer := TTimer.Create(timer);
   timer.OnTimer := ControlBots;
   timer.Interval := 100;
-//  timer.Enabled := False;
+  timer.Enabled := False;
 end;
 
 procedure TTcpgameserver.DeleteUserList(Pos: Integer);
@@ -1232,6 +1232,7 @@ var
   PlayerName: AnsiString;
 begin
   PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
+  if FMoveUserList.Count > 0 then
   FMoveUserList.Delete(FMoveUserList.IndexOf(PlayerName));
 end;
 
@@ -1248,8 +1249,8 @@ begin
   FUserList.head.Command := S_USERLIST;
   TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@Fmap, SizeOf(FMap));
   TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@FUserList, SizeOf(FUserList));
-  InitBot;
-  timer.Enabled := True;
+//  InitBot;
+//  timer.Enabled := True;
   Result := 0;
 end;
 
@@ -1264,9 +1265,10 @@ begin
     nowtime := GetTickCount;
     for I := 0 to FMoveUserList.Count - 1 do
     begin
-      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (100 div (TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
+      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (1000 div (TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
       begin
         PlayerMove(TMovePlayer(FMoveUserList.Objects[I]));
+        TMovePlayer(FMoveUserList.Objects[I]).Timer := nowtime;
       end;
     end;
   end;
