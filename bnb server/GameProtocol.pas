@@ -83,6 +83,13 @@ type
     MoveType: MoveDirect;
   end;
 
+  PPlayerStopMove = ^TPlayerStopMove;
+
+  TPlayerStopMove = record
+    head: TGameMsgHead;
+    UserName: array[0..15] of AnsiChar;
+  end;
+
   PPlayerSetBoom = ^TPlayerSetBoom;
 
   TPlayerSetBoom = record     //客户端发给服务器的放置炸弹消息
@@ -147,6 +154,14 @@ type
     property FBombPosY: Integer read BombPosY;
   end;
 
+  TMovePlayer = class
+  public
+    UserName: AnsiString;
+    Timer: Int64;
+    MoveType: MoveDirect;
+    MoveSpeed: Integer;
+  end;
+
   TBots = record
     RoBotID: Integer;
     BotPosX: Integer;
@@ -190,6 +205,7 @@ const
   S_RANGEDPROP = 19;
   S_BOTINFO = 20;
   S_BOTMOVE = 21;
+  C_STOPMOVE = 22;
 
 implementation
 

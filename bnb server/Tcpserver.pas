@@ -64,6 +64,7 @@ type
     procedure ProcessClientIO(AClient: TTCPClient); virtual;
     procedure CheckBombTime; virtual;
     procedure SetShoesProp; virtual;
+    procedure SendMoveMessage; virtual;
   protected
     property Status: TServerStatus read FStatus write SetStatus;
   public
@@ -163,6 +164,11 @@ begin
 end;
 
 procedure TTcpServer.ProcessClientIO(AClient: TTCPClient);
+begin
+
+end;
+
+procedure TTcpServer.SendMoveMessage;
 begin
 
 end;
@@ -382,6 +388,7 @@ begin
   end;
   CheckBombTime;
   SetShoesProp;
+  SendMoveMessage;
 end;
 
 
