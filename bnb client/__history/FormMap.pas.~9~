@@ -21,7 +21,6 @@ type
     lbl1: TLabel;
     lbl8: TLabel;
     btn1: TButton;
-    tmr1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure doWork(Sender: TObject);
     procedure processAni(Sender: TObject);
@@ -67,7 +66,6 @@ type
     function IsDeadPlayerListEmpty: Boolean;
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btn1Click(Sender: TObject);
-    procedure tmr1Timer(Sender: TObject);
 //    procedure tmr1Timer(Sender: TObject);
   private
     FBmpRole: TBitmap32;
@@ -134,7 +132,7 @@ var
   tick: Integer;
   bmpFireE, bmpFireW, bmpFireN, bmpFireS: TBitmap32;
   bmpFireCenter, bmpFireEEnd, bmpFireWEnd, bmpFireNEnd, bmpFireSEnd, bmpPlayerDead: TBitmap32;
-  p1: TRole;
+
 procedure TFrmMap.AddBoomList(BoomPtr: PTBoomPic);
 begin
   if FBoomListBegin = nil then
@@ -218,6 +216,7 @@ end;
 
 procedure TFrmMap.btn1Click(Sender: TObject);
 var
+  p1: TRole;
   x, y: Integer;
 begin
   p1 := TRole.Create(1, 1, 1, 1, '123456');
@@ -225,14 +224,6 @@ begin
   x := 1 * 40;
   y := 1 * 40 - (p1.fbmp.Height - 40);
   p1.fbmp.DrawTo(pntbx.Buffer, rect(x, y, W + x, y + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
-//  bmp3.DrawTo(pntbx.Buffer, x, y);
-  pntbx.Invalidate;
-  tmr1.Enabled := True;
-//  p1.Move(pntbx,1,1,1,2);
-//  p1.Move(pntbx,1,1,2,1);
-//  p1.Move(pntbx,3,2,3,1);
-//  p1.Move(pntbx,3,2,2,2);
-//  p1.Move(pntbx,1,1,1,2);
 end;
 
 procedure TFrmMap.CheckBoomRange(Ptr: PTBombBoom);
@@ -898,7 +889,7 @@ begin
   timer := TTimer.Create(Self);
   timer.OnTimer := doWork;
   timer.Interval := 100;
-  timer.Enabled := False;
+  timer.Enabled := True;
   FMovingRoleIndex := -1;
   FOldTime := Now;
   FNewTime := Now;
@@ -1137,16 +1128,6 @@ begin
   PosX := Ptr^.ShoesPosX;
   PosY := Ptr^.ShoesPosY;
   FMap[PosX * 20 + PosY] := 5;
-end;
-
-procedure TFrmMap.tmr1Timer(Sender: TObject);
-var desx, desy :Integer;
-begin
-  desx := 1;
-  desy := 2;
-  if (p1.x = desx) and (p1.y = desy) then
-     Exit;
-   p1.Move(pntbx, desx, desy);
 end;
 
 function TFrmMap.UpdateUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功  1 失败，没有找到要更新的用户

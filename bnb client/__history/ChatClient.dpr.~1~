@@ -52,7 +52,6 @@ begin
   begin
     Application.CreateForm(TFrmMap, FrmMap);
   Application.Run;
-  Application.ProcessMessages
   end;
 end.
 

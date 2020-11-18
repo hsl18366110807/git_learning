@@ -79,11 +79,6 @@ type
     MoveType: MoveDirect;
   end;
 
-  TPlayerStopMove = record
-     head: TChatMsgHead;
-    PlayerName: TUserAccount;
-  end;
-
   PSMUserState = ^TSMUserState;
 
   TSMUserState = record

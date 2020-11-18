@@ -100,10 +100,4 @@ object FrmMap: TFrmMap
     TabOrder = 2
     OnClick = btn1Click
   end
-  object tmr1: TTimer
-    Enabled = False
-    OnTimer = tmr1Timer
-    Left = 800
-    Top = 312
-  end
 end
