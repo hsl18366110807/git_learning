@@ -20,7 +20,6 @@ type
     lbl7: TLabel;
     lbl1: TLabel;
     lbl8: TLabel;
-    btn1: TButton;
     tmr1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure doWork(Sender: TObject);
@@ -120,7 +119,7 @@ var
   RecvThread: TRecv;
   FMap: array of Integer;
   FUserList: TUserList;
-
+  num : Integer;
 implementation
 
 {$R *.dfm}
@@ -310,6 +309,7 @@ var
 begin
   ChatMgr.ReadResponse(FMsgs);
 //   FMsgNum := Fmsgs.MsgNum;
+  
   while not FMsgs.IsEmpty do
   begin
     FMsgs.FetchNext(MsgPtr);
@@ -338,7 +338,9 @@ begin
             begin
               UserPtr := PTPlayerInfo(MsgPtr);
               PlayerMove(UserPtr); //以我现在写的move逻辑的话，多人同时动的话可能存在问题
-              OutputDebugString('move');
+              Inc(num);
+              
+              OutputDebugString(PWideChar(IntToStr(num)));
             end;
           S_SETSHOES:
             begin
@@ -897,8 +899,8 @@ begin
 
   timer := TTimer.Create(Self);
   timer.OnTimer := doWork;
-  timer.Interval := 100;
-  timer.Enabled := False;
+  timer.Interval := 10;
+  timer.Enabled := true;
   FMovingRoleIndex := -1;
   FOldTime := Now;
   FNewTime := Now;
@@ -926,6 +928,7 @@ end;
 procedure TFrmMap.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   ChatMgr.RequestStopMove(Key);
+  OutputDebugString('stop111111111111');
 end;
 
 procedure TFrmMap.InitPlayerList;
