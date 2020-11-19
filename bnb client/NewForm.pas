@@ -153,8 +153,7 @@ begin
       end
       else if Map[i * 20 + j] = 5 then //аЌзг
       begin
-        drawY := y - (BmpShoe.Height - 40);
-        BmpShoe.DrawTo(pntbx.Buffer, x, drawY);
+        BmpShoe.DrawTo(pntbx.Buffer, x, y);
       end;
       x := x + 40;
     end;

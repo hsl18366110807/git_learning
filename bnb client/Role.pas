@@ -8,20 +8,10 @@ uses
 
 const
   CELL_WIDTH = 40; //每个格子40像素
-  DEFAULT_SPEED = 16 * CELL_WIDTH;     // Speed 默认speed 每秒2个单位格
+  DEFAULT_SPEED = 6 * CELL_WIDTH;     // Speed 默认speed 每秒2个单位格
   SPEED_INTERVAL = 20;
   FPS = 18;
 type
-  Tprocess = procedure(Map: TPaintBox32; SrcY, SrcX, DesX: Integer; W: Integer) of object;
-
-  TMyTimer = class
-  private
-//      OldTime: TTime;
-//      NewTime: TTime;
-  public
-    constructor Create;
-    procedure dowork(proce: Tprocess; Map: TPaintBox32; SrcY, SrcX, DesX: Integer; W: Integer; interval: Integer; timeTurnoff: Integer);
-  end;
 
   TRole = class(TBitmap32)
   private
@@ -151,30 +141,24 @@ begin
   begin
     if FPos.Y < DesY then
     begin
-//      if FTurnTo <> SOUTH then
-//        SetTurnTo(SOUTH);
-      MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y + 1, 40);
-      if FSpeed * Fmovetime div 1000 > 40 then
+      MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y + 1, CELL_WIDTH);
+      if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
       begin
         Inc(FPos.Y);
         Fmovetime := 0;
         DelFirstMoveList;
-//        if IsMoveListEmpty then
-          State := ROLESTILL;
+        State := ROLESTILL;
       end;
     end;
     if FPos.Y > DesY then
     begin
-//      if FTurnTo <> NORTH then
-//        SetTurnTo(NORTH);
-      MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y - 1, 40);
-      if FSpeed * Fmovetime div 1000 > 40 then
+      MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y - 1, CELL_WIDTH);
+      if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
       begin
         Dec(FPos.Y);
         Fmovetime := 0;
         DelFirstMoveList;
-//        if IsMoveListEmpty then
-          State := ROLESTILL;
+        State := ROLESTILL;
       end;
     end;
   end;
@@ -182,30 +166,24 @@ begin
   begin
     if FPos.X < DesX then
     begin
-//      if FTurnTo <> EAST then
-//        SetTurnTo(EAST);
-      MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X + 1, 40);
-      if FSpeed * Fmovetime div 1000 > 40 then
+      MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X + 1, CELL_WIDTH);
+      if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
       begin
         Inc(FPos.X);
         Fmovetime := 0;
         DelFirstMoveList;
-//        if IsMoveListEmpty then
-          State := ROLESTILL;
+        State := ROLESTILL;
       end;
     end;
     if FPos.X > DesX then
     begin
-//      if FTurnTo <> WEST then
-//        SetTurnTo(WEST);
-      MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X - 1, 40);
-      if FSpeed * Fmovetime div 1000 > 40 then
+      MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X - 1, CELL_WIDTH);
+      if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
       begin
         Dec(FPos.X);
         Fmovetime := 0;
         DelFirstMoveList;
-//        if IsMoveListEmpty then
-          State := ROLESTILL;
+        State := ROLESTILL;
       end;
     end;
   end;
@@ -222,15 +200,15 @@ begin
   if SrcX < DesX then
   begin
     bmpRoleH := FBmp.Height;
-    PosX := SrcX * 40 + Distance;
-    PosY := SrcY * 40 - (bmpRoleH - 40);
+    PosX := SrcX * CELL_WIDTH + Distance;
+    PosY := SrcY * CELL_WIDTH - (bmpRoleH - CELL_WIDTH);
     FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Frame, 0, piceRoleW * (Frame + 1), bmpRoleH));
   end
   else
   begin
     bmpRoleH := FBmp.Height;
-    PosX := SrcX * 40 - Distance;
-    PosY := SrcY * 40 - (bmpRoleH - 40);
+    PosX := SrcX * CELL_WIDTH - Distance;
+    PosY := SrcY * CELL_WIDTH - (bmpRoleH - CELL_WIDTH);
     FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Frame, 0, piceRoleW * (Frame + 1), bmpRoleH));
   end;
   Map.Invalidate;
@@ -247,15 +225,15 @@ begin
   if SrcY < DesY then
   begin
     bmpRoleH := FBmp.Height;
-    PosX := SrcX * 40;
-    PosY := SrcY * 40 - (bmpRoleH - 40) + Distance;
+    PosX := SrcX * CELL_WIDTH;
+    PosY := SrcY * CELL_WIDTH - (bmpRoleH - CELL_WIDTH) + Distance;
     FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Frame, 0, piceRoleW * (Frame + 1), bmpRoleH));
   end
   else
   begin
     bmpRoleH := FBmp.Height;
-    PosX := SrcX * 40;
-    PosY := SrcY * 40 - (bmpRoleH - 40) - Distance;
+    PosX := SrcX * CELL_WIDTH;
+    PosY := SrcY * CELL_WIDTH - (bmpRoleH - CELL_WIDTH) - Distance;
     FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Frame, 0, piceRoleW * (Frame + 1), bmpRoleH));
   end;
   Map.Invalidate;
@@ -275,35 +253,5 @@ procedure TRole.SetState(const Value: RoleState);
 begin
   FState := Value;
 end;
-
-{ TMyTimer }
-
-constructor TMyTimer.Create;
-begin
-//  OldTime := Now;
-//  NewTime := Now;
-end;
-
-procedure TMyTimer.dowork(proce: Tprocess; Map: TPaintBox32; SrcY, SrcX, DesX: Integer; W: Integer; interval, timeTurnoff: Integer);
-var
-  tick: Integer;
-  oldtime: TDateTime;
-  newtime: TDateTime;
-begin
-  tick := 0;
-  oldtime := Now;
-  while tick <> timeTurnoff do
-  begin
-    newtime := Now;
-    if MilliSecondsBetween(newtime, oldtime) >= interval * tick then
-    begin
-      proce(Map, SrcY, SrcX, DesX, 40);
-      Inc(tick);
-      oldtime := newtime;
-    end;
-
-  end;
-end;
-
 end.
 
