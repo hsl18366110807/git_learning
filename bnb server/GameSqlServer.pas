@@ -47,7 +47,7 @@ begin
   ZConnection.Database := 'test';
   ZConnection.Protocol := 'mysql';
   ZConnection.HostName := '127.0.0.1';
-  ZConnection.LibraryLocation := 'C:\Users\haoshengli\Desktop\libmysql.dll';
+//  ZConnection.LibraryLocation := 'C:\Users\haoshengli\Desktop\libmysql.dll';
   ZConnection.Name := 'ZConnection';
   ZConnection.Connect;
   ZQuery.Connection := ZConnection;
