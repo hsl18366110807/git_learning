@@ -21,6 +21,7 @@ type
     lbl1: TLabel;
     lbl8: TLabel;
     tmr1: TTimer;
+    btn1: TButton;
     procedure FormCreate(Sender: TObject);
     procedure doWork(Sender: TObject);
     procedure processAni(Sender: TObject);
@@ -86,6 +87,7 @@ type
     FOldMap: array of Integer;
 //    FMap: array of Integer;
     FUsersChanged: Boolean;
+    FPressed: Boolean;
     FUserListNew: TUserList; // array[0..4] of TPlayerInfo;
     FUserListOld: TUserList;
 //    FUserList: TUserList;
@@ -133,7 +135,7 @@ var
   tick: Integer;
   bmpFireE, bmpFireW, bmpFireN, bmpFireS: TBitmap32;
   bmpFireCenter, bmpFireEEnd, bmpFireWEnd, bmpFireNEnd, bmpFireSEnd, bmpPlayerDead: TBitmap32;
-  p1: TRole;
+  p1, p2: TRole;
 procedure TFrmMap.AddBoomList(BoomPtr: PTBoomPic);
 begin
   if FBoomListBegin = nil then
@@ -219,11 +221,14 @@ procedure TFrmMap.btn1Click(Sender: TObject);
 var
   x, y: Integer;
 begin
-  p1 := TRole.Create(1, 1, 1, 1, '123456');
-  p1.FaceTo(NORTH);
+                      p1 := TRole.Create(1, 1, 1, 50, '123456');
   x := 1 * 40;
   y := 1 * 40 - (p1.fbmp.Height - 40);
   p1.fbmp.DrawTo(pntbx.Buffer, rect(x, y, W + x, y + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+  p2 := TRole.Create(2, 1, 1, 100, '789');
+  x := 1 * 40;
+  y := 1 * 40 - (p1.fbmp.Height - 40);
+  p2.fbmp.DrawTo(pntbx.Buffer, rect(x, y, W + x, y + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
 //  bmp3.DrawTo(pntbx.Buffer, x, y);
   pntbx.Invalidate;
   tmr1.Enabled := True;
@@ -899,8 +904,8 @@ begin
 
   timer := TTimer.Create(Self);
   timer.OnTimer := doWork;
-  timer.Interval := 40;
-  timer.Enabled := true;
+  timer.Interval := 20;
+  timer.Enabled := False;
   FMovingRoleIndex := -1;
   FOldTime := Now;
   FNewTime := Now;
@@ -917,17 +922,18 @@ begin
     exit;
   end;
   FNewTime := Now;
-  if (TickForRole = 0) and (FMovingRoleIndex = -1) and (SecondsBetween(FNewTime, FOldTime) > 0.1) then
+  if (TickForRole = 0) and (FMovingRoleIndex = -1) and (SecondsBetween(FNewTime, FOldTime) > 0.1) and (not FPressed) then
   begin
+    FPressed := True;
     ChatMgr.RequestMove(Key);
     FOldTime := Now;
   end;
-
 end;
 
 procedure TFrmMap.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   ChatMgr.RequestStopMove(Key);
+  FPressed := False;
   OutputDebugString('stop111111111111');
 end;
 
@@ -1150,6 +1156,12 @@ begin
   if (p1.x = desx) and (p1.y = desy) then
      Exit;
    p1.Move(pntbx, desx, desy);
+   p1.Fmovetime := p1.Fmovetime + tmr1.Interval;
+
+ desx := 2;
+ desy := 2;
+   p2.Move(pntbx, desx, desy);
+   p2.Fmovetime := p2.Fmovetime + tmr1.Interval;
 end;
 
 function TFrmMap.UpdateUserToList(Ptr: PTPlayerInfo): Integer; // -1 失败 0 成功  1 失败，没有找到要更新的用户

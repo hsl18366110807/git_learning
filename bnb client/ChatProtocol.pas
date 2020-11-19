@@ -15,6 +15,8 @@ type
 
   FaceOrientate = (NORTH, SOUTH, WEST, EAST);
 
+  RoleState = (ROLESTILL, ROLEMOVE);
+
   TUserAccount = array[0..15] of AnsiChar;
 
   TArrayOfBoomDestroy = array[0..3, 0..1] of Integer;
@@ -199,6 +201,14 @@ type
     FaceTo: FaceOrientate;
     Tick: Integer;
   end;
+  PTRoleMove = ^TRoleMove;
+  TRoleMove = record
+    Next: PTRoleMove;
+    TurnTo: FaceOrientate;
+    Speed: Integer;
+    DesX: Integer;
+    DesY: Integer;
+  end;
 
   PTBoomPic = ^TBoomPic;
 
@@ -212,7 +222,7 @@ type
   PTPlayerDeadEvent = ^TPlayerDeadEvent;
 
   TPlayerDeadEvent = record   //被炸死玩家信息
-    head: TChatMsgHead;
+    Head: TChatMsgHead;
     UserName: array[0..15] of AnsiChar;
     PlayerPosX: Integer;
     PlayerPosY: Integer;
