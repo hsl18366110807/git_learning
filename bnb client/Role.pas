@@ -8,12 +8,12 @@ uses
 
 const
   CELL_WIDTH = 40; //每个格子40像素
-  DEFAULT_SPEED = 6 * CELL_WIDTH;     // Speed 默认speed 每秒2个单位格
+  DEFAULT_SPEED = 8 * CELL_WIDTH;     // Speed 默认speed 每秒2个单位格
   SPEED_INTERVAL = 20;
-  FPS = 18;
-type
+  FPS = 36;
 
-  TRole = class(TBitmap32)
+type
+  TRole = class
   private
     FId: Integer;
     FName: AnsiString;
@@ -21,9 +21,11 @@ type
     Ftick: Integer;
     FTurnTo: FaceOrientate;
     FState: RoleState;
+    FBmp: TBitmap32;
   public
     function IsMoveListEmpty: Boolean;
     function GetSpeed: Integer;
+    function GetBmp: TBitmap32;
     procedure AddMoveList(Move: PTRoleMove);
     procedure DelFirstMoveList;
     procedure SetState(const Value: RoleState);
@@ -34,7 +36,6 @@ type
     procedure SetSpeed(const Value: Integer);
     procedure SetBomb;
   public
-    FBmp: TBitmap32;
     Fmovetime: Integer;
     FSpeed: Integer;
     FMoveList: PTRoleMove;
@@ -48,13 +49,14 @@ type
     property State: RoleState read FState write SetState;
     property TurnTo: FaceOrientate read FTurnTo write SetTurnTo;
     property Speed: Integer read GetSpeed write SetSpeed;
+    property Bmp: TBitmap32 read GetBmp;
   end;
 
 implementation
 
 var
   bmpE, bmpW, bmpS, bmpN: TBitmap32; //相当于这个类的图片资源，所以没有写在类的里面，而是根据不同的情况来选则不同的图片资源
-
+  bmpE_Stop, bmpW_Stop, bmpS_Stop, bmpN_Stop: TBitmap32;
 { RolePlayer }
 
 procedure TRole.AddMoveList(Move: PTRoleMove);
@@ -77,14 +79,26 @@ begin
   bmpW := TBitmap32.Create;
   bmpN := TBitmap32.Create;
   bmpS := TBitmap32.Create;
+  bmpE_Stop := TBitmap32.Create;
+  bmpW_Stop := TBitmap32.Create;
+  bmpN_Stop := TBitmap32.Create;
+  bmpS_Stop := TBitmap32.Create;
   bmpE.DrawMode := dmTransparent;
   bmpN.DrawMode := dmTransparent;
   bmpS.DrawMode := dmTransparent;
   bmpW.DrawMode := dmTransparent;
+  bmpE_Stop.DrawMode := dmTransparent;
+  bmpN_Stop.DrawMode := dmTransparent;
+  bmpS_Stop.DrawMode := dmTransparent;
+  bmpW_Stop.DrawMode := dmTransparent;
   LoadBitmap32FromPNG(bmpE, 'img/redp_m_east.png');
   LoadBitmap32FromPNG(bmpN, 'img/redp_m_north.png');
   LoadBitmap32FromPNG(bmpS, 'img/redp_m_south.png');
   LoadBitmap32FromPNG(bmpW, 'img/redp_m_west.png');
+  LoadBitmap32FromPNG(bmpE_Stop, 'img/redp_s_east.png');
+  LoadBitmap32FromPNG(bmpN_Stop, 'img/redp_s_north.png');
+  LoadBitmap32FromPNG(bmpS_Stop, 'img/redp_s_south.png');
+  LoadBitmap32FromPNG(bmpW_Stop, 'img/redp_s_west.png');
   FPos.X := PosX;
   FPos.Y := PosY;
   FBmp := bmpS;
@@ -120,6 +134,39 @@ begin
   Ptr := FBeginMove;
   FBeginMove := FBeginMove.Next;
   FreeMem(Ptr);
+end;
+
+function TRole.GetBmp: TBitmap32;
+var
+  bmp: TBitmap32;
+begin
+  if FState = ROLEMOVE then
+  begin
+    case FTurnTo of
+      EAST:
+        bmp := bmpE;
+      SOUTH:
+        bmp := bmpS;
+      WEST:
+        bmp := bmpW;
+      NORTH:
+        bmp := bmpN;
+    end;
+  end
+  else
+  begin
+    case FTurnTo of
+      EAST:
+        bmp := bmpE_Stop;
+      SOUTH:
+        bmp := bmpS_Stop;
+      WEST:
+        bmp := bmpW_Stop;
+      NORTH:
+        bmp := bmpN_Stop;
+    end;
+  end;
+  Result := bmp;
 end;
 
 function TRole.GetSpeed: Integer;
@@ -253,5 +300,6 @@ procedure TRole.SetState(const Value: RoleState);
 begin
   FState := Value;
 end;
+
 end.
 

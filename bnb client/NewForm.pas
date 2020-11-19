@@ -34,7 +34,8 @@ type
     Lock: TCriticalSection;
     RecvThread: TRecv;
     Role: TRole;
-    Pressed: Boolean;
+    KeyPressed: Boolean;
+    TickShoes: Integer;
   public
     procedure InitRoleList;
     procedure DrawMap(Sender: TObject);
@@ -108,8 +109,10 @@ begin
   for I := 0 to Length(RoleList) do
   begin
     if RoleList[I] <> nil then
-//        RoleList[I].Free;
-       //free
+    begin
+      RoleList[I].Free;
+      RoleList[I] := nil;
+    end;
   end;
 end;
 
@@ -153,7 +156,10 @@ begin
       end
       else if Map[i * 20 + j] = 5 then //аЌзг
       begin
-        BmpShoe.DrawTo(pntbx.Buffer, x, y);
+        drawY := y + TickShoes;
+        BmpShoe.DrawTo(pntbx.Buffer, x, drawY);
+        Inc(TickShoes);
+        TickShoes := TickShoes mod 14;
       end;
       x := x + 40;
     end;
@@ -171,8 +177,8 @@ begin
   Role := FindRole(PosX, PosY);
 //  if (Role = nil) or (Role.FBmp = nil)then
 //    Exit;
-  PieceOfBmp := Role.FBmp.Width div 6;
-  High := Role.FBmp.Height;
+  PieceOfBmp := Role.Bmp.Width div 6;
+  High := Role.Bmp.Height;
   if not Role.IsMoveListEmpty then
   begin
     if (Role.FBeginMove.DesX = PosX) and (Role.FBeginMove.DesY = PosY) then
@@ -187,7 +193,7 @@ begin
   begin
     x := Role.X * CELL_WIDTH;
     y := Role.Y * CELL_WIDTH - (High - CELL_WIDTH);
-    Role.FBmp.DrawTo(pntbx.Buffer, Rect(x, y, CELL_WIDTH + x, y + High), Rect(0, 0, PieceOfBmp, High));
+    Role.Bmp.DrawTo(pntbx.Buffer, Rect(x, y, CELL_WIDTH + x, y + High), Rect(0, 0, Role.Bmp.Width, High));
   end
   else
   begin
@@ -276,16 +282,16 @@ begin
     exit;
   end;
   if True then
-    if (Role.State = ROLESTILL) and (Pressed = False) then
+    if (Role.State = ROLESTILL) and (KeyPressed = False) then
     begin
-      Pressed := True;
+      KeyPressed := True;
       ChatMgr.RequestMove(Key);
     end;
 end;
 
 procedure TForm1.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  Pressed := False;
+  KeyPressed := False;
   ChatMgr.RequestStopMove(Key);
 end;
 

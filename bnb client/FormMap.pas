@@ -223,12 +223,12 @@ var
 begin
                       p1 := TRole.Create(1, 1, 1, 50, '123456');
   x := 1 * 40;
-  y := 1 * 40 - (p1.fbmp.Height - 40);
-  p1.fbmp.DrawTo(pntbx.Buffer, rect(x, y, W + x, y + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+  y := 1 * 40 - (p1.Bmp.Height - 40);
+  p1.Bmp.DrawTo(pntbx.Buffer, rect(x, y, W + x, y + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
   p2 := TRole.Create(2, 1, 1, 100, '789');
   x := 1 * 40;
-  y := 1 * 40 - (p1.fbmp.Height - 40);
-  p2.fbmp.DrawTo(pntbx.Buffer, rect(x, y, W + x, y + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
+  y := 1 * 40 - (p1.Bmp.Height - 40);
+  p2.Bmp.DrawTo(pntbx.Buffer, rect(x, y, W + x, y + bmpRoleH), Rect(0, 0, piceRoleW, bmpRoleH));
 //  bmp3.DrawTo(pntbx.Buffer, x, y);
   pntbx.Invalidate;
   tmr1.Enabled := True;
