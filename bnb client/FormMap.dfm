@@ -87,8 +87,18 @@ object FrmMap: TFrmMap
       Caption = '0'
     end
   end
+  object btn1: TButton
+    Left = 821
+    Top = 248
+    Width = 75
+    Height = 25
+    Caption = 'btn1'
+    TabOrder = 2
+    OnClick = btn1Click
+  end
   object tmr1: TTimer
     Enabled = False
+    Interval = 100
     OnTimer = tmr1Timer
     Left = 800
     Top = 312

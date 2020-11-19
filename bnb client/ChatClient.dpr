@@ -1,6 +1,7 @@
 program ChatClient;
 
 uses
+  FastMMMemLeakMonitor,
   Forms,
   Controls,
   FormLogin in 'FormLogin.pas' {FrmLogin},
@@ -12,7 +13,8 @@ uses
   FormMap in 'FormMap.pas' {FrmMap},
   Role in 'Role.pas',
   Bomb in 'Bomb.pas',
-  Item in 'Item.pas';
+  Item in 'Item.pas',
+  NewForm in 'NewForm.pas' {Form1};
 
 //  {$R}
 //  var,
@@ -50,9 +52,9 @@ begin
 
   if not ExitApp then
   begin
-    Application.CreateForm(TFrmMap, FrmMap);
+//    Application.CreateForm(TFrmMap, FrmMap);
+  Application.CreateForm(TForm1, GameForm);
   Application.Run;
-  Application.ProcessMessages
   end;
 end.
 

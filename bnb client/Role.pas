@@ -6,6 +6,11 @@ uses
   System.Classes, GR32, GR32_Image, GR32_PNG, ChatProtocol, System.SysUtils,
   System.DateUtils;
 
+const
+  CELL_WIDTH = 40; //每个格子40像素
+  DEFAULT_SPEED = 16 * CELL_WIDTH;     // Speed 默认speed 每秒2个单位格
+  SPEED_INTERVAL = 20;
+  FPS = 18;
 type
   Tprocess = procedure(Map: TPaintBox32; SrcY, SrcX, DesX: Integer; W: Integer) of object;
 
@@ -23,22 +28,36 @@ type
     FId: Integer;
     FName: AnsiString;
     FPos: TPoint;
-    FSpeed: Integer;
     Ftick: Integer;
-    Ftime: TMyTimer;
+    FTurnTo: FaceOrientate;
+    FState: RoleState;
   public
-    FBmp: TBitmap32;
-    constructor Create(PosX, PosY, Id, Speed: Integer; Name: AnsiString);
-    property Id: Integer read FId;
-    property Name: AnsiString read FName; //先暂时没有添加改名接口
-    property x: Integer read FPos.x;
-    property y: Integer read FPos.y;
-  public
+    function IsMoveListEmpty: Boolean;
+    function GetSpeed: Integer;
+    procedure AddMoveList(Move: PTRoleMove);
+    procedure DelFirstMoveList;
+    procedure SetState(const Value: RoleState);
     procedure Move(Map: TPaintBox32; DesX, DesY: Integer);
     procedure MoveOneStepX(Map: TPaintBox32; SrcY, SrcX, DesX: Integer; W: Integer); //W 为正方形格子的宽度
     procedure MoveOneStepY(Map: TPaintBox32; SrcX, SrcY, DesY: Integer; W: Integer);
-    procedure FaceTo(Dir: FaceOrientate);
+    procedure SetTurnTo(const Dir: FaceOrientate);
+    procedure SetSpeed(const Value: Integer);
     procedure SetBomb;
+  public
+    FBmp: TBitmap32;
+    Fmovetime: Integer;
+    FSpeed: Integer;
+    FMoveList: PTRoleMove;
+    FBeginMove: PTRoleMove;
+    FEndMove: PTRoleMove;
+    constructor Create(PosX, PosY, Id, Speed: Integer; Name: AnsiString);
+    property Id: Integer read FId;
+    property Name: AnsiString read FName; //先暂时没有添加改名接口
+    property X: Integer read FPos.x;
+    property Y: Integer read FPos.y;
+    property State: RoleState read FState write SetState;
+    property TurnTo: FaceOrientate read FTurnTo write SetTurnTo;
+    property Speed: Integer read GetSpeed write SetSpeed;
   end;
 
 implementation
@@ -47,6 +66,20 @@ var
   bmpE, bmpW, bmpS, bmpN: TBitmap32; //相当于这个类的图片资源，所以没有写在类的里面，而是根据不同的情况来选则不同的图片资源
 
 { RolePlayer }
+
+procedure TRole.AddMoveList(Move: PTRoleMove);
+begin
+  if FBeginMove = nil then
+  begin
+    FBeginMove := Move;
+    FEndMove := Move;
+  end
+  else
+  begin
+    FEndMove.Next := Move;
+    FEndMove := FEndMove.Next;
+  end;
+end;
 
 constructor TRole.Create(PosX, PosY, Id, Speed: Integer; Name: AnsiString);
 begin
@@ -67,14 +100,15 @@ begin
   FBmp := bmpS;
   FId := Id;
   FSpeed := Speed;
-//  FName := StrPas(Name);
+  FTurnTo := SOUTH;
   FName := Name;
   Ftick := 0;
-  Ftime := TMyTimer.Create;
+  FState := ROLESTILL;
 end;
 
-procedure TRole.FaceTo(Dir: FaceOrientate);
+procedure TRole.SetTurnTo(const Dir: FaceOrientate);
 begin
+  FTurnTo := Dir;
   case Dir of
     EAST:
       FBmp := bmpE;
@@ -87,6 +121,27 @@ begin
   end;
 end;
 
+procedure TRole.DelFirstMoveList;
+var
+  Ptr: PTRoleMove;
+begin
+  if FBeginMove = nil then
+    Exit;
+  Ptr := FBeginMove;
+  FBeginMove := FBeginMove.Next;
+  FreeMem(Ptr);
+end;
+
+function TRole.GetSpeed: Integer;
+begin
+  Result := (FSpeed - DEFAULT_SPEED) div SPEED_INTERVAL;
+end;
+
+function TRole.IsMoveListEmpty: Boolean;
+begin
+  Result := (FBeginMove = nil);
+end;
+
 procedure TRole.Move(Map: TPaintBox32; DesX, DesY: Integer);
 begin
 //
@@ -96,40 +151,62 @@ begin
   begin
     if FPos.Y < DesY then
     begin
-      FaceTo(SOUTH);
+//      if FTurnTo <> SOUTH then
+//        SetTurnTo(SOUTH);
       MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y + 1, 40);
-//      Ftime.dowork(MoveOneStepY,Map, SrcX, SrcY, SrcY + 1, 40, 100, 6);
-      if Ftick = 0 then
+      if FSpeed * Fmovetime div 1000 > 40 then
+      begin
         Inc(FPos.Y);
+        Fmovetime := 0;
+        DelFirstMoveList;
+//        if IsMoveListEmpty then
+          State := ROLESTILL;
+      end;
     end;
     if FPos.Y > DesY then
     begin
-      FaceTo(NORTH);
-      MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y + 1, 40);
-//      Ftime.dowork(MoveOneStepY,Map, FPos.X, FPos.Y, FPos.Y - 1, 40, 100, 6);
-      if Ftick = 0 then
+//      if FTurnTo <> NORTH then
+//        SetTurnTo(NORTH);
+      MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y - 1, 40);
+      if FSpeed * Fmovetime div 1000 > 40 then
+      begin
         Dec(FPos.Y);
+        Fmovetime := 0;
+        DelFirstMoveList;
+//        if IsMoveListEmpty then
+          State := ROLESTILL;
+      end;
     end;
   end;
   if FPos.Y = DesY then
   begin
     if FPos.X < DesX then
     begin
-      FaceTo(EAST);
+//      if FTurnTo <> EAST then
+//        SetTurnTo(EAST);
       MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X + 1, 40);
-//      Ftime.dowork(MoveOneStepX,Map, SrcY, SrcX, DesX + 1, 40, 100, 6);
-//      SrcX := SrcX + 1;
-      if Ftick = 0 then
+      if FSpeed * Fmovetime div 1000 > 40 then
+      begin
         Inc(FPos.X);
+        Fmovetime := 0;
+        DelFirstMoveList;
+//        if IsMoveListEmpty then
+          State := ROLESTILL;
+      end;
     end;
     if FPos.X > DesX then
     begin
-      FaceTo(WEST);
+//      if FTurnTo <> WEST then
+//        SetTurnTo(WEST);
       MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X - 1, 40);
-//      Ftime.dowork(MoveOneStepX,Map, SrcY, SrcX, DesX - 1, 40, 100, 6);
-//      SrcX := SrcX - 1;
-      if Ftick = 0 then
+      if FSpeed * Fmovetime div 1000 > 40 then
+      begin
         Dec(FPos.X);
+        Fmovetime := 0;
+        DelFirstMoveList;
+//        if IsMoveListEmpty then
+          State := ROLESTILL;
+      end;
     end;
   end;
 end;
@@ -137,64 +214,66 @@ end;
 procedure TRole.MoveOneStepX(Map: TPaintBox32; SrcY, SrcX, DesX: Integer; W: Integer);
 var
   piceRoleW, bmpRoleH: Integer;
-  PosX, PosY: Integer;
+  PosX, PosY, Distance, Frame: Integer;
 begin
   piceRoleW := FBmp.Width div 6;
-//  while Ftick <> 6 do
-//  begin
+  Distance := FSpeed * Fmovetime div 1000;
+  Frame := Fmovetime * FPS div 1000 mod 6;
   if SrcX < DesX then
   begin
     bmpRoleH := FBmp.Height;
-    PosX := SrcX * 40 + (Ftick + 1) * 40 div 6;
+    PosX := SrcX * 40 + Distance;
     PosY := SrcY * 40 - (bmpRoleH - 40);
-    FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Ftick, 0, piceRoleW * (Ftick + 1), bmpRoleH));
+    FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Frame, 0, piceRoleW * (Frame + 1), bmpRoleH));
   end
   else
   begin
     bmpRoleH := FBmp.Height;
-    PosX := SrcX * 40 - (Ftick + 1) * 40 div 6;
+    PosX := SrcX * 40 - Distance;
     PosY := SrcY * 40 - (bmpRoleH - 40);
-    FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Ftick, 0, piceRoleW * (Ftick + 1), bmpRoleH));
+    FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Frame, 0, piceRoleW * (Frame + 1), bmpRoleH));
   end;
   Map.Invalidate;
-  Inc(Ftick);
-//  end;
-  if Ftick = 6 then
-    Ftick := 0;
 end;
 
 procedure TRole.MoveOneStepY(Map: TPaintBox32; SrcX, SrcY, DesY: Integer; W: Integer);
 var
   piceRoleW, bmpRoleH: Integer;
-  PosX, PosY: Integer;
+  PosX, PosY, Distance, Frame: Integer;
 begin
   piceRoleW := FBmp.Width div 6;
-//  while Ftick <> 6 do
-//  begin
+  Distance := FSpeed * Fmovetime div 1000;
+  Frame := Fmovetime * FPS div 1000 mod 6;
   if SrcY < DesY then
   begin
     bmpRoleH := FBmp.Height;
     PosX := SrcX * 40;
-    PosY := SrcY * 40 - (bmpRoleH - 40) + (Ftick + 1) * 40 div 6;
-    FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Ftick, 0, piceRoleW * (Ftick + 1), bmpRoleH));
+    PosY := SrcY * 40 - (bmpRoleH - 40) + Distance;
+    FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Frame, 0, piceRoleW * (Frame + 1), bmpRoleH));
   end
   else
   begin
     bmpRoleH := FBmp.Height;
     PosX := SrcX * 40;
-    PosY := SrcY * 40 - (bmpRoleH - 40) - (Ftick + 1) * 40 div 6;
-    FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Ftick, 0, piceRoleW * (Ftick + 1), bmpRoleH));
+    PosY := SrcY * 40 - (bmpRoleH - 40) - Distance;
+    FBmp.DrawTo(Map.Buffer, rect(PosX, PosY, W + PosX, PosY + bmpRoleH), Rect(piceRoleW * Frame, 0, piceRoleW * (Frame + 1), bmpRoleH));
   end;
   Map.Invalidate;
-  Inc(Ftick);
-//  end;
-  if Ftick = 6 then
-    Ftick := 0;
 end;
 
 procedure TRole.SetBomb;
 begin
 // 目前想的是bomb的创建不在role中创建，只是发消息在Map层实现创建和销毁。
+end;
+
+procedure TRole.SetSpeed(const Value: Integer);
+begin
+  FSpeed := DEFAULT_SPEED + Value * SPEED_INTERVAL;
+end;
+
+procedure TRole.SetState(const Value: RoleState);
+begin
+  FState := Value;
 end;
 
 { TMyTimer }
