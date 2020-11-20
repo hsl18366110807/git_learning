@@ -8,9 +8,9 @@ uses
 
 const
   CELL_WIDTH = 40; //每个格子40像素
-  DEFAULT_SPEED = 8 * CELL_WIDTH;     // Speed 默认speed 每秒2个单位格
+  DEFAULT_SPEED = 2 * CELL_WIDTH;     // Speed 默认speed 每秒2个单位格
   SPEED_INTERVAL = 20;
-  FPS = 36;
+  FPS = 16;
 
 type
   TRole = class
@@ -18,7 +18,6 @@ type
     FId: Integer;
     FName: AnsiString;
     FPos: TPoint;
-    Ftick: Integer;
     FTurnTo: FaceOrientate;
     FState: RoleState;
     FBmp: TBitmap32;
@@ -41,6 +40,7 @@ type
     FMoveList: PTRoleMove;
     FBeginMove: PTRoleMove;
     FEndMove: PTRoleMove;
+    NowFrame: Integer;
     constructor Create(PosX, PosY, Id, Speed: Integer; Name: AnsiString);
     property Id: Integer read FId;
     property Name: AnsiString read FName; //先暂时没有添加改名接口
@@ -106,7 +106,7 @@ begin
   FSpeed := Speed;
   FTurnTo := SOUTH;
   FName := Name;
-  Ftick := 0;
+  NowFrame := 0;
   FState := ROLESTILL;
 end;
 
@@ -140,32 +140,32 @@ function TRole.GetBmp: TBitmap32;
 var
   bmp: TBitmap32;
 begin
-  if FState = ROLEMOVE then
-  begin
-    case FTurnTo of
-      EAST:
-        bmp := bmpE;
-      SOUTH:
-        bmp := bmpS;
-      WEST:
-        bmp := bmpW;
-      NORTH:
-        bmp := bmpN;
-    end;
-  end
-  else
-  begin
-    case FTurnTo of
-      EAST:
-        bmp := bmpE_Stop;
-      SOUTH:
-        bmp := bmpS_Stop;
-      WEST:
-        bmp := bmpW_Stop;
-      NORTH:
-        bmp := bmpN_Stop;
-    end;
+//  if FState = ROLEMOVE then
+//  begin
+  case FTurnTo of
+    EAST:
+      bmp := bmpE;
+    SOUTH:
+      bmp := bmpS;
+    WEST:
+      bmp := bmpW;
+    NORTH:
+      bmp := bmpN;
   end;
+//  end
+//  else
+//  begin
+//    case FTurnTo of
+//      EAST:
+//        bmp := bmpE_Stop;
+//      SOUTH:
+//        bmp := bmpS_Stop;
+//      WEST:
+//        bmp := bmpW_Stop;
+//      NORTH:
+//        bmp := bmpN_Stop;
+//    end;
+//  end;
   Result := bmp;
 end;
 
@@ -191,6 +191,7 @@ begin
       MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y + 1, CELL_WIDTH);
       if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
       begin
+        NowFrame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
         Inc(FPos.Y);
         Fmovetime := 0;
         DelFirstMoveList;
@@ -202,6 +203,7 @@ begin
       MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y - 1, CELL_WIDTH);
       if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
       begin
+        NowFrame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
         Dec(FPos.Y);
         Fmovetime := 0;
         DelFirstMoveList;
@@ -216,6 +218,7 @@ begin
       MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X + 1, CELL_WIDTH);
       if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
       begin
+        NowFrame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
         Inc(FPos.X);
         Fmovetime := 0;
         DelFirstMoveList;
@@ -227,6 +230,7 @@ begin
       MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X - 1, CELL_WIDTH);
       if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
       begin
+        NowFrame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
         Dec(FPos.X);
         Fmovetime := 0;
         DelFirstMoveList;
@@ -243,7 +247,7 @@ var
 begin
   piceRoleW := FBmp.Width div 6;
   Distance := FSpeed * Fmovetime div 1000;
-  Frame := Fmovetime * FPS div 1000 mod 6;
+  Frame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
   if SrcX < DesX then
   begin
     bmpRoleH := FBmp.Height;
@@ -268,7 +272,7 @@ var
 begin
   piceRoleW := FBmp.Width div 6;
   Distance := FSpeed * Fmovetime div 1000;
-  Frame := Fmovetime * FPS div 1000 mod 6;
+  Frame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
   if SrcY < DesY then
   begin
     bmpRoleH := FBmp.Height;

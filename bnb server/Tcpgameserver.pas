@@ -92,7 +92,7 @@ begin
   FMovePlayer := TMovePlayer.Create;
   playername := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
   MovePlayerSpeed := FUserList.UserList[FGamers.IndexOf(playername)].Speed;
-  FMovePlayer.MoveSpeed := MovePlayerSpeed + 1;
+  FMovePlayer.MoveSpeed := MovePlayerSpeed;
   FMovePlayer.UserName := playername;
   FMovePlayer.Timer := GetTickCount;
   FMovePlayer.MoveType := RequestPtr.MoveType;
@@ -1273,9 +1273,10 @@ begin
     nowtime := GetTickCount;
     for I := 0 to FMoveUserList.Count - 1 do
     begin
-      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (100 div (TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
+      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (2000 div (2 + TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
       begin
         PlayerMove(TMovePlayer(FMoveUserList.Objects[I]));
+        Log.Info('move');
         TMovePlayer(FMoveUserList.Objects[I]).Timer := nowtime;
       end;
     end;

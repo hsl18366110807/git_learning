@@ -35,7 +35,7 @@ type
     RecvThread: TRecv;
     Role: TRole;
     KeyPressed: Boolean;
-    TickShoes: Integer;
+//    TickShoes: Integer;
   public
     procedure InitRoleList;
     procedure DrawMap(Sender: TObject);
@@ -54,7 +54,7 @@ type
 var
   GameForm: TForm1;
   num: Integer;
-
+  oldtime: TDateTime;
 implementation
 
 {$R *.dfm}
@@ -156,10 +156,10 @@ begin
       end
       else if Map[i * 20 + j] = 5 then //鞋子
       begin
-        drawY := y + TickShoes;
-        BmpShoe.DrawTo(pntbx.Buffer, x, drawY);
-        Inc(TickShoes);
-        TickShoes := TickShoes mod 14;
+//        drawY := y + TickShoes;
+        BmpShoe.DrawTo(pntbx.Buffer, x, y);
+//        Inc(TickShoes);
+//        TickShoes := TickShoes mod 14;
       end;
       x := x + 40;
     end;
@@ -175,8 +175,6 @@ var
   PieceOfBmp, High: Integer;
 begin
   Role := FindRole(PosX, PosY);
-//  if (Role = nil) or (Role.FBmp = nil)then
-//    Exit;
   PieceOfBmp := Role.Bmp.Width div 6;
   High := Role.Bmp.Height;
   if not Role.IsMoveListEmpty then
@@ -193,13 +191,17 @@ begin
   begin
     x := Role.X * CELL_WIDTH;
     y := Role.Y * CELL_WIDTH - (High - CELL_WIDTH);
-    Role.Bmp.DrawTo(pntbx.Buffer, Rect(x, y, CELL_WIDTH + x, y + High), Rect(0, 0, Role.Bmp.Width, High));
+    Role.Bmp.DrawTo(pntbx.Buffer, Rect(x, y, CELL_WIDTH + x, y + High), Rect(Role.NowFrame * PieceOfBmp, 0, (Role.NowFrame + 1) * PieceOfBmp, High));
   end
   else
   begin
     //更新人物状态
     Role.Speed := Role.FBeginMove.Speed;
-    Role.TurnTo := Role.FBeginMove.TurnTo;
+    if Role.TurnTo <> Role.FBeginMove.TurnTo then
+    begin
+      Role.TurnTo := Role.FBeginMove.TurnTo;
+      Role.NowFrame := 0;
+    end;
     Role.Move(pntbx, Role.FBeginMove.DesX, Role.FBeginMove.DesY);
     if Role.State = ROLEMOVE then
       Role.Fmovetime := Role.Fmovetime + tmr1.Interval
@@ -389,6 +391,8 @@ var
   BombPtr: PTBombSeted;
   BombBoomPtr: PTBombBoom;
   PlayerDeadPtr: PTPlayerDeadEvent;
+
+  numMovepkg: Integer;
 begin
   ChatMgr.ReadResponse(GameForm.Msgs);
   while not GameForm.Msgs.IsEmpty do
@@ -420,7 +424,12 @@ begin
           S_PlayerInfo:
             begin
               UserPtr := PTPlayerInfo(MsgPtr);
-              GameForm.AddUserToList(UserPtr^);
+              GameForm.Lock.Enter;
+              try
+                GameForm.AddUserToList(UserPtr^);
+              finally
+                GameForm.Lock.Leave;
+              end;
             end;
             {收到玩家move一步的信息}
           S_PLAYERMOVE:

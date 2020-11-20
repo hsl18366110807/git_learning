@@ -208,7 +208,6 @@ begin
     begin
       FUserList[I] := Ptr^;
       FMap[Ptr.UserPosX * 20 + Ptr.UserPosY] := 3;
-
       Result := 0;
       Exit
     end;
