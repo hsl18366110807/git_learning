@@ -41,6 +41,12 @@ type
     FBeginMove: PTRoleMove;
     FEndMove: PTRoleMove;
     NowFrame: Integer;
+
+     //test
+    oldtime: TDateTime;
+    newtime: TDateTime;
+    actrolspeed: Integer;
+    first: Boolean;
     constructor Create(PosX, PosY, Id, Speed: Integer; Name: AnsiString);
     property Id: Integer read FId;
     property Name: AnsiString read FName; //先暂时没有添加改名接口
@@ -108,6 +114,8 @@ begin
   FName := Name;
   NowFrame := 0;
   FState := ROLESTILL;
+  //test
+  first := True;
 end;
 
 procedure TRole.SetTurnTo(const Dir: FaceOrientate);
@@ -189,8 +197,23 @@ begin
     if FPos.Y < DesY then
     begin
       MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y + 1, CELL_WIDTH);
-      if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
+      if (FSpeed * 2 - 20) * Fmovetime div 1000 > CELL_WIDTH then
       begin
+
+      //test
+        if first then
+        begin
+          first := False;
+          newtime := Now;
+          oldtime := Now;
+        end
+        else
+        begin
+          newtime := Now;
+          actrolspeed := 40 * 1000 div MilliSecondsBetween(newtime, oldtime);
+          oldtime := newtime;
+        end;
+        ////////test
         NowFrame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
         Inc(FPos.Y);
         Fmovetime := 0;
@@ -201,8 +224,22 @@ begin
     if FPos.Y > DesY then
     begin
       MoveOneStepY(Map, FPos.X, FPos.Y, FPos.Y - 1, CELL_WIDTH);
-      if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
+      if (FSpeed * 2 - 20) * Fmovetime div 1000 > CELL_WIDTH then
       begin
+        //test
+        if first then
+        begin
+          first := False;
+          newtime := Now;
+          oldtime := Now;
+        end
+        else
+        begin
+          newtime := Now;
+          actrolspeed := 40 * 1000 div MilliSecondsBetween(newtime, oldtime);
+          oldtime := newtime;
+        end;
+        //test
         NowFrame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
         Dec(FPos.Y);
         Fmovetime := 0;
@@ -216,8 +253,22 @@ begin
     if FPos.X < DesX then
     begin
       MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X + 1, CELL_WIDTH);
-      if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
+      if (FSpeed * 2 - 20) * Fmovetime div 1000 > CELL_WIDTH then
       begin
+        //test
+        if first then
+        begin
+          first := False;
+          newtime := Now;
+          oldtime := Now;
+        end
+        else
+        begin
+          newtime := Now;
+          actrolspeed := 40 * 1000 div MilliSecondsBetween(newtime, oldtime);
+          oldtime := newtime;
+        end;
+        //test
         NowFrame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
         Inc(FPos.X);
         Fmovetime := 0;
@@ -228,8 +279,22 @@ begin
     if FPos.X > DesX then
     begin
       MoveOneStepX(Map, FPos.Y, FPos.X, FPos.X - 1, CELL_WIDTH);
-      if FSpeed * Fmovetime div 1000 > CELL_WIDTH then
+      if (FSpeed * 2 - 20) * Fmovetime div 1000 > CELL_WIDTH then
       begin
+        //test
+        if first then
+        begin
+          first := False;
+          newtime := Now;
+          oldtime := Now;
+        end
+        else
+        begin
+          newtime := Now;
+          actrolspeed := 40 * 1000 div MilliSecondsBetween(newtime, oldtime);
+          oldtime := newtime;
+        end;
+        //test
         NowFrame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
         Dec(FPos.X);
         Fmovetime := 0;
@@ -246,7 +311,7 @@ var
   PosX, PosY, Distance, Frame: Integer;
 begin
   piceRoleW := FBmp.Width div 6;
-  Distance := FSpeed * Fmovetime div 1000;
+  Distance := (FSpeed * 2 - 20) * Fmovetime div 1000;
   Frame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
   if SrcX < DesX then
   begin
@@ -271,7 +336,7 @@ var
   PosX, PosY, Distance, Frame: Integer;
 begin
   piceRoleW := FBmp.Width div 6;
-  Distance := FSpeed * Fmovetime div 1000;
+  Distance := (FSpeed * 2 - 20) * Fmovetime div 1000;
   Frame := (NowFrame + Fmovetime * FPS div 1000) mod 6;
   if SrcY < DesY then
   begin

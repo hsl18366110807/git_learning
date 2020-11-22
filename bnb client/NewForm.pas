@@ -55,9 +55,15 @@ var
   GameForm: TForm1;
   num: Integer;
   oldtime: TDateTime;
+  newtime: TDateTime;
+  serverspeed: Integer;
+  lixiangspeed: Integer;
+  clientspeed: Integer;
 implementation
 
 {$R *.dfm}
+uses
+  System.DateUtils; // just for test speed;
 
 function TForm1.AddRole(User: TPlayerInfo): Integer;
 var
@@ -166,6 +172,10 @@ begin
     y := y + 40;
     x := 0;
   end;
+
+  pntbx.Buffer.TextOut(10, 10, '理想速度  ' + IntToStr(lixiangspeed));
+  pntbx.Buffer.TextOut(10, 40, '客户端速度  ' + IntToStr(clientspeed));
+  pntbx.Buffer.TextOut(10, 70, '服务器速度  ' + IntToStr(serverspeed));
 end;
 
 procedure TForm1.DrawPlayer(PosX, PosY: Integer);
@@ -209,6 +219,8 @@ begin
     begin
       Map[PosX * 20 + PosY] := 0;
       Map[Role.X * 20 + Role.Y] := 3;
+      clientspeed := Role.actrolspeed;
+//      OutputDebugString(PWideChar('actrolclientspeed' + IntToStr(Role.actrolspeed)));
         //更新userlist ----------------------------------------------------------------------------没有更新
     end;
   end;
@@ -337,6 +349,9 @@ begin
   Move.Speed := DesPlayer.Speed;
   Role.AddMoveList(Move);
   Role.State := ROLEMOVE;
+  lixiangspeed := 80 + DesPlayer.Speed * 20;
+//  OutputDebugString(PWideChar('clientspeed' + IntToStr(clientspeed)));
+  OutputDebugString(PWideChar('serverspeed' + IntToStr(serverspeed)));
 end;
 
 procedure TForm1.SetShoes(Ptr: PTShoesInfo);
@@ -391,7 +406,6 @@ var
   BombPtr: PTBombSeted;
   BombBoomPtr: PTBombBoom;
   PlayerDeadPtr: PTPlayerDeadEvent;
-
   numMovepkg: Integer;
 begin
   ChatMgr.ReadResponse(GameForm.Msgs);
@@ -434,10 +448,21 @@ begin
             {收到玩家move一步的信息}
           S_PLAYERMOVE:
             begin
+              if num = 0 then
+              begin
+                oldtime := Now;
+                newtime := Now;
+              end;
+              Inc(num);
+              newtime := Now;
+              if num > 2 then
+              begin
+                serverspeed := 40 * 1000 div MilliSecondsBetween(newtime, oldtime);
+                oldtime := newtime;
+              end;
+              OutputDebugString(PWideChar(IntToStr(num)));
               UserPtr := PTPlayerInfo(MsgPtr);
               GameForm.PlayerMove(UserPtr);
-              Inc(num);
-              OutputDebugString(PWideChar(IntToStr(num)));
             end;
             {收到鞋子信息}
           S_SETSHOES:
