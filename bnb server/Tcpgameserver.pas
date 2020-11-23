@@ -77,6 +77,8 @@ type
 
 var
   FTcpgameserver: TTcpgameserver;
+  LastTime: Int64;
+  NowTime: Int64;
 
 implementation
 
@@ -96,7 +98,12 @@ begin
   FMovePlayer.UserName := playername;
   FMovePlayer.Timer := GetTickCount;
   FMovePlayer.MoveType := RequestPtr.MoveType;
-//  PlayerMove(FMovePlayer);
+  NowTime := GetTickCount;
+  if Abs(LastTime - NowTime) > 500 then
+  begin
+    PlayerMove(FMovePlayer);
+    LastTime := NowTime;
+  end;
   FMoveUserList.AddObject(playername, FMovePlayer);
 end;
 
@@ -475,19 +482,9 @@ begin
   InitGameMap;
   timer := TTimer.Create(timer);
   timer.OnTimer := ControlBots;
-<<<<<<< Updated upstream
   timer.Enabled := False;
   timer.Interval := 800;
   timer.Enabled := False;
-=======
-<<<<<<< Updated upstream
-  timer.Interval := 100;
-//  timer.Enabled := False;
-=======
-  timer.Interval := 8000;
-  timer.Enabled := False;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 end;
 
 procedure TTcpgameserver.DeleteUserList(Pos: Integer);
@@ -945,9 +942,12 @@ begin
           FuserList.UserList[I].UserPosY := Y - 1;
           if FMap.Map[X][Y - 1] = 5 then
           begin
-            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
-            Dec(ShoseNum);
+            if FUserList.UserList[I].Speed < 3 then
+            begin
+              FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+              Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
+              Dec(ShoseNum);
+            end;
           end;
         end;
       end;
@@ -988,9 +988,12 @@ begin
           FuserList.UserList[I].UserPosY := Y + 1;
           if FMap.Map[X][Y + 1] = 5 then
           begin
-            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
-            Dec(ShoseNum);
+            if FUserList.UserList[I].Speed < 3 then
+            begin
+              FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+              Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
+              Dec(ShoseNum);
+            end;
           end;
         end;
       end;
@@ -1030,9 +1033,12 @@ begin
           FuserList.UserList[I].UserPosY := Y;
           if FMap.Map[X - 1][Y] = 5 then
           begin
-            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
-            Dec(ShoseNum);
+            if FUserList.UserList[I].Speed < 3 then
+            begin
+              FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+              Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
+              Dec(ShoseNum);
+            end;
           end;
         end;
       end;
@@ -1072,9 +1078,12 @@ begin
           FuserList.UserList[I].UserPosY := Y;
           if FMap.Map[X + 1][Y] = 5 then
           begin
-            FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
-            Dec(ShoseNum);
+            if FUserList.UserList[I].Speed < 3 then
+            begin
+              FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
+              Log.Info(Format('玩家%s获得道具鞋子，速度变为%d', [PlayerName, FUserList.UserList[I].Speed]));
+              Dec(ShoseNum);
+            end;
           end;
 
         end;
@@ -1189,7 +1198,6 @@ begin
       end;
     C_MOVE:
       begin
-
         AddMoveUser(PPlayerMove(RequestPtr), AClient);
       end;
     C_STOPMOVE:
@@ -1283,7 +1291,7 @@ begin
     nowtime := GetTickCount;
     for I := 0 to FMoveUserList.Count - 1 do
     begin
-      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (2000 div (4 + TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
+      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (2000 div (2 + TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
       begin
         PlayerMove(TMovePlayer(FMoveUserList.Objects[I]));
         Log.Info('move');
