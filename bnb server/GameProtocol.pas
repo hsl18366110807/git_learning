@@ -206,6 +206,7 @@ const
   S_BOTINFO = 20;
   S_BOTMOVE = 21;
   C_STOPMOVE = 22;
+  C_GETBOTINFO = 23;
 
 implementation
 

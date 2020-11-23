@@ -73,6 +73,7 @@ type
     function SendBotInfo(BotID: Integer; PosX: Integer; PosY: Integer; FaceTo: Integer): Integer;
     function SendBotMove(BotID, PosX, PosY, faceto: Integer): Integer;
     function CheckAndRemoveList(PlayerName: AnsiString): Integer;
+    function SendAndAddBot: Integer;
   end;
 
 var
@@ -442,6 +443,10 @@ begin
     Idx := FGamers.IndexOfObject(DeletedChatter);
     if Idx >= 0 then
     begin
+      if FMoveUserList.Count <> 0 then
+      begin
+        CheckAndRemoveList(TGameClient(FGamers.Objects[Idx]).FUsername);
+      end;
       FGamers.Delete(Idx);
       DeleteUserList(Idx);
     end
@@ -483,8 +488,7 @@ begin
   timer := TTimer.Create(timer);
   timer.OnTimer := ControlBots;
   timer.Enabled := False;
-  timer.Interval := 800;
-  timer.Enabled := False;
+  timer.Interval := 500;
 end;
 
 procedure TTcpgameserver.DeleteUserList(Pos: Integer);
@@ -1196,6 +1200,10 @@ begin
       begin
         SendMap;
       end;
+    C_GETBOTINFO:
+      begin
+        SendAndAddBot;
+      end;
     C_MOVE:
       begin
         AddMoveUser(PPlayerMove(RequestPtr), AClient);
@@ -1275,8 +1283,6 @@ begin
   FUserList.head.Command := S_USERLIST;
   TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@Fmap, SizeOf(FMap));
   TGameClient(FGamers.Objects[FGamers.Count - 1]).FClient.SendData(@FUserList, SizeOf(FUserList));
-//  InitBot;
-//  timer.Enabled := True;
   Result := 0;
 end;
 
@@ -1418,6 +1424,12 @@ begin
   begin
     TGameClient(FGamers.Objects[I]).FClient.SendData(@FShoesInfo, SizeOf(FShoesInfo));
   end;
+end;
+
+function TTcpgameserver.SendAndAddBot: Integer;
+begin
+  InitBot;
+  timer.Enabled := True;
 end;
 
 function TTcpgameserver.SendBombEvent(BombX: Integer; BombY: Integer; BoomW: Integer; BoomA: Integer; BoomS: Integer; BoomD: Integer; PosArray: Pointer): Integer;
