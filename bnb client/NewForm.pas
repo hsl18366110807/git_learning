@@ -480,7 +480,7 @@ begin
     Exit;
   case Item.ShowBmpType of
     0:  //auto
-      begin
+      begin                                                                  
         bmp := Item.AutoBmp;
         piceBoomW := bmp.Width div Item.AutoBmpMaxFrame;
         x := Item.X * CELL_WIDTH;
