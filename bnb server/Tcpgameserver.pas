@@ -1300,7 +1300,6 @@ begin
       if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (2000 div (4 + TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
       begin
         PlayerMove(TMovePlayer(FMoveUserList.Objects[I]));
-        Log.Info('move');
         TMovePlayer(FMoveUserList.Objects[I]).Timer := nowtime;
       end;
     end;
