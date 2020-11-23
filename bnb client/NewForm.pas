@@ -41,10 +41,13 @@ type
     procedure InitRoleList;
     procedure DrawMap(Sender: TObject);
     procedure DestroyRoleList;
+    procedure DestroyItemList;
     procedure DrawPlayer(PosX, PosY: Integer);
+    procedure DrawBomb;
     procedure PlayerMove(DesPlayer: PTPlayerInfo);
     procedure UpdateUserList(Role: TRole);
     procedure SetShoes(Ptr: PTShoesInfo);
+    procedure SetBomb(Ptr: PTBombSeted);
     procedure ShowItem(PosX, PosY: Integer);
     function AddItem(TypeId: MapSign; PosX, PosY: Integer): Integer;
     function AddRole(User: TPlayerInfo): Integer;
@@ -84,14 +87,20 @@ begin
     begin
       case TypeId of
         PBOMB:
-          ;
+          begin
+            ItemTypeId := 4;
+            Item := TItem.Create(PosX, PosY, ItemTypeId);
+            Item.ShowBmpType := 0;
+          end;
         PSHOES:
-          ItemTypeId := 5;
+          begin
+            ItemTypeId := 5;
+            Item := TItem.Create(PosX, PosY, ItemTypeId);
+            Item.ShowBmpType := 1;
+          end;
         PBOT:
           ;
       end;
-      Item := TItem.Create(PosX, PosY, ItemTypeId);
-      Item.ShowBmpType := 1;
       ItemList[I] := Item;
       Result := 1;
       Exit;
@@ -172,6 +181,31 @@ begin
   end;
 end;
 
+procedure TForm1.DestroyItemList;
+var
+  I: Integer;
+begin
+  for I := 0 to Length(ItemList) do
+  begin
+    if ItemList[I] <> nil then
+    begin
+      ItemList[I].Free;
+      ItemList[I] := nil;
+    end;
+  end;
+end;
+
+procedure TForm1.DrawBomb;
+var
+  I: Integer;
+begin
+  for I := 0 to Length(ItemList) do
+  begin
+    if (ItemList[I] <> nil) and (ItemList[I].ItemType = 4) then
+      ShowItem(ItemList[I].X, ItemList[I].Y);
+  end;
+end;
+
 procedure TForm1.DrawMap(Sender: TObject);
 var
   x, y, i, j, drawY, bmpBombH, PosX, PosY, RoleId: Integer;
@@ -210,7 +244,7 @@ begin
       begin
         DrawPlayer(i, j);
       end
-      else if Map[i * 20 + j] = 5 then //鞋子
+      else if (Map[i * 20 + j] = 5) then //鞋子
       begin
         ShowItem(i, j);
       end;
@@ -219,6 +253,7 @@ begin
     y := y + 40;
     x := 0;
   end;
+  DrawBomb;
   pntbx.Buffer.TextOut(10, 10, '理想速度  ' + IntToStr(lixiangspeed));
   pntbx.Buffer.TextOut(10, 40, '客户端速度  ' + IntToStr(clientspeed));
   pntbx.Buffer.TextOut(10, 70, '服务器速度  ' + IntToStr(serverspeed));
@@ -328,10 +363,10 @@ begin
   BmpBox1 := TBitmap32.Create;
   BmpBox1.DrawMode := dmBlend;
   LoadBitmap32FromPNG(BmpBox1, 'img/box1.png');
-  BmpShoe := TBitmap32.Create;
-  BmpShoe.DrawMode := dmBlend;
-  LoadBitmap32FromPNG(BmpShoe, 'img/shoe.png');
-  //线程接收服务器信息
+//  BmpShoe := TBitmap32.Create;
+//  BmpShoe.DrawMode := dmBlend;
+//  LoadBitmap32FromPNG(BmpShoe, 'img/shoe.png');
+//  //线程接收服务器信息
   RecvThread := TRecv.Create;
   //UI主线程渲染工作
   tmr1.Enabled := True;
@@ -343,7 +378,8 @@ procedure TForm1.FormDestroy(Sender: TObject);
 begin
   RecvThread.Terminate;
   //析构Rolelist
-  DestroyRoleList;  {-----------------------------------------------------------------------------------------free有问题}
+  DestroyRoleList;
+
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -410,6 +446,18 @@ begin
   lixiangspeed := 80 + DesPlayer.Speed * 20;
 end;
 
+procedure TForm1.SetBomb(Ptr: PTBombSeted);
+var
+  PosX, PosY: Integer;
+  BoomPtr: PTBoomPic;
+begin
+  PosX := Ptr^.BombPosX;
+  PosY := Ptr^.BombPosY;
+//  Map[PosX * 20 + PosY] := 4;
+  if AddItem(PBOMB, PosX, PosY) = 0 then
+    OutputDebugString('AddBmob failed!');
+end;
+
 procedure TForm1.SetShoes(Ptr: PTShoesInfo);
 var
   PosX, PosY: Integer;
@@ -424,7 +472,8 @@ end;
 procedure TForm1.ShowItem(PosX, PosY: Integer);
 var
   Item: TItem;
-  x, y: Integer;
+  x, y, piceBoomW: Integer;
+  bmp: TBitmap32;
 begin
   Item := FindItem(PosX, PosY);
   if Item = nil then
@@ -432,13 +481,19 @@ begin
   case Item.ShowBmpType of
     0:  //auto
       begin
-
+        bmp := Item.AutoBmp;
+        piceBoomW := bmp.Width div Item.AutoBmpMaxFrame;
+        x := Item.X * CELL_WIDTH;
+        y := Item.Y * CELL_WIDTH - (bmp.Height - CELL_WIDTH);
+        bmp.DrawTo(pntbx.Buffer, rect(x, y, piceBoomW + x, y + bmp.Height), Rect(piceBoomW * Item.AutoBmpFrame, 0, piceBoomW * (Item.AutoBmpFrame + 1), bmp.Height));
+        Item.AutoBmpFrame := (Item.AutoBmpFrame + 1) mod Item.AutoBmpMaxFrame;
       end;
     1: //float
       begin
         x := Item.X * CELL_WIDTH;
         y := Item.Y * CELL_WIDTH + Item.FloatDistance;
-        Item.FloatBmp.DrawTo(pntbx.Buffer, x, y);
+        bmp := Item.FloatBmp;
+        bmp.DrawTo(pntbx.Buffer, x, y);
         if Item.FloatDistanceOrder then
           Item.FloatDistance := Item.FloatDistance + 1
         else
@@ -562,7 +617,7 @@ begin
           S_SETBOME:
             begin
               BombPtr := PTBombSeted(MsgPtr);
-//              GameForm.SetBomb(BombPtr);
+              GameForm.SetBomb(BombPtr);
             end;
             {收到爆炸火花信息}
           S_BOMBBOOM:

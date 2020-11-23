@@ -6,12 +6,6 @@ uses
   System.Classes, GR32, GR32_Image, GR32_PNG, ChatProtocol, System.SysUtils,
   System.DateUtils;
 
-const
-  CELL_WIDTH = 40; //每个格子40像素
-  DEFAULT_SPEED = 2 * CELL_WIDTH;     // Speed 默认speed 每秒2个单位格
-  SPEED_INTERVAL = 20;
-  FPS = 16;
-
 type
   TRole = class
   private

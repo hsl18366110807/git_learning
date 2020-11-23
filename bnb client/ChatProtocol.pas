@@ -10,6 +10,13 @@ const
   MapLength = 19; //地图最大长度
   MapWide = 19; //地图最大宽度
   MaxFloatDistance = 4;
+
+const
+  CELL_WIDTH = 40; //每个格子40像素
+  DEFAULT_SPEED = 2 * CELL_WIDTH;     // Speed 默认speed 每秒2个单位格
+  SPEED_INTERVAL = 20;
+  FPS = 16;
+
 type
   MoveDirect = (MOVEUP, MOVEDOWN, MOVELEFT, MOVERIGHT);
 
@@ -82,7 +89,7 @@ type
   end;
 
   TPlayerStopMove = record
-     head: TChatMsgHead;
+    head: TChatMsgHead;
     PlayerName: TUserAccount;
   end;
 
@@ -201,7 +208,9 @@ type
     FaceTo: FaceOrientate;
     Tick: Integer;
   end;
+
   PTRoleMove = ^TRoleMove;
+
   TRoleMove = record
     Next: PTRoleMove;
     TurnTo: FaceOrientate;
@@ -258,7 +267,7 @@ type
     procedure AddTail(ChatMsgPtr: PChatMsg); virtual;
     procedure FetchTo(Dest: TChatMsgs); virtual;
     function IsEmpty: Boolean; virtual;
-    function MsgNum:Integer;
+    function MsgNum: Integer;
     procedure Clear; virtual;
   public
     constructor Create; virtual;
@@ -281,7 +290,7 @@ type
   end;
 
 const
-    C_REGISTER = 1;
+  C_REGISTER = 1;
   S_REGISTER = 2;
   C_LOGIN = 3;
   S_LOGIN = 4;
@@ -406,7 +415,8 @@ begin
 end;
 
 function TChatMsgs.MsgNum: Integer;
-var num:Integer;
+var
+  num: Integer;
   Ptr: PChatMsgNode;
 begin
 //
