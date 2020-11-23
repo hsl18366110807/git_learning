@@ -72,7 +72,6 @@ type
     function SendRangedPropInfo(PropPosX: Integer; PropPosY: Integer; DestoryPos: DestoryTypes): Integer;
     function SendBotInfo(BotID: Integer; PosX: Integer; PosY: Integer; FaceTo: Integer): Integer;
     function SendBotMove(BotID, PosX, PosY, faceto: Integer): Integer;
-    function CheckAndRemoveList(PlayerName: AnsiString): Integer;
   end;
 
 var
@@ -92,11 +91,10 @@ begin
   FMovePlayer := TMovePlayer.Create;
   playername := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
   MovePlayerSpeed := FUserList.UserList[FGamers.IndexOf(playername)].Speed;
-  FMovePlayer.MoveSpeed := MovePlayerSpeed;
+  FMovePlayer.MoveSpeed := MovePlayerSpeed + 1;
   FMovePlayer.UserName := playername;
   FMovePlayer.Timer := GetTickCount;
   FMovePlayer.MoveType := RequestPtr.MoveType;
-//  PlayerMove(FMovePlayer);
   FMoveUserList.AddObject(playername, FMovePlayer);
 end;
 
@@ -120,16 +118,17 @@ begin
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
-          Log.Info(Format('ÕÊº“: %s À¿Õˆ', [TGameClient(FGamers.Objects[J]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂: %s Ê≠ª‰∫°', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+//          FGamers.Delete(J);
           DeleteUserList(J);
         end;
       end;
     end;
   end;
 
-  for I := 0 to BoomScope - 1 do   //≈–∂® «∑Ò±¨∆∆µΩ»À
+  for I := 0 to BoomScope - 1 do   //Âà§ÂÆöÊòØÂê¶ÁàÜÁ†¥Âà∞‰∫∫
   begin
 
     if FMap.Map[BombX + I][BombY] = 3 then
@@ -140,9 +139,10 @@ begin
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
-          Log.Info(Format('ÕÊº“: %s À¿Õˆ', [TGameClient(FGamers.Objects[J]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂: %s Ê≠ª‰∫°', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+//          FGamers.Delete(J);
           DeleteUserList(J);
         end;
       end;
@@ -170,9 +170,10 @@ begin
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
-          Log.Info(Format('ÕÊº“: %s À¿Õˆ', [TGameClient(FGamers.Objects[J]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂: %s Ê≠ª‰∫°', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+//          FGamers.Delete(J);
           DeleteUserList(J);
         end;
       end;
@@ -201,9 +202,10 @@ begin
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
-          Log.Info(Format('ÕÊº“: %s À¿Õˆ', [TGameClient(FGamers.Objects[J]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂: %s Ê≠ª‰∫°', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+//          FGamers.Delete(J);
           DeleteUserList(J);
         end;
       end;
@@ -233,9 +235,10 @@ begin
       begin
         if (TGameClient(FGamers.Objects[J]).GamerPosX = PlayerX) and (TGameClient(FGamers.Objects[J]).GamerPosy = PlayerY) then
         begin
-          Log.Info(Format('ÕÊº“: %s À¿Õˆ', [TGameClient(FGamers.Objects[J]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂: %s Ê≠ª‰∫°', [TGameClient(FGamers.Objects[J]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[J]).FUsername, PlayerX, PlayerY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[J]).FUsername, TGameClient(FGamers.Objects[J]));
+//          FGamers.Delete(J);
           DeleteUserList(J);
         end;
       end;
@@ -253,7 +256,7 @@ begin
     end;
     Inc(BoomW);
   end;
-  Log.Info(Format('±¨’®∑∂Œß-> W:%d, A:%d, S:%d, D:%d', [BoomW, BoomA, BoomS, BoomD]));
+  Log.Info(Format('ÁàÜÁÇ∏ËåÉÂõ¥-> W:%d, A:%d, S:%d, D:%d', [BoomW, BoomA, BoomS, BoomD]));
   SendBombEvent(BombX, BombY, BoomW, BoomA, BoomS, BoomD, @DestoryPos);
   FMap.Map[BombX][BombY] := 0;
 end;
@@ -298,7 +301,7 @@ begin
       begin
         if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosy = PosY - 1) then
         begin
-          Log.Info(Format('ÕÊº“: %s ±ªπ÷ŒÔ…±À¿', [TGameClient(FGamers.Objects[I]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂: %s Ë¢´ÊÄ™Áâ©ÊùÄÊ≠ª', [TGameClient(FGamers.Objects[I]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY - 1);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
           DeleteUserList(I);
@@ -324,7 +327,7 @@ begin
       begin
         if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosy = PosY + 1) then
         begin
-          Log.Info(Format('ÕÊº“: %s ±ªπ÷ŒÔ…±À¿', [TGameClient(FGamers.Objects[I]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂: %s Ë¢´ÊÄ™Áâ©ÊùÄÊ≠ª', [TGameClient(FGamers.Objects[I]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY + 1);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
           DeleteUserList(I);
@@ -349,7 +352,7 @@ begin
       begin
         if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX - 1) and (TGameClient(FGamers.Objects[I]).GamerPosy = PosY) then
         begin
-          Log.Info(Format('ÕÊº“: %s ±ªπ÷ŒÔ…±À¿', [TGameClient(FGamers.Objects[I]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂: %s Ë¢´ÊÄ™Áâ©ÊùÄÊ≠ª', [TGameClient(FGamers.Objects[I]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX - 1, PosY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
           DeleteUserList(I);
@@ -374,7 +377,7 @@ begin
       begin
         if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX + 1) and (TGameClient(FGamers.Objects[I]).GamerPosy = PosY) then
         begin
-          Log.Info(Format('ÕÊº“: %s ±ªπ÷ŒÔ…±À¿', [TGameClient(FGamers.Objects[I]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂: %s Ë¢´ÊÄ™Áâ©ÊùÄÊ≠ª', [TGameClient(FGamers.Objects[I]).FUsername]));
           PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX + 1, PosY);
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
           DeleteUserList(I);
@@ -386,14 +389,6 @@ begin
       FBotList.BotList[BotId - 1].BotFaceTo := RandomRange(0, 3);
     end;
     Exit;
-  end;
-end;
-
-function TTcpgameserver.CheckAndRemoveList(PlayerName: AnsiString): Integer;
-begin
-  if FMoveUserList.IndexOf(PlayerName) <> -1 then
-  begin
-    FMoveUserList.Delete(FMoveUserList.IndexOf(PlayerName));
   end;
 end;
 
@@ -410,8 +405,8 @@ begin
       nowtimer := Now;
       if SecondsBetween(nowtimer, (TBOMB(FBombList.Objects[i]).Timer)) = BoomTime then
       begin
-        Log.Info(Format('’®µØ %d ±¨’®', [i]));
-        BombEvent(i); //±¨’® ¬º˛;
+        Log.Info(Format('ÁÇ∏Âºπ %d ÁàÜÁÇ∏', [i]));
+        BombEvent(i); //ÁàÜÁÇ∏‰∫ã‰ª∂;
         FBombList.Delete(i);
       end;
     end;
@@ -428,41 +423,38 @@ var
 begin
   DeletedChatter := FindGamer(AClient);
   DeletedDeadChatter := FindDeadGamer(AClient);
+  for I := 0 to 4 do
 
-  if DeletedChatter <> nil then
-  begin
-    FMap.Map[DeletedChatter.GamerPosX][DeletedChatter.GamerPosY] := 0;
-    Idx := FGamers.IndexOfObject(DeletedChatter);
-    if Idx >= 0 then
+    if DeletedChatter <> nil then
     begin
-      FGamers.Delete(Idx);
-      DeleteUserList(Idx);
-    end
-    else
-    begin
-      if DeletedDeadChatter <> nil then
+      FMap.Map[DeletedChatter.GamerPosX][DeletedChatter.GamerPosY] := 0;
+      Idx := FGamers.IndexOfObject(DeletedChatter);
+      if Idx >= 0 then
       begin
-        FMap.Map[DeletedDeadChatter.GamerPosX][DeletedDeadChatter.GamerPosY] := 0;
-        Idx := FGamers.IndexOfObject(DeletedDeadChatter);
-        if Idx >= 0 then
+        FGamers.Delete(Idx);
+        DeleteUserList(Idx);
+      end
+      else
+      begin
+        if DeletedDeadChatter <> nil then
         begin
-          if FMoveUserList.Count <> 0 then
+          FMap.Map[DeletedDeadChatter.GamerPosX][DeletedDeadChatter.GamerPosY] := 0;
+          Idx := FGamers.IndexOfObject(DeletedDeadChatter);
+          if Idx >= 0 then
           begin
-            CheckAndRemoveList(TGameClient(FGamers.Objects[Idx]).FUsername);
+            FDeadGamers.Delete(Idx);
+            DeleteUserList(Idx);
+          end
+          else
+          begin
+            Exit;
           end;
-          FDeadGamers.Delete(Idx);
-          DeleteUserList(Idx);
-        end
-        else
-        begin
-          Exit;
+          DeletedChatter.Free;
         end;
-        DeletedChatter.Free;
+        Exit;
       end;
-      Exit;
+      DeletedChatter.Free;
     end;
-    DeletedChatter.Free;
-  end;
 end;
 
 constructor TTcpgameserver.Create;
@@ -475,19 +467,9 @@ begin
   InitGameMap;
   timer := TTimer.Create(timer);
   timer.OnTimer := ControlBots;
-<<<<<<< Updated upstream
-  timer.Enabled := False;
-  timer.Interval := 800;
-  timer.Enabled := False;
-=======
-<<<<<<< Updated upstream
-  timer.Interval := 100;
 //  timer.Enabled := False;
-=======
   timer.Interval := 8000;
   timer.Enabled := False;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 end;
 
 procedure TTcpgameserver.DeleteUserList(Pos: Integer);
@@ -568,7 +550,7 @@ begin
         if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosY = PosY) then
         begin
           PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY);
-          Log.Info(Format('ÕÊº“ %s ±ªø≥À¿', [TGameClient(FGamers.Objects[I]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂ %s Ë¢´Á†çÊ≠ª', [TGameClient(FGamers.Objects[I]).FUsername]));
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
           FGamers.Delete(I);
           DeleteUserList(I);
@@ -587,7 +569,7 @@ begin
         if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosY = PosY) then
         begin
           PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY);
-          Log.Info(Format('ÕÊº“ %s ±ªø≥À¿', [TGameClient(FGamers.Objects[I]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂ %s Ë¢´Á†çÊ≠ª', [TGameClient(FGamers.Objects[I]).FUsername]));
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
           FGamers.Delete(I);
           DeleteUserList(I);
@@ -606,7 +588,7 @@ begin
         if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosY = PosY) then
         begin
           PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY);
-          Log.Info(Format('ÕÊº“ %s ±ªø≥À¿', [TGameClient(FGamers.Objects[I]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂ %s Ë¢´Á†çÊ≠ª', [TGameClient(FGamers.Objects[I]).FUsername]));
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
           FGamers.Delete(I);
           DeleteUserList(I);
@@ -625,7 +607,7 @@ begin
         if (TGameClient(FGamers.Objects[I]).GamerPosX = PosX) and (TGameClient(FGamers.Objects[I]).GamerPosY = PosY) then
         begin
           PlayerDead(TGameClient(FGamers.Objects[I]).FUsername, PosX, PosY);
-          Log.Info(Format('ÕÊº“ %s ±ªø≥À¿', [TGameClient(FGamers.Objects[I]).FUsername]));
+          Log.Info(Format('Áé©ÂÆ∂ %s Ë¢´Á†çÊ≠ª', [TGameClient(FGamers.Objects[I]).FUsername]));
           FDeadGamers.AddObject(TGameClient(FGamers.Objects[I]).FUsername, TGameClient(FGamers.Objects[I]));
           FGamers.Delete(I);
           DeleteUserList(I);
@@ -653,22 +635,22 @@ begin
       begin
         Dec(PropPosY);
       end
-      else if FMap.Map[PropPosX][I] = 1 then   //≈ˆ◊≤«Ω±⁄
+      else if FMap.Map[PropPosX][I] = 1 then   //Á¢∞ÊíûÂ¢ôÂ£Å
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Block);
         Exit;
       end
-      else if FMap.Map[PropPosX][I] = 2 then   //≈ˆ◊≤ƒæœ‰
+      else if FMap.Map[PropPosX][I] = 2 then   //Á¢∞ÊíûÊú®ÁÆ±
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Box);
         Exit;
       end
-      else if FMap.Map[PropPosX][I] = 3 then   //≈ˆ◊≤»ÀŒÔ
+      else if FMap.Map[PropPosX][I] = 3 then   //Á¢∞Êíû‰∫∫Áâ©
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Player);
         Exit;
       end
-      else if FMap.Map[PropPosX][I] = 4 then    //≈ˆ◊≤’®µØ
+      else if FMap.Map[PropPosX][I] = 4 then    //Á¢∞ÊíûÁÇ∏Âºπ
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Bomb);
         Exit;
@@ -684,22 +666,22 @@ begin
       begin
         Inc(PropPosY);
       end
-      else if FMap.Map[PropPosX][I] = 1 then   //≈ˆ◊≤«Ω±⁄
+      else if FMap.Map[PropPosX][I] = 1 then   //Á¢∞ÊíûÂ¢ôÂ£Å
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Block);
         Exit;
       end
-      else if FMap.Map[PropPosX][I] = 2 then   //≈ˆ◊≤ƒæœ‰
+      else if FMap.Map[PropPosX][I] = 2 then   //Á¢∞ÊíûÊú®ÁÆ±
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Box);
         Exit;
       end
-      else if FMap.Map[PropPosX][I] = 3 then   //≈ˆ◊≤»ÀŒÔ
+      else if FMap.Map[PropPosX][I] = 3 then   //Á¢∞Êíû‰∫∫Áâ©
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Player);
         Exit;
       end
-      else if FMap.Map[PropPosX][I] = 4 then    //≈ˆ◊≤’®µØ
+      else if FMap.Map[PropPosX][I] = 4 then    //Á¢∞ÊíûÁÇ∏Âºπ
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Bomb);
         Exit;
@@ -715,22 +697,22 @@ begin
       begin
         Dec(PropPosX);
       end
-      else if FMap.Map[I][PropPosY] = 1 then   //≈ˆ◊≤«Ω±⁄
+      else if FMap.Map[I][PropPosY] = 1 then   //Á¢∞ÊíûÂ¢ôÂ£Å
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Block);
         Exit;
       end
-      else if FMap.Map[I][PropPosY] = 2 then   //≈ˆ◊≤ƒæœ‰
+      else if FMap.Map[I][PropPosY] = 2 then   //Á¢∞ÊíûÊú®ÁÆ±
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Box);
         Exit;
       end
-      else if FMap.Map[I][PropPosY] = 3 then   //≈ˆ◊≤»ÀŒÔ
+      else if FMap.Map[I][PropPosY] = 3 then   //Á¢∞Êíû‰∫∫Áâ©
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Player);
         Exit;
       end
-      else if FMap.Map[I][PropPosY] = 4 then    //≈ˆ◊≤’®µØ
+      else if FMap.Map[I][PropPosY] = 4 then    //Á¢∞ÊíûÁÇ∏Âºπ
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Bomb);
         Exit;
@@ -746,22 +728,22 @@ begin
       begin
         Inc(PropPosX);
       end
-      else if FMap.Map[I][PropPosY] = 1 then   //≈ˆ◊≤«Ω±⁄
+      else if FMap.Map[I][PropPosY] = 1 then   //Á¢∞ÊíûÂ¢ôÂ£Å
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Block);
         Exit;
       end
-      else if FMap.Map[I][PropPosY] = 2 then   //≈ˆ◊≤ƒæœ‰
+      else if FMap.Map[I][PropPosY] = 2 then   //Á¢∞ÊíûÊú®ÁÆ±
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Box);
         Exit;
       end
-      else if FMap.Map[I][PropPosY] = 3 then   //≈ˆ◊≤»ÀŒÔ
+      else if FMap.Map[I][PropPosY] = 3 then   //Á¢∞Êíû‰∫∫Áâ©
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Player);
         Exit;
       end
-      else if FMap.Map[I][PropPosY] = 4 then    //≈ˆ◊≤’®µØ
+      else if FMap.Map[I][PropPosY] = 4 then    //Á¢∞ÊíûÁÇ∏Âºπ
       begin
         SendRangedPropInfo(PropPosX, PropPosY, Bomb);
         Exit;
@@ -832,7 +814,7 @@ begin
     sql := 'SELECT * from test where username=' + '"' + UserName + '"' + 'and password=' + '"' + password + '";';
     if SQLserver.SetSqlList(sql) = True then
     begin
-      Log.Info('”√ªß' + RequestPtr.UserName + 'µ«¬º');
+      Log.Info('Áî®Êà∑' + RequestPtr.UserName + 'ÁôªÂΩï');
       AGameer := TGameClient.Create(RequestPtr.UserName, AClient);
       AGameer.FUsername := RequestPtr.UserName;
       SetGamerPos(AGameer);
@@ -842,21 +824,22 @@ begin
       StrPCopy(FUserList.UserList[FGamers.Count - 1].UserName, UserName);
       FUserList.UserList[FGamers.Count - 1].UserPosX := AGameer.GamerPosX;
       FUserList.UserList[FGamers.Count - 1].UserPosY := AGameer.GamerPosY;
+
     end
     else
     begin
-      Log.Error('”√ªß√˚ªÚ√‹¬Î¥ÌŒÛ£°');
+      Log.Error('Áî®Êà∑ÂêçÊàñÂØÜÁ†ÅÈîôËØØÔºÅ');
       Result := 1;
     end;
   end
   else if (FGamers.Count > 5) then
   begin
-    Log.Error('”√ªß“—¥Ô…œœﬁ£°');
+    Log.Error('Áî®Êà∑Â∑≤Ëææ‰∏äÈôêÔºÅ');
     Result := 2;
   end
   else
   begin
-    Log.Error('”√ªß“—æ≠‘⁄œﬂ£°');
+    Log.Error('Áî®Êà∑Â∑≤ÁªèÂú®Á∫øÔºÅ');
     Result := 3;
   end;
   FillChar(request, SizeOf(request), 0);
@@ -866,17 +849,17 @@ begin
   request.ErrorCode := Result;
   if Result = 1 then
   begin
-    Error := '”√ªß√˚ªÚ√‹¬Î¥ÌŒÛ';
+    Error := 'Áî®Êà∑ÂêçÊàñÂØÜÁ†ÅÈîôËØØ';
     StrLCopy(@request.ErrorInfo[0], PAnsiChar(Error), Length(Error));
   end
   else if Result = 2 then
   begin
-    Error := '”√ªß“—¥Ô…œœﬁ';
+    Error := 'Áî®Êà∑Â∑≤Ëææ‰∏äÈôê';
     StrLCopy(@request.ErrorInfo[0], PAnsiChar(Error), Length(Error));
   end
   else if Result = 3 then
   begin
-    Error := '”√ªß“—æ≠‘⁄œﬂ';
+    Error := 'Áî®Êà∑Â∑≤ÁªèÂú®Á∫ø';
     StrLCopy(@request.ErrorInfo[0], PAnsiChar(Error), Length(Error));
   end;
 
@@ -946,17 +929,17 @@ begin
           if FMap.Map[X][Y - 1] = 5 then
           begin
             FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('ÕÊº“%sªÒµ√µ¿æﬂ–¨◊”£¨ÀŸ∂»±‰Œ™%d', [PlayerName, FUserList.UserList[I].Speed]));
+            Log.Info(Format('Áé©ÂÆ∂%sËé∑ÂæóÈÅìÂÖ∑ÈûãÂ≠êÔºåÈÄüÂ∫¶Âèò‰∏∫%d', [PlayerName, FUserList.UserList[I].Speed]));
             Dec(ShoseNum);
           end;
         end;
       end;
       FMap.Map[X][Y - 1] := 3;
-      Log.Info(Format('ÕÊº“ %s œÚ±±“∆∂Ø,µ±«∞◊¯±Í(%d, %d)', [PlayerName, X, Y - 1]));
+      Log.Info(Format('Áé©ÂÆ∂ %s ÂêëÂåóÁßªÂä®,ÂΩìÂâçÂùêÊ†á(%d, %d)', [PlayerName, X, Y - 1]));
     end
     else if FMap.Map[X][Y - 1] = 6 then
     begin
-      Log.Info(Format('ÕÊº“: %s ±ªπ÷ŒÔ…±À¿', [PlayerName]));
+      Log.Info(Format('Áé©ÂÆ∂: %s Ë¢´ÊÄ™Áâ©ÊùÄÊ≠ª', [PlayerName]));
       PlayerDead(PlayerName, X, Y - 1);
       FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
       DeleteUserList(FGamers.IndexOf(PlayerName));
@@ -989,17 +972,17 @@ begin
           if FMap.Map[X][Y + 1] = 5 then
           begin
             FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('ÕÊº“%sªÒµ√µ¿æﬂ–¨◊”£¨ÀŸ∂»±‰Œ™%d', [PlayerName, FUserList.UserList[I].Speed]));
+            Log.Info(Format('Áé©ÂÆ∂%sËé∑ÂæóÈÅìÂÖ∑ÈûãÂ≠êÔºåÈÄüÂ∫¶Âèò‰∏∫%d', [PlayerName, FUserList.UserList[I].Speed]));
             Dec(ShoseNum);
           end;
         end;
       end;
       FMap.Map[X][Y + 1] := 3;
-      Log.Info(Format('ÕÊº“ %s œÚƒœ“∆∂Ø,µ±«∞◊¯±Í(%d, %d)', [PlayerName, X, Y + 1]));
+      Log.Info(Format('Áé©ÂÆ∂ %s ÂêëÂçóÁßªÂä®,ÂΩìÂâçÂùêÊ†á(%d, %d)', [PlayerName, X, Y + 1]));
     end
     else if FMap.Map[X][Y + 1] = 6 then
     begin
-      Log.Info(Format('ÕÊº“: %s ±ªπ÷ŒÔ…±À¿', [PlayerName]));
+      Log.Info(Format('Áé©ÂÆ∂: %s Ë¢´ÊÄ™Áâ©ÊùÄÊ≠ª', [PlayerName]));
       PlayerDead(PlayerName, X, Y + 1);
       FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
       DeleteUserList(FGamers.IndexOf(PlayerName));
@@ -1031,17 +1014,17 @@ begin
           if FMap.Map[X - 1][Y] = 5 then
           begin
             FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('ÕÊº“%sªÒµ√µ¿æﬂ–¨◊”£¨ÀŸ∂»±‰Œ™%d', [PlayerName, FUserList.UserList[I].Speed]));
+            Log.Info(Format('Áé©ÂÆ∂%sËé∑ÂæóÈÅìÂÖ∑ÈûãÂ≠êÔºåÈÄüÂ∫¶Âèò‰∏∫%d', [PlayerName, FUserList.UserList[I].Speed]));
             Dec(ShoseNum);
           end;
         end;
       end;
       FMap.Map[X - 1][Y] := 3;
-      Log.Info(Format('ÕÊº“ %s œÚŒ˜“∆∂Ø,µ±«∞◊¯±Í(%d, %d)', [PlayerName, X - 1, Y]));
+      Log.Info(Format('Áé©ÂÆ∂ %s ÂêëË•øÁßªÂä®,ÂΩìÂâçÂùêÊ†á(%d, %d)', [PlayerName, X - 1, Y]));
     end
     else if FMap.Map[X - 1][Y] = 6 then
     begin
-      Log.Info(Format('ÕÊº“: %s ±ªπ÷ŒÔ…±À¿', [PlayerName]));
+      Log.Info(Format('Áé©ÂÆ∂: %s Ë¢´ÊÄ™Áâ©ÊùÄÊ≠ª', [PlayerName]));
       PlayerDead(PlayerName, X - 1, Y);
       FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
       DeleteUserList(FGamers.IndexOf(PlayerName));
@@ -1073,18 +1056,18 @@ begin
           if FMap.Map[X + 1][Y] = 5 then
           begin
             FUserList.UserList[I].Speed := FUserList.UserList[I].Speed + 1;
-            Log.Info(Format('ÕÊº“%sªÒµ√µ¿æﬂ–¨◊”£¨ÀŸ∂»±‰Œ™%d', [PlayerName, FUserList.UserList[I].Speed]));
+            Log.Info(Format('Áé©ÂÆ∂%sËé∑ÂæóÈÅìÂÖ∑ÈûãÂ≠êÔºåÈÄüÂ∫¶Âèò‰∏∫%d', [PlayerName, FUserList.UserList[I].Speed]));
             Dec(ShoseNum);
           end;
 
         end;
       end;
       FMap.Map[X + 1][Y] := 3;
-      Log.Info(Format('ÕÊº“ %s œÚ∂´“∆∂Ø,µ±«∞◊¯±Í(%d, %d)', [PlayerName, X + 1, Y]));
+      Log.Info(Format('Áé©ÂÆ∂ %s Âêë‰∏úÁßªÂä®,ÂΩìÂâçÂùêÊ†á(%d, %d)', [PlayerName, X + 1, Y]));
     end
     else if FMap.Map[X + 1][Y] = 6 then
     begin
-      Log.Info(Format('ÕÊº“: %s ±ªπ÷ŒÔ…±À¿', [PlayerName]));
+      Log.Info(Format('Áé©ÂÆ∂: %s Ë¢´ÊÄ™Áâ©ÊùÄÊ≠ª', [PlayerName]));
       PlayerDead(PlayerName, X + 1, Y);
       FDeadGamers.AddObject(PlayerName, TGameClient(FGamers.Objects[FGamers.IndexOf(PlayerName)]));
       DeleteUserList(FGamers.IndexOf(PlayerName));
@@ -1157,6 +1140,7 @@ begin
         FetchSize := FetchSize + 1;
         Continue;
       end;
+
       if (BufSize >= SizeOf(TGameMsgHead)) and (PGameMsgHead(BufPtr)^.Size <= BufSize) then
       begin
         FetchSize := FetchSize + PGameMsgHead(BufPtr)^.Size;
@@ -1189,7 +1173,6 @@ begin
       end;
     C_MOVE:
       begin
-
         AddMoveUser(PPlayerMove(RequestPtr), AClient);
       end;
     C_STOPMOVE:
@@ -1222,13 +1205,13 @@ begin
     sql := 'INSERT into test (username, password) values(' + '"' + username + '"' + ',' + '"' + password + '"' + ');';
     if SQLserver.SetSqlList(sql) then
     begin
-      Log.Info('◊¢≤·≥…π¶');
+      Log.Info('Ê≥®ÂÜåÊàêÂäü');
       Result := 0;
     end;
   end
   else
   begin
-    Log.Warn('”√ªß“—¥Ê‘⁄£¨◊¢≤· ß∞‹');
+    Log.Warn('Áî®Êà∑Â∑≤Â≠òÂú®ÔºåÊ≥®ÂÜåÂ§±Ë¥•');
     Result := 1;
   end;
 
@@ -1239,7 +1222,7 @@ begin
   Request.ErrorCode := Result;
   if Result = 1 then
   begin
-    Error := '”√ªß“—æ≠¥Ê‘⁄';
+    Error := 'Áî®Êà∑Â∑≤ÁªèÂ≠òÂú®';
     StrLCopy(@Request.ErrorInfo[0], PAnsiChar(Error), Length(Error));
   end;
   AClient.SendData(@Request, sizeof(Request));
@@ -1250,8 +1233,7 @@ var
   PlayerName: AnsiString;
 begin
   PlayerName := StrPas(PAnsichar(@(RequestPtr.UserName)[0]));
-  if FMoveUserList.Count > 0 then
-    FMoveUserList.Delete(FMoveUserList.IndexOf(PlayerName));
+  FMoveUserList.Delete(FMoveUserList.IndexOf(PlayerName));
 end;
 
 function TTcpgameserver.SendMap: Integer;
@@ -1283,11 +1265,9 @@ begin
     nowtime := GetTickCount;
     for I := 0 to FMoveUserList.Count - 1 do
     begin
-      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (2000 div (4 + TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
+      if (nowtime - TMovePlayer(FMoveUserList.Objects[I]).Timer) > (100 div (TMovePlayer(FMoveUserList.Objects[I]).MoveSpeed)) then
       begin
         PlayerMove(TMovePlayer(FMoveUserList.Objects[I]));
-        Log.Info('move');
-        TMovePlayer(FMoveUserList.Objects[I]).Timer := nowtime;
       end;
     end;
   end;
