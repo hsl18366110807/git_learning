@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Role,
   GR32_Image, Vcl.ExtCtrls, ChatProtocol, ChatManager, GR32, GR32_PNG,
-  System.SyncObjs;
+  System.SyncObjs, Item;
 
 type
   TRecv = class(TThread)
@@ -35,6 +35,7 @@ type
     RecvThread: TRecv;
     Role: TRole;
     KeyPressed: Boolean;
+    ItemList: array[0..49] of TItem;
 //    TickShoes: Integer;
   public
     procedure InitRoleList;
@@ -44,11 +45,15 @@ type
     procedure PlayerMove(DesPlayer: PTPlayerInfo);
     procedure UpdateUserList(Role: TRole);
     procedure SetShoes(Ptr: PTShoesInfo);
+    procedure ShowItem(PosX, PosY: Integer);
+    function AddItem(TypeId: MapSign; PosX, PosY: Integer): Integer;
     function AddRole(User: TPlayerInfo): Integer;
     function DeleteRole(User: TPlayerInfo): Integer;
+    function DeleteItem(PosX, PosY: Integer): Integer;
     function AddUserToList(User: TPlayerInfo): Integer; // 0 失败 1 成功
     function FindRole(x, y: Integer): TRole; overload;
     function FindRole(id: Integer): TRole; overload;
+    function FindItem(x, y: Integer): TItem;
   end;
 
 var
@@ -59,11 +64,40 @@ var
   serverspeed: Integer;
   lixiangspeed: Integer;
   clientspeed: Integer;
+
 implementation
 
 {$R *.dfm}
 uses
   System.DateUtils; // just for test speed;
+
+function TForm1.AddItem(TypeId: MapSign; PosX, PosY: Integer): Integer;
+var
+  I: Integer;
+  Item: TItem;
+  ItemTypeId: Integer;
+begin
+  Result := 0;
+  for I := 0 to Length(ItemList) do
+  begin
+    if ItemList[I] = nil then
+    begin
+      case TypeId of
+        PBOMB:
+          ;
+        PSHOES:
+          ItemTypeId := 5;
+        PBOT:
+          ;
+      end;
+      Item := TItem.Create(PosX, PosY, ItemTypeId);
+      Item.ShowBmpType := 1;
+      ItemList[I] := Item;
+      Result := 1;
+      Exit;
+    end;
+  end;
+end;
 
 function TForm1.AddRole(User: TPlayerInfo): Integer;
 var
@@ -101,6 +135,22 @@ begin
   end;
   if I = Length(UserList) - 1 then
     Result := 0;
+end;
+
+function TForm1.DeleteItem(PosX, PosY: Integer): Integer;
+var
+  I: Integer;
+begin
+  Result := 0;
+  for I := 0 to Length(ItemList) do
+  begin
+    if (ItemList[I].X = PosX) and (ItemList[I].Y = PosY) then
+    begin
+      ItemList[I].Free;
+      ItemList[I] := nil;
+      Result := 1;
+    end;
+  end;
 end;
 
 function TForm1.DeleteRole(User: TPlayerInfo): Integer;
@@ -162,17 +212,13 @@ begin
       end
       else if Map[i * 20 + j] = 5 then //鞋子
       begin
-//        drawY := y + TickShoes;
-        BmpShoe.DrawTo(pntbx.Buffer, x, y);
-//        Inc(TickShoes);
-//        TickShoes := TickShoes mod 14;
+        ShowItem(i, j);
       end;
       x := x + 40;
     end;
     y := y + 40;
     x := 0;
   end;
-
   pntbx.Buffer.TextOut(10, 10, '理想速度  ' + IntToStr(lixiangspeed));
   pntbx.Buffer.TextOut(10, 40, '客户端速度  ' + IntToStr(clientspeed));
   pntbx.Buffer.TextOut(10, 70, '服务器速度  ' + IntToStr(serverspeed));
@@ -235,6 +281,18 @@ begin
   begin
     if (RoleList[I] <> nil) and (RoleList[I].x = x) and (RoleList[I].y = y) then
       Result := RoleList[I];
+  end;
+end;
+
+function TForm1.FindItem(x, y: Integer): TItem;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to Length(ItemList) do
+  begin
+    if (ItemList[I] <> nil) and (ItemList[I].x = x) and (ItemList[I].y = y) then
+      Result := ItemList[I];
   end;
 end;
 
@@ -350,8 +408,6 @@ begin
   Role.AddMoveList(Move);
   Role.State := ROLEMOVE;
   lixiangspeed := 80 + DesPlayer.Speed * 20;
-//  OutputDebugString(PWideChar('clientspeed' + IntToStr(clientspeed)));
-  OutputDebugString(PWideChar('serverspeed' + IntToStr(serverspeed)));
 end;
 
 procedure TForm1.SetShoes(Ptr: PTShoesInfo);
@@ -361,6 +417,38 @@ begin
   PosX := Ptr^.ShoesPosX;
   PosY := Ptr^.ShoesPosY;
   Map[PosX * 20 + PosY] := 5;
+  if AddItem(PSHOES, PosX, PosY) = 0 then
+    OutputDebugString('AddShoes failed!');
+end;
+
+procedure TForm1.ShowItem(PosX, PosY: Integer);
+var
+  Item: TItem;
+  x, y: Integer;
+begin
+  Item := FindItem(PosX, PosY);
+  if Item = nil then
+    Exit;
+  case Item.ShowBmpType of
+    0:  //auto
+      begin
+
+      end;
+    1: //float
+      begin
+        x := Item.X * CELL_WIDTH;
+        y := Item.Y * CELL_WIDTH + Item.FloatDistance;
+        Item.FloatBmp.DrawTo(pntbx.Buffer, x, y);
+        if Item.FloatDistanceOrder then
+          Item.FloatDistance := Item.FloatDistance + 1
+        else
+          Item.FloatDistance := Item.FloatDistance - 1;
+        if Item.FloatDistance = MaxFloatDistance then
+          Item.FloatDistanceOrder := False;
+        if Item.FloatDistance = 0 then
+          Item.FloatDistanceOrder := True;
+      end;
+  end;
 end;
 
 procedure TForm1.tmr1Timer(Sender: TObject);

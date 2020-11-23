@@ -9,7 +9,7 @@ const
   PACK_FLAG = $FFBBFFCC;
   MapLength = 19; //地图最大长度
   MapWide = 19; //地图最大宽度
-
+  MaxFloatDistance = 4;
 type
   MoveDirect = (MOVEUP, MOVEDOWN, MOVELEFT, MOVERIGHT);
 
